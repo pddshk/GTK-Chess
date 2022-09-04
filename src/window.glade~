@@ -182,8 +182,8 @@
             <property name="wide-handle">True</property>
             <child>
               <object class="GtkBox" id="BoardHolder">
-                <property name="width-request">400</property>
-                <property name="height-request">400</property>
+                <property name="width-request">500</property>
+                <property name="height-request">500</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
