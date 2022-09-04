@@ -3,8 +3,6 @@
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkApplicationWindow" id="MainWindow">
-    <property name="width-request">1600</property>
-    <property name="height-request">900</property>
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">GTK Chess</property>
     <child>
@@ -181,40 +179,41 @@
           <object class="GtkPaned" id="GameHolder">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="wide-handle">True</property>
             <child>
-              <object class="GtkFrame" id="BoardFrame">
+              <object class="GtkBox" id="BoardHolder">
                 <property name="width-request">400</property>
+                <property name="height-request">400</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label-xalign">0</property>
-                <property name="shadow-type">none</property>
+                <property name="hexpand">True</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkGLArea" id="Board">
-                    <property name="visible">True</property>
-                    <property name="app-paintable">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-end">3</property>
-                    <property name="hexpand">False</property>
-                  </object>
-                </child>
-                <child type="label">
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Board</property>
+                    <property name="xalign">0.009999999776482582</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
                 <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
             <child>
               <object class="GtkPaned" id="StateHolder">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="margin-start">3</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkFrame">
@@ -302,7 +301,6 @@
                             </child>
                             <child>
                               <object class="GtkTextView" id="Notation">
-                                <property name="height-request">150</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="editable">False</property>
@@ -469,7 +467,7 @@
               </object>
               <packing>
                 <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>
