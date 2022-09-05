@@ -1,7 +1,7 @@
 #include "board.h"
 #include <math.h>
 
-void init_board(GooCanvas* canvas, GooCanvasItemModel *rect)
+void init_board(GooCanvas* canvas)
 {
 	GooCanvasItemModel *root=goo_canvas_group_model_new(NULL, NULL);
 
@@ -20,7 +20,7 @@ void init_board(GooCanvas* canvas, GooCanvasItemModel *rect)
 		wmargin = (width - 0.96*height) / 2.;
 		hmargin = 0.02*height;
 	}
-	rect = goo_canvas_rect_model_new(root,
+	goo_canvas_rect_model_new(root,
 		wmargin, hmargin, width-2*wmargin, height-2*hmargin,
 		"line-width", 10.0,
 		"stroke-color", "darkblue",
