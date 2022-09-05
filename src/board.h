@@ -4,9 +4,7 @@
 #include <gtk/gtk.h>
 #include <goocanvas.h>
 
-void init_board(GooCanvas*, GooCanvasItemModel*);
-
-//void draw_board(GooCanvas*, GooCanvasItem*);
+void init_board(GooCanvas*);
 
 void resize_board(GtkWidget*, gpointer);
 
