@@ -1,14 +1,19 @@
-GTK=gtk+-3.0
-GCanvas=goocanvas-2.0
-C_FLAGS=-Wall `pkg-config --cflags $(GTK)` `pkg-config --cflags $(GCanvas)`
-LD_FLAGS=`pkg-config --libs $(GTK)` `pkg-config --libs $(GCanvas)`
-FLAGS=`pkg-config --cflags --libs $(GTK)` `pkg-config --cflags --libs $(GCanvas)`
+CC		= clang
+GTK		= gtk+-3.0
+GCanvas	= goocanvas-3.0
+CFLAGS	+= -Wall `pkg-config --cflags $(GTK)` `pkg-config --cflags $(GCanvas)`
+LDFLAGS	+= `pkg-config --libs $(GTK)` `pkg-config --libs $(GCanvas)` -lm
+OBJDIR	= obj
+OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o)
 
-main:
-	clang $(C_FLAGS) src/main.c -o bin/GTKChess $(LD_FLAGS)
-	
+all: $(OBJECTS)
+	$(CC) $(CFLAGS) -o bin/GTKChess $(OBJECTS) $(LDFLAGS)
+
+$(OBJDIR)/%.o: src/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 clean:
-	rm -rf bin
-	
+	rm -f $(OBJECTS)
+
 run:
 	bin/GTKChess
