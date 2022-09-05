@@ -6,8 +6,11 @@ LDFLAGS	+= `pkg-config --libs $(GTK)` `pkg-config --libs $(GCanvas)` -lm
 OBJDIR	= obj
 OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o)
 
-all: $(OBJECTS)
+all: prepare $(OBJECTS)
 	$(CC) $(CFLAGS) -o bin/GTKChess $(OBJECTS) $(LDFLAGS)
+
+prepare:
+	mkdir -p obj
 
 $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
