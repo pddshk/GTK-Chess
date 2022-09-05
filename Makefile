@@ -10,7 +10,7 @@ all: prepare $(OBJECTS)
 	$(CC) $(CFLAGS) -o bin/GTKChess $(OBJECTS) $(LDFLAGS)
 
 prepare:
-	mkdir -p obj
+	mkdir -p obj bin
 
 $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
