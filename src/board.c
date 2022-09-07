@@ -100,15 +100,17 @@ void resize_board(GtkWidget *widget, gpointer data)
 
 	double x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 	gdouble *x=g_new(gdouble, 1), *y=g_new(gdouble, 1);
-	for (int i = 63; i >= 0; goo_canvas_item_remove_child(cells, i--));
+	//for (int i = 63; i >= 0; goo_canvas_item_remove_child(cells, i--));
 	for (int i = 0; i < 64; i++) {
 		int col=i/8, row=i%8;
 		calc_cell_size(col, row, cell_size, x, y);
-		goo_canvas_rect_new(
-			cells,
-			x_offset + *x, y_offset + *y, cell_size, cell_size,
-	       	"fill-color", ((col + row) % 2 == 0) ? "white" : "black",
-			"stroke-color", "none",
+		GooCanvasItem *cell=goo_canvas_item_get_child(cells, i);
+		g_object_set(
+			G_OBJECT(cell),
+			"x", x_offset + *x,
+			"y", y_offset + *y,
+			"width", cell_size,
+			"height", cell_size,
 			NULL
 		);
 	}
