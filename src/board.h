@@ -2,10 +2,13 @@
 #define BOARD_H
 
 #include <gtk/gtk.h>
-#include <goocanvas.h>
+#include <librsvg/rsvg.h>
+#include "state.h"
 
-void init_board(GooCanvas*);
+extern board_state game_state;
 
-void resize_board(GtkWidget*, gpointer);
+void load_textures(/*const char* pack*/);
+
+gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 
 #endif
