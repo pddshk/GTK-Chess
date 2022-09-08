@@ -13,9 +13,7 @@ gboolean
 draw_callback (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
 	guint width, height;
-	GdkRGBA color;
 	GtkStyleContext *context;
-
 	context = gtk_widget_get_style_context (widget);
 
 	width = gtk_widget_get_allocated_width (widget);
@@ -36,7 +34,12 @@ draw_callback (GtkWidget *widget, cairo_t *cr, gpointer data)
 	double x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 
 	gtk_render_background (context, cr, 0, 0, width, height);
-
+	cairo_set_source_rgb(cr, 0.1, 0.4, 0.3);
+	cairo_rectangle(
+		cr,
+		wmargin, hmargin, board_size, board_size
+	);
+	cairo_fill(cr);
 	gdouble *x=g_new(gdouble, 1), *y=g_new(gdouble, 1);
 	for (int i = 0; i < 64; i++) {
 		int col=i/8, row=i%8;
@@ -52,16 +55,17 @@ draw_callback (GtkWidget *widget, cairo_t *cr, gpointer data)
 		);
 		cairo_fill(cr);
 	}
-	g_free(x); g_free(y);
-
-	gtk_style_context_get_color (
-		context,
-		gtk_style_context_get_state (context),
-		&color
+	calc_cell_size(0, 0, cell_size, x, y);
+	RsvgRectangle piece_holder;
+	piece_holder.x = x_offset + *x;
+	piece_holder.y = y_offset + *y;
+	piece_holder.width = piece_holder.height = cell_size;
+	rsvg_handle_render_document(
+		image,
+		cr,
+		&piece_holder,
+		NULL
 	);
-	gdk_cairo_set_source_rgba (cr, &color);
-
-	cairo_fill(cr);
-
+	g_free(x); g_free(y);
 	return FALSE;
 }
