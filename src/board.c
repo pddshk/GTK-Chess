@@ -92,19 +92,9 @@ draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	gdouble *x=g_new(gdouble, 1), *y=g_new(gdouble, 1);
 	for (int i = 0; i < 64; i++) {
 		int col=i/8, row=i%8;
-		calc_cell_size(col, row, cell_size, x, y);
-		// if ((col+row)%2)
-		// 	cairo_set_source_rgb(cr, 0.4,0.4,0.4);
-		// else
-		// 	cairo_set_source_rgb(cr, 1,1,1);
-		// cairo_rectangle(
-		// 	cr,
-		// 	x_offset + *x, y_offset + *y,
-		// 	cell_size, cell_size
-		// );
-		// cairo_fill(cr);
 		RsvgHandle *current_piece=resolve_piece(game_state.field[row][col]);
 		if (current_piece){
+			calc_cell_size(col, row, cell_size, x, y);
 			RsvgRectangle piece_holder;
 			piece_holder.x = x_offset + *x;
 			piece_holder.y = y_offset + *y;
