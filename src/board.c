@@ -2,7 +2,7 @@
 #include <math.h>
 
 RsvgHandle *BKing, *WKing, *BQueen, *WQueen, *BRook, *WRook,
-    *BBishop, *WBishop, *BKnight, *WKnight, *BPawn, *WPawn;
+    *BBishop, *WBishop, *BKnight, *WKnight, *BPawn, *WPawn, *Board;
 
 const double border_perc=0.03;
 
@@ -20,6 +20,7 @@ void load_textures(/*const char* pack*/)
 	WKnight = rsvg_handle_new_from_file("src/textures/classic/WKnight.svg", NULL);
 	BPawn = rsvg_handle_new_from_file("src/textures/classic/BPawn.svg", NULL);
 	WPawn = rsvg_handle_new_from_file("src/textures/classic/WPawn.svg", NULL);
+	Board = rsvg_handle_new_from_file("src/textures/classic/Board.svg", NULL);
 }
 
 RsvgHandle* resolve_piece(char code)
@@ -78,20 +79,30 @@ draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 		wmargin, hmargin, board_size, board_size
 	);
 	cairo_fill(cr);
+	RsvgRectangle board_holder;
+	board_holder.x = x_offset;
+	board_holder.y = y_offset;
+	board_holder.width = board_holder.height = (board_size - 2*border_size);
+	rsvg_handle_render_document(
+		Board,
+		cr,
+		&board_holder,
+		NULL
+	);
 	gdouble *x=g_new(gdouble, 1), *y=g_new(gdouble, 1);
 	for (int i = 0; i < 64; i++) {
 		int col=i/8, row=i%8;
 		calc_cell_size(col, row, cell_size, x, y);
-		if ((col+row)%2)
-			cairo_set_source_rgb(cr, 0.4,0.4,0.4);
-		else
-			cairo_set_source_rgb(cr, 1,1,1);
-		cairo_rectangle(
-			cr,
-			x_offset + *x, y_offset + *y,
-			cell_size, cell_size
-		);
-		cairo_fill(cr);
+		// if ((col+row)%2)
+		// 	cairo_set_source_rgb(cr, 0.4,0.4,0.4);
+		// else
+		// 	cairo_set_source_rgb(cr, 1,1,1);
+		// cairo_rectangle(
+		// 	cr,
+		// 	x_offset + *x, y_offset + *y,
+		// 	cell_size, cell_size
+		// );
+		// cairo_fill(cr);
 		RsvgHandle *current_piece=resolve_piece(game_state.field[row][col]);
 		if (current_piece){
 			RsvgRectangle piece_holder;
