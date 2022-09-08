@@ -1,8 +1,7 @@
 CC		= clang
 GTK		= gtk+-3.0
-GCANVAS	= goocanvas-3.0
-CFLAGS	+= -Wall `pkg-config --cflags $(GTK)` `pkg-config --cflags $(GCANVAS)`
-LDFLAGS	+= `pkg-config --libs $(GTK)` `pkg-config --libs $(GCANVAS)` -lm
+CFLAGS	+= -Wall `pkg-config --cflags $(GTK)`
+LDFLAGS	+= `pkg-config --libs $(GTK)` -lm
 OBJDIR	= obj
 OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o)
 
