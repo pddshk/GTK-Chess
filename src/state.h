@@ -10,7 +10,7 @@ typedef struct {
     char enpassant[3];
 } board_state;
 
-extern board_state global_state;
+extern board_state game_state;
 
 void init_state();
 

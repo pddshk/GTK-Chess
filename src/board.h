@@ -5,9 +5,10 @@
 #include <librsvg/rsvg.h>
 #include "state.h"
 
-extern board_state global_state;
-extern RsvgHandle *image;
+extern board_state game_state;
 
-gboolean draw_callback (GtkWidget*, cairo_t*, gpointer);
+void load_textures(/*const char* pack*/);
+
+gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 
 #endif
