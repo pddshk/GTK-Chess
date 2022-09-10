@@ -3,15 +3,15 @@
 
 void init_state()
 {
-    strcpy(game_state.field[0], "rnbqkbnr");
-    strcpy(game_state.field[1], "pppppppp");
-    for (int i = 2; i < 6; strcpy(game_state.field[i++], "--------"));
-    strcpy(game_state.field[6], "PPPPPPPP");
-    strcpy(game_state.field[7], "RNBQKBNR");
-    game_state.side_to_move = 0;
-    game_state.fifty_moves_counter = 0;
-    game_state.move_counter = 0;
-    game_state.enpassant[0] = 0;
+    strcpy(state.field[0], "rnbqkbnr");
+    strcpy(state.field[1], "pppppppp");
+    for (int i = 2; i < 6; strcpy(state.field[i++], "--------"));
+    strcpy(state.field[6], "PPPPPPPP");
+    strcpy(state.field[7], "RNBQKBNR");
+    state.side_to_move = 0;
+    state.fifty_moves_counter = 0;
+    state.move_counter = 0;
+    state.enpassant[0] = 0;
 }
 
 char get_field(const char* field)
@@ -28,5 +28,5 @@ char get_field(const char* field)
         case 'h': i = 7; break;
     }
     j = field[1] - '0';
-    return game_state.field[i][j];
+    return state.field[i][j];
 }
