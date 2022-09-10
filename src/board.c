@@ -160,7 +160,7 @@ drag_start(GtkWidget *widget,
 		dragged_piece = state.field[dragged_y][dragged_x];
 		if (state.field[dragged_y][dragged_x] != '-'){
 			state.field[dragged_y][dragged_x] = '-';
-			gtk_drag_begin_with_coordinates(
+			GdkDragContext *context = gtk_drag_begin_with_coordinates(
 				widget,
 				board_target,
 				GDK_ACTION_MOVE,
@@ -168,6 +168,12 @@ drag_start(GtkWidget *widget,
 				(GdkEvent*)event,
 				-1,
 				-1
+			);
+			gtk_drag_set_icon_pixbuf (
+				context,
+				gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1),
+				0,
+				0
 			);
 		}
 	}
@@ -232,7 +238,7 @@ drag_drop (
 	gdouble cell_size=(board_size - 2*border_size)/8;
 	gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 	int col = (int)((x - x_offset) / cell_size), row = (int)((y - y_offset) / cell_size);
-	
+
 	state.field[row][col] = dragged_piece;
 	state.field[dragged_y][dragged_x] = '-';
 
