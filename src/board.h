@@ -5,9 +5,25 @@
 #include <librsvg/rsvg.h>
 #include "state.h"
 
-extern board_state game_state;
+extern game_state state;
+extern GtkTargetList* board_target;
+extern GtkGestureDrag* drag_handler;
 
-void load_textures(/*const char* pack*/);
+void load_textures(/* const char* pack */);
+
+gboolean
+drag_drop (
+  GtkWidget* self,
+  GdkDragContext* context,
+  gint x, gint y,
+  guint time,
+  gpointer data
+);
+
+gboolean
+drag_start(GtkWidget *widget,
+    GdkEventMotion *event,
+    gpointer data);
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 

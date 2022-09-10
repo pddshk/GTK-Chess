@@ -8,9 +8,9 @@ typedef struct {
     int move_counter;
     char field[8][9];
     char enpassant[3];
-} board_state;
+} game_state;
 
-extern board_state game_state;
+extern game_state state;
 
 void init_state();
 
