@@ -6,6 +6,7 @@ RsvgHandle *BKing, *WKing, *BQueen, *WQueen, *BRook, *WRook,
 
 char dragged_piece = 0;
 int dragged_x, dragged_y;
+int drag_pos_x, drag_pos_y;
 
 const double border_perc=0.05;
 
@@ -45,8 +46,7 @@ RsvgHandle* resolve_piece(char code)
 	}
 }
 
-gboolean
-draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
+gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
 	guint width = gtk_widget_get_allocated_width(widget),
 		  height = gtk_widget_get_allocated_height (widget);
@@ -99,6 +99,21 @@ draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 			);
 		}
 	}
+	if (drag_pos_x != -1){
+		RsvgHandle *current_piece=resolve_piece(dragged_piece);
+		if(current_piece){
+			RsvgRectangle piece_holder;
+			piece_holder.x = drag_pos_x - cell_size/2;
+			piece_holder.y = drag_pos_y - cell_size/2;
+			piece_holder.width = piece_holder.height = cell_size;
+			rsvg_handle_render_document(
+				current_piece,
+				cr,
+				&piece_holder,
+				NULL
+			);
+		}
+	}
 	return FALSE;
 }
 
@@ -114,19 +129,6 @@ drag_start(GtkWidget *widget,
 		&start_y
 	))
 		return FALSE;
-
-	GdkWindow *gdk_window = gtk_widget_get_window(widget);
-	GdkDisplay* display = gdk_display_get_default();
-	GdkSeat* seat = gdk_display_get_default_seat(display);
-	GdkDevice* device = gdk_seat_get_pointer(seat);
-	gdouble x,y;
-	gdk_window_get_device_position_double (
-		gdk_window,
-		device,
-		&x,
-		&y,
-		NULL
-	);
 
 	if (gtk_drag_check_threshold(
 		widget,
@@ -151,10 +153,13 @@ drag_start(GtkWidget *widget,
 		gdouble border_size=border_perc * board_size;
 		gdouble cell_size=(board_size - 2*border_size)/8;
 		gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
+		drag_pos_x = (int) (event->x);
+		drag_pos_y = (int) (event->y);
 		dragged_x = (int)((event->x - x_offset) / cell_size);
 		dragged_y = (int)((event->y - y_offset) / cell_size);
-		//dragged_piece = 0;
-		if (state.field[dragged_y][dragged_x] != '-')
+		dragged_piece = state.field[dragged_y][dragged_x];
+		if (state.field[dragged_y][dragged_x] != '-'){
+			state.field[dragged_y][dragged_x] = '-';
 			gtk_drag_begin_with_coordinates(
 				widget,
 				board_target,
@@ -164,7 +169,39 @@ drag_start(GtkWidget *widget,
 				-1,
 				-1
 			);
+		}
 	}
+	return TRUE;
+}
+
+gboolean
+drag_motion (
+  GtkWidget* widget,
+  GdkDragContext* context,
+  gint x,
+  gint y,
+  guint time,
+  gpointer user_data
+)
+{
+	drag_pos_x = x;
+	drag_pos_y = y;
+	gtk_widget_queue_draw(widget);
+	return TRUE;
+}
+
+gboolean
+drag_failed (
+  GtkWidget* self,
+  GdkDragContext* context,
+  GtkDragResult result,
+  gpointer user_data
+)
+{
+	state.field[dragged_y][dragged_x] = dragged_piece;
+	dragged_x = dragged_y = 0;
+	drag_pos_x = drag_pos_y = -1;
+	gtk_widget_queue_draw(self);
 	return TRUE;
 }
 
@@ -195,14 +232,10 @@ drag_drop (
 	gdouble cell_size=(board_size - 2*border_size)/8;
 	gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 	int col = (int)((x - x_offset) / cell_size), row = (int)((y - y_offset) / cell_size);
-	//printf("drag-drop is from %d %d to %d %d\n",dragged_y, dragged_x, col, row);
-	state.field[row][col] = state.field[dragged_y][dragged_x];
+	
+	state.field[row][col] = dragged_piece;
 	state.field[dragged_y][dragged_x] = '-';
-	// for (int i = 0; i < 8; i++){
-	// 	for (int j = 0; j < 8; j++)
-	// 		printf("%c\t", state.field[i][j]);
-	// 	printf("\n");
-	// }
+
 	gtk_widget_queue_draw_area (
 		widget,
 		0,
@@ -211,5 +244,6 @@ drag_drop (
 		height
 	);
 	dragged_x = dragged_y = 0;
+	drag_pos_x = drag_pos_y = -1;
 	return TRUE;
 }

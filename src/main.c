@@ -45,8 +45,10 @@ int main(int argc, char** argv)
 	gtk_widget_show(GTK_WIDGET(window));
 	gtk_widget_add_events(GTK_WIDGET(Board), GDK_POINTER_MOTION_MASK);
 	g_signal_connect(Board, "draw", G_CALLBACK(draw_board), NULL);
-	g_signal_connect(Board, "drag-drop", G_CALLBACK(drag_drop), NULL);
 	g_signal_connect(Board, "motion-notify-event", G_CALLBACK(drag_start), NULL);
+	g_signal_connect(Board, "drag-motion", G_CALLBACK(drag_motion), NULL);
+	g_signal_connect(Board, "drag-failed", G_CALLBACK(drag_failed), NULL);
+	g_signal_connect(Board, "drag-drop", G_CALLBACK(drag_drop), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_main();

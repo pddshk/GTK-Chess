@@ -12,6 +12,31 @@ extern GtkGestureDrag* drag_handler;
 void load_textures(/* const char* pack */);
 
 gboolean
+drag_start(
+    GtkWidget *widget,
+    GdkEventMotion *event,
+    gpointer data
+);
+
+gboolean
+drag_motion (
+  GtkWidget* self,
+  GdkDragContext* context,
+  gint x,
+  gint y,
+  guint time,
+  gpointer user_data
+);
+
+gboolean
+drag_failed (
+  GtkWidget* self,
+  GdkDragContext* context,
+  GtkDragResult result,
+  gpointer user_data
+);
+
+gboolean
 drag_drop (
   GtkWidget* self,
   GdkDragContext* context,
@@ -19,11 +44,6 @@ drag_drop (
   guint time,
   gpointer data
 );
-
-gboolean
-drag_start(GtkWidget *widget,
-    GdkEventMotion *event,
-    gpointer data);
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 
