@@ -1,11 +1,12 @@
 #include "board.h"
 #include <math.h>
+#include <string.h>
 
 RsvgHandle *BKing, *WKing, *BQueen, *WQueen, *BRook, *WRook,
     *BBishop, *WBishop, *BKnight, *WKnight, *BPawn, *WPawn, *Board;
 
 char dragged_piece = 0;
-int dragged_x, dragged_y;
+int dragged_col, dragged_row;
 int drag_pos_x, drag_pos_y;
 
 const double border_perc=0.05;
@@ -155,11 +156,12 @@ drag_start(GtkWidget *widget,
 		gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 		drag_pos_x = (int) (event->x);
 		drag_pos_y = (int) (event->y);
-		dragged_x = (int)((event->x - x_offset) / cell_size);
-		dragged_y = (int)((event->y - y_offset) / cell_size);
-		dragged_piece = state.field[dragged_y][dragged_x];
-		if (state.field[dragged_y][dragged_x] != '-'){
-			state.field[dragged_y][dragged_x] = '-';
+		dragged_col = (int)((event->x - x_offset) / cell_size);
+		dragged_row = (int)((event->y - y_offset) / cell_size);
+		dragged_piece = state.field[dragged_row][dragged_col];
+		const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
+		if (strchr(piece_set, state.field[dragged_row][dragged_col])){
+			state.field[dragged_row][dragged_col] = '-';
 			GdkDragContext *context = gtk_drag_begin_with_coordinates(
 				widget,
 				board_target,
@@ -171,6 +173,7 @@ drag_start(GtkWidget *widget,
 			);
 			gtk_drag_set_icon_pixbuf (
 				context,
+				//this may memory leak?
 				gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1),
 				0,
 				0
@@ -204,8 +207,8 @@ drag_failed (
   gpointer user_data
 )
 {
-	state.field[dragged_y][dragged_x] = dragged_piece;
-	dragged_x = dragged_y = 0;
+	state.field[dragged_row][dragged_col] = dragged_piece;
+	dragged_col = dragged_row = 0;
 	drag_pos_x = drag_pos_y = -1;
 	gtk_widget_queue_draw(self);
 	return TRUE;
@@ -239,8 +242,44 @@ drag_drop (
 	gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
 	int col = (int)((x - x_offset) / cell_size), row = (int)((y - y_offset) / cell_size);
 
-	state.field[row][col] = dragged_piece;
-	state.field[dragged_y][dragged_x] = '-';
+	if (is_valid_move(dragged_piece, dragged_row, dragged_col, row, col)){
+		if (is_enpassant_square(row, col)){
+			if (dragged_piece == 'P')
+				state.field[row+1][col] = '-';
+			else if (dragged_piece == 'p')
+			 	state.field[row-1][col] = '-';
+		}
+		state.field[row][col] = dragged_piece;
+		state.field[dragged_row][dragged_col] = '-';
+		if (dragged_piece == 'K'){
+			if (col - dragged_col == -2){
+				state.field[7][0] = '-';
+				state.field[7][3] = 'R';
+			} else if (col - dragged_col == 2){
+				state.field[7][7] = '-';
+				state.field[7][5] = 'R';
+			}
+		} else if (dragged_piece == 'k'){
+			if (col - dragged_col == -2){
+				state.field[0][0] = '-';
+				state.field[0][3] = 'r';
+			} else if (col - dragged_col == 2){
+				state.field[0][7] = '-';
+				state.field[0][5] = 'r';
+			}
+		}
+		recalc_castlings();
+		state.side_to_move = !state.side_to_move;
+		state.move_counter++;
+		if (dragged_piece == 'P' && row - dragged_row == -2)
+			set_enpassant(row+1, col);
+		else if (dragged_piece == 'p' && row - dragged_row == 2)
+			set_enpassant(row-1, col);
+		else
+			clear_enpassant();
+	}
+	else
+		state.field[dragged_row][dragged_col] = dragged_piece;
 
 	gtk_widget_queue_draw_area (
 		widget,
@@ -249,7 +288,7 @@ drag_drop (
 		width,
 		height
 	);
-	dragged_x = dragged_y = 0;
+	dragged_col = dragged_row = 0;
 	drag_pos_x = drag_pos_y = -1;
 	return TRUE;
 }

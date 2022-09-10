@@ -7,13 +7,24 @@ typedef struct {
     int fifty_moves_counter;
     int move_counter;
     char field[8][9];
-    char enpassant[3];
+    int enpassant_row, enpassant_col;
 } game_state;
 
 extern game_state state;
 
 void init_state();
 
-char get_field(const char*);
+char get_field_by_notation(const char*);
+
+int is_enpassant_square(int,int);
+
+void set_enpassant(int,int);
+
+void clear_enpassant();
+
+void recalc_castlings();
+
+//debug
+void print_state();
 
 #endif

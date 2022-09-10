@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #include <librsvg/rsvg.h>
 #include "state.h"
+#include "rules.h"
 
 extern game_state state;
 extern GtkTargetList* board_target;
