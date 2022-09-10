@@ -4,7 +4,7 @@ RSVG	= librsvg-2.0
 CFLAGS	+= -Wall `pkg-config --cflags $(GTK) $(RSVG)`
 LDFLAGS	+= `pkg-config --libs $(GTK) $(RSVG)` -lm
 OBJDIR	= obj
-OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o)
+OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o)
 
 all: prepare $(OBJECTS)
 	$(CC) $(CFLAGS) -o bin/GTKChess $(OBJECTS) $(LDFLAGS)

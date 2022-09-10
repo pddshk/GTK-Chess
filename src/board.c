@@ -1,14 +1,40 @@
 #include "board.h"
 #include <math.h>
+#include <string.h>
 
 RsvgHandle *BKing, *WKing, *BQueen, *WQueen, *BRook, *WRook,
     *BBishop, *WBishop, *BKnight, *WKnight, *BPawn, *WPawn, *Board;
 
 char dragged_piece = 0;
-int dragged_x, dragged_y;
+int drag_row_start, drag_col_start;
 int drag_pos_x, drag_pos_y;
 
 const double border_perc=0.05;
+
+void calc_size(GtkWidget* widget,
+	gdouble *wmargin, gdouble *hmargin,
+	gdouble *board_size,
+	gdouble *cell_size,
+	gdouble *w_offset, gdouble *h_offset
+)
+{
+	guint width = gtk_widget_get_allocated_width(widget),
+		  height = gtk_widget_get_allocated_height(widget);
+
+	gdouble minimum=fmin(width, height);
+	if (minimum == width) {
+		*hmargin = (height - 0.96*width) / 2.;
+		*wmargin = 0.02*width;
+	} else {
+		*wmargin = (width - 0.96*height) / 2.;
+		*hmargin = 0.02*height;
+	}
+	*board_size = width - 2*(*wmargin);
+	gdouble border_size = border_perc * (*board_size);
+	*cell_size = (*board_size - 2*border_size)/8;
+	*w_offset = *wmargin + border_size;
+	*h_offset = *hmargin + border_size;
+}
 
 void load_textures(/* const char* pack */)
 {
@@ -48,22 +74,14 @@ RsvgHandle* resolve_piece(char code)
 
 gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
-	guint width = gtk_widget_get_allocated_width(widget),
-		  height = gtk_widget_get_allocated_height (widget);
+	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
-	gdouble minimum=fmin(width, height);
-	gdouble hmargin, wmargin;
-	if (minimum == width) {
-		hmargin = (height - 0.96*width) / 2.;
-		wmargin = 0.02*width;
-	} else {
-		wmargin = (width - 0.96*height) / 2.;
-		hmargin = 0.02*height;
-	}
-	gdouble board_size=width-2*wmargin;
-	gdouble border_size=border_perc * board_size;
-	gdouble cell_size=(board_size - 2*border_size)/8;
-	gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
+	calc_size(widget,
+		&wmargin, &hmargin,
+		&board_size,
+		&cell_size,
+		&w_offset, &h_offset
+	);
 
 	cairo_set_source_rgb(cr, 0.05, 0.2, 0.15);
 	cairo_rectangle(
@@ -73,9 +91,9 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	cairo_fill(cr);
 
 	RsvgRectangle board_holder;
-	board_holder.x = x_offset;
-	board_holder.y = y_offset;
-	board_holder.width = board_holder.height = (board_size - 2*border_size);
+	board_holder.x = w_offset;
+	board_holder.y = h_offset;
+	board_holder.width = board_holder.height = 8*cell_size;
 	rsvg_handle_render_document(
 		Board,
 		cr,
@@ -88,8 +106,8 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 		if (current_piece){
 			gdouble x = col * cell_size, y = row * cell_size;
 			RsvgRectangle piece_holder;
-			piece_holder.x = x_offset + x;
-			piece_holder.y = y_offset + y;
+			piece_holder.x = w_offset + x;
+			piece_holder.y = h_offset + y;
 			piece_holder.width = piece_holder.height = cell_size;
 			rsvg_handle_render_document(
 				current_piece,
@@ -137,29 +155,23 @@ drag_start(GtkWidget *widget,
 		event->x,
 		event->y
 	)){
-		guint width = gtk_widget_get_allocated_width(widget),
-			  height = gtk_widget_get_allocated_height(widget);
+		gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
-		gdouble minimum=fmin(width, height);
-		gdouble hmargin, wmargin;
-		if (minimum == width) {
-			hmargin = (height - 0.96*width) / 2.;
-			wmargin = 0.02*width;
-		} else {
-			wmargin = (width - 0.96*height) / 2.;
-			hmargin = 0.02*height;
-		}
-		gdouble board_size=width-2*wmargin;
-		gdouble border_size=border_perc * board_size;
-		gdouble cell_size=(board_size - 2*border_size)/8;
-		gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
+		calc_size(widget,
+			&wmargin, &hmargin,
+			&board_size,
+			&cell_size,
+			&w_offset, &h_offset
+		);
+
 		drag_pos_x = (int) (event->x);
 		drag_pos_y = (int) (event->y);
-		dragged_x = (int)((event->x - x_offset) / cell_size);
-		dragged_y = (int)((event->y - y_offset) / cell_size);
-		dragged_piece = state.field[dragged_y][dragged_x];
-		if (state.field[dragged_y][dragged_x] != '-'){
-			state.field[dragged_y][dragged_x] = '-';
+		drag_col_start = (int)((event->x - w_offset) / cell_size);
+		drag_row_start = (int)((event->y - h_offset) / cell_size);
+		dragged_piece = state.field[drag_row_start][drag_col_start];
+		const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
+		if (strchr(piece_set, state.field[drag_row_start][drag_col_start])){
+			state.field[drag_row_start][drag_col_start] = '-';
 			GdkDragContext *context = gtk_drag_begin_with_coordinates(
 				widget,
 				board_target,
@@ -171,6 +183,7 @@ drag_start(GtkWidget *widget,
 			);
 			gtk_drag_set_icon_pixbuf (
 				context,
+				//this may memory leak?
 				gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1),
 				0,
 				0
@@ -204,8 +217,8 @@ drag_failed (
   gpointer user_data
 )
 {
-	state.field[dragged_y][dragged_x] = dragged_piece;
-	dragged_x = dragged_y = 0;
+	cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
+	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	gtk_widget_queue_draw(self);
 	return TRUE;
@@ -221,35 +234,24 @@ drag_drop (
   gpointer user_data
 )
 {
-	guint width = gtk_widget_get_allocated_width(widget),
-		  height = gtk_widget_get_allocated_height(widget);
+	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
-	gdouble minimum=fmin(width, height);
-	gdouble hmargin, wmargin;
-	if (minimum == width) {
-		hmargin = (height - 0.96*width) / 2.;
-		wmargin = 0.02*width;
-	} else {
-		wmargin = (width - 0.96*height) / 2.;
-		hmargin = 0.02*height;
-	}
-	gdouble board_size=width-2*wmargin;
-	gdouble border_size=border_perc * board_size;
-	gdouble cell_size=(board_size - 2*border_size)/8;
-	gdouble x_offset=wmargin+border_size, y_offset=hmargin+border_size;
-	int col = (int)((x - x_offset) / cell_size), row = (int)((y - y_offset) / cell_size);
-
-	state.field[row][col] = dragged_piece;
-	state.field[dragged_y][dragged_x] = '-';
-
-	gtk_widget_queue_draw_area (
-		widget,
-		0,
-		0,
-		width,
-		height
+	calc_size(widget,
+		&wmargin, &hmargin,
+		&board_size,
+		&cell_size,
+		&w_offset, &h_offset
 	);
-	dragged_x = dragged_y = 0;
+
+	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
+
+	if (is_valid_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col))
+		next_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col);
+	else
+		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
+
+	gtk_widget_queue_draw(widget);
+	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	return TRUE;
 }

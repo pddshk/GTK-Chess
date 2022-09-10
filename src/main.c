@@ -11,7 +11,7 @@ GtkGestureDrag* drag_handler;
 int main(int argc, char** argv)
 {
 	gtk_init(&argc, &argv);
-	init_state();
+	init_state(&state);
 	load_textures();
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
