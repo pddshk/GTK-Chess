@@ -33,15 +33,15 @@ char get_field_by_notation(const char* field)
     return state.field[i][j];
 }
 
-void print_state()
+void print_state(game_state* state)
 {
     for (int i = 0; i < 8; i++){
         for (size_t j = 0; j < 8; j++) {
-            printf("%c\t", state.field[i][j]);
+            printf("%c\t", state->field[i][j]);
         }
         printf("\n");
     }
-    printf("Enpassant is %d %d\n", state.enpassant_row, state.enpassant_col);
+    //printf("Enpassant is %d %d\n", state.enpassant_row, state.enpassant_col);
 }
 
 int is_enpassant_square(int row, int col)
@@ -79,4 +79,8 @@ void recalc_castlings()
         if (state.field[7][7] != 'R')
             state.castlings[1] = 0;
     }
+}
+
+void copy_state(game_state *other){
+    memcpy((void*) other, &state, sizeof(game_state));
 }

@@ -24,7 +24,9 @@ void clear_enpassant();
 
 void recalc_castlings();
 
+void copy_state(game_state*);
+
 //debug
-void print_state();
+void print_state(game_state*);
 
 #endif
