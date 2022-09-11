@@ -3,13 +3,6 @@
 
 #include "state.h"
 
-//extern game_state state;
-
-// N.B ----------------------------------------------------------------------
-// make pieces not to jump over other pieces
-// check threatened squares for castling
-// N.B ----------------------------------------------------------------------
-
 int queens_moves(game_state*, char piece, int from_row, int from_col, int to_row, int to_col);
 int rooks_moves(game_state*, char piece, int from_row, int from_col, int to_row, int to_col);
 int bishops_moves(game_state*, char piece, int from_row, int from_col, int to_row, int to_col);
@@ -27,6 +20,7 @@ int is_square_foe(game_state*, char piece, int row, int col);
 int is_square_friend(game_state*, char piece, int row, int col);
 int is_square_threatened(game_state*, char, int, int);
 int is_king_threatened(game_state*, char);
+char is_castling(game_state*, char, int, int, int, int);
 
 int _is_valid_move(game_state*,char,int,int,int,int);
 int is_valid_move(game_state*, char,int,int,int,int);

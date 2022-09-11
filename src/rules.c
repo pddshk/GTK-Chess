@@ -97,7 +97,7 @@ int pawns_moves(game_state *state, char piece, int from_row, int from_col, int t
                 (d_col == 0 && is_square_empty(state, to_row, to_col)) ||
                 ((d_col == 1 || d_col == -1) &&
                 (is_square_foe(state, piece, to_row, to_col) ||
-                is_enpassant_square(to_row, to_col)))
+                is_enpassant_square(state, to_row, to_col)))
             );
     else
         if (from_row == 1 && d_row == 2)
@@ -109,7 +109,7 @@ int pawns_moves(game_state *state, char piece, int from_row, int from_col, int t
                 (d_col == 0 && is_square_empty(state, to_row, to_col)) || // just move
                 ((d_col == 1 || d_col == -1) &&             //capture only
                 (is_square_foe(state, piece, to_row, to_col) ||  //foe piece or
-                is_enpassant_square(to_row, to_col)))       //enpassant
+                is_enpassant_square(state, to_row, to_col)))       //enpassant
             );
 }
 
@@ -158,12 +158,6 @@ int can_castle(game_state* state, char piece, char side)
             !is_square_threatened(state, piece,0,5) &&
             !is_square_threatened(state, piece,0,6);
     return 0;
-}
-
-int is_castling(char piece, int from_row, int from_col, int to_row, int to_col)
-{
-    return (piece == 'K' || piece == 'k') &&
-        (from_col - to_col == 2 || from_col - to_col == -2);
 }
 
 int is_square_valid(game_state *state, char piece, int row, int col){
@@ -241,16 +235,21 @@ int is_square_threatened(game_state *state, char piece, int row, int col)
 
 int is_king_threatened(game_state* state, char piece)
 {
-    int row=0, col=0;
-    for (int i = 0; i < 8; i++){
-        for (int j = 0; j < 8; j++){
-            if (state->field[i][j] == piece){
-                row = i;
-                col = j;
-                goto brk;
-            }
-        }
+    for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++)
+        if (state->field[i][j] == piece)
+            return is_square_threatened(state, piece, i, j);
+    //unreachable; suppress warning
+    return -1;
+}
+
+char is_castling(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
+{
+    int d_col = to_col - from_col;
+    if (piece == 'K' || piece == 'k'){
+        if (d_col == -2)
+            return 'Q';
+        else if (d_col == 2)
+            return 'K';
     }
-    brk:
-    return is_square_threatened(state, piece, row, col);
+    return '-';
 }
