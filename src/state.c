@@ -107,10 +107,10 @@ void move(game_state* state, char piece, int from_row, int from_col, int to_row,
     char castling_side = is_castling(state, piece, from_row, from_col, to_row, to_col);
     if (castling_side != '-'){
         castle(state, piece, castling_side);
-    } else if (piece == 'P' && to_row == 0) {
-        //white pawn promotion
-    } else if (piece == 'p' && to_row == 7){
-        //black pawn promotion
+    } else if (is_pawn_promotion(piece, to_row)) {
+        pawn_promotion = piece;
+        pawn_promotion_row = to_row;
+        pawn_promotion_col = to_col;
     } else {
         just_move(state, piece, to_row, to_col);
     }
@@ -118,8 +118,19 @@ void move(game_state* state, char piece, int from_row, int from_col, int to_row,
 
 void just_move(game_state* state, char piece, int to_row, int to_col)
 {
-    //state->field[from_row][from_col] = '-';
     state->field[to_row][to_col] = piece;
+}
+
+char is_castling(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
+{
+    int d_col = to_col - from_col;
+    if (piece == 'K' || piece == 'k'){
+        if (d_col == -2)
+            return 'Q';
+        else if (d_col == 2)
+            return 'K';
+    }
+    return '-';
 }
 
 void castle(game_state* state, char king, char side)
@@ -159,6 +170,17 @@ void castle(game_state* state, char king, char side)
     }
 }
 
+int is_pawn_promotion(char piece, int to_row)
+{
+    return (piece == 'P' && to_row == 0) ||
+            (piece == 'p' && to_row == 7);
+}
+
+void promote_pawn(game_state* state, int to_row, int to_col, char newpiece)
+{
+    state->field[to_row][to_col] = newpiece;
+}
+
 void enpassant(game_state* state, char piece, int to_row, int to_col){
     just_move(state, piece, to_row, to_col);
     switch (piece) {
@@ -187,4 +209,9 @@ int is_pawn(char piece) { return piece == 'P' || piece == 'p'; }
 
 void copy_state(game_state *other){
     memcpy((void*) other, &state, sizeof(game_state));
+}
+
+char resolve_promotion(int row)
+{
+    return "QRBNnbrq"[row];
 }

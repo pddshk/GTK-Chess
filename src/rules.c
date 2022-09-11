@@ -6,6 +6,8 @@ int _is_valid_move(game_state *state, char piece, int from_row, int from_col, in
 {
     if (from_row == to_row && from_col == to_col)
         return 0;
+    if (!is_square_valid(state, piece, to_row, to_col))
+        return 0;
     switch(piece){
         case 'K': case 'k':
             return kings_moves(state, piece, from_row, from_col, to_row, to_col);
@@ -81,8 +83,7 @@ int bishops_moves(game_state* state, char piece, int from_row, int from_col, int
 int knights_moves(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col){
     int d_row = to_row - from_row, d_col = to_col - from_col;
     return (((d_row == 2 || d_row == -2) && (d_col == 1 || d_col == -1)) ||
-           ((d_col == 2 || d_col == -2) && (d_row == 1 || d_row == -1))) &&
-           is_square_valid(state, piece, to_row, to_col);
+           ((d_col == 2 || d_col == -2) && (d_row == 1 || d_row == -1)));
 }
 
 int pawns_moves(game_state *state, char piece, int from_row, int from_col, int to_row, int to_col){
@@ -240,16 +241,4 @@ int is_king_threatened(game_state* state, char piece)
             return is_square_threatened(state, piece, i, j);
     //unreachable; suppress warning
     return -1;
-}
-
-char is_castling(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
-{
-    int d_col = to_col - from_col;
-    if (piece == 'K' || piece == 'k'){
-        if (d_col == -2)
-            return 'Q';
-        else if (d_col == 2)
-            return 'K';
-    }
-    return '-';
 }
