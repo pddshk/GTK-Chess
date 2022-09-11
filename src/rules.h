@@ -20,7 +20,6 @@ int is_square_foe(game_state*, char piece, int row, int col);
 int is_square_friend(game_state*, char piece, int row, int col);
 int is_square_threatened(game_state*, char, int, int);
 int is_king_threatened(game_state*, char);
-char is_castling(game_state*, char, int, int, int, int);
 
 int _is_valid_move(game_state*,char,int,int,int,int);
 int is_valid_move(game_state*, char,int,int,int,int);

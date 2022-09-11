@@ -2,12 +2,16 @@
 #include <math.h>
 #include <string.h>
 
-RsvgHandle *BKing, *WKing, *BQueen, *WQueen, *BRook, *WRook,
-    *BBishop, *WBishop, *BKnight, *WKnight, *BPawn, *WPawn, *Board;
+RsvgHandle *BKing, *BQueen, *BRook, *BBishop, *BKnight, *BPawn,
+		   *WKing, *WQueen, *WRook, *WBishop, *WKnight, *WPawn,
+		   *BPQueen, *BPRook, *BPBishop, *BPKnight,
+		   *WPQueen, *WPRook, *WPBishop, *WPKnight,
+		   *Board;
 
 char dragged_piece = 0;
 int drag_row_start, drag_col_start;
 int drag_pos_x, drag_pos_y;
+int drag_status = 0;
 
 const double border_perc=0.05;
 
@@ -51,11 +55,19 @@ void load_textures(/* const char* pack */)
 	BPawn	= rsvg_handle_new_from_file("src/textures/classic/BPawn.svg",	NULL);
 	WPawn	= rsvg_handle_new_from_file("src/textures/classic/WPawn.svg",	NULL);
 	Board	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
+	BPQueen = rsvg_handle_new_from_file("src/textures/classic/BPQueen.svg",	NULL);
+	BPRook	= rsvg_handle_new_from_file("src/textures/classic/BPRook.svg",	NULL);
+	BPBishop= rsvg_handle_new_from_file("src/textures/classic/BPBishop.svg",NULL);
+	BPKnight= rsvg_handle_new_from_file("src/textures/classic/BPKnight.svg",NULL);
+	WPQueen	= rsvg_handle_new_from_file("src/textures/classic/WPQueen.svg",	NULL);
+	WPRook	= rsvg_handle_new_from_file("src/textures/classic/WPRook.svg",	NULL);
+	WPBishop= rsvg_handle_new_from_file("src/textures/classic/WPBishop.svg",NULL);
+	WPKnight= rsvg_handle_new_from_file("src/textures/classic/WPKnight.svg",NULL);
 }
 
-RsvgHandle* resolve_piece(char code)
+RsvgHandle* resolve_piece(char piece)
 {
-	switch (code) {
+	switch (piece) {
 		case 'k': return BKing;
 		case 'K': return WKing;
 		case 'q': return BQueen;
@@ -68,6 +80,21 @@ RsvgHandle* resolve_piece(char code)
 		case 'N': return WKnight;
 		case 'p': return BPawn;
 		case 'P': return WPawn;
+		default: return NULL;
+	}
+}
+
+RsvgHandle *resolve_promoted_piece(char piece)
+{
+	switch (piece) {
+		case 'q': return BPQueen;
+		case 'Q': return WPQueen;
+		case 'r': return BPRook;
+		case 'R': return WPRook;
+		case 'b': return BPBishop;
+		case 'B': return WPBishop;
+		case 'n': return BPKnight;
+		case 'N': return WPKnight;
 		default: return NULL;
 	}
 }
@@ -100,9 +127,39 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 		&board_holder,
 		NULL
 	);
-	for (int i = 0; i < 64; i++) {
-		int col=i/8, row=i%8;
-		RsvgHandle *current_piece=resolve_piece(state.field[row][col]);
+	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
+	char q,r,b,n;
+	switch (pawn_promotion) {
+		case 'P':
+			q_row=pawn_promotion_row;
+			r_row=pawn_promotion_row+1;
+			b_row=pawn_promotion_row+2;
+			n_row=pawn_promotion_row+3;
+			q='Q';r='R';b='B';n='N';
+			break;
+		case 'p':
+			q_row=pawn_promotion_row;
+			r_row=pawn_promotion_row-1;
+			b_row=pawn_promotion_row-2;
+			n_row=pawn_promotion_row-3;
+			q='q';r='r';b='b';n='n';
+			break;
+	}
+	for (int row=0; row<8; row++) for (int col=0; col<8; col++) {
+		RsvgHandle *current_piece = NULL;
+		if (col == pawn_promotion_col) {
+			if (row == q_row)
+				current_piece = resolve_promoted_piece(q);
+			else if (row == r_row)
+				current_piece = resolve_promoted_piece(r);
+			else if (row == b_row)
+				current_piece = resolve_promoted_piece(b);
+			else if (row == n_row)
+				current_piece = resolve_promoted_piece(n);
+			else
+				current_piece=resolve_piece(state.field[row][col]);
+		} else
+			current_piece=resolve_piece(state.field[row][col]);
 		if (current_piece){
 			gdouble x = col * cell_size, y = row * cell_size;
 			RsvgRectangle piece_holder;
@@ -135,62 +192,47 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	return FALSE;
 }
 
-gboolean
-drag_start(GtkWidget *widget,
-    GdkEventMotion *event,
-    gpointer data)
+void
+drag_begin (
+  GtkWidget* widget,
+  GdkDragContext* context,
+  gpointer user_data
+)
 {
-	gdouble start_x, start_y;
-	if(!gtk_gesture_drag_get_start_point(
-		drag_handler,
+	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
+
+	calc_size(widget,
+		&wmargin, &hmargin,
+		&board_size,
+		&cell_size,
+		&w_offset, &h_offset
+	);
+	GdkWindow* window = gtk_widget_get_window(widget);
+	GdkDevice* device = gdk_drag_context_get_device (context);
+	int start_x, start_y;
+	gdk_window_get_device_position (
+		window,
+		device,
 		&start_x,
-		&start_y
-	))
-		return FALSE;
-
-	if (gtk_drag_check_threshold(
-		widget,
-		start_x,
-		start_y,
-		event->x,
-		event->y
-	)){
-		gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
-
-		calc_size(widget,
-			&wmargin, &hmargin,
-			&board_size,
-			&cell_size,
-			&w_offset, &h_offset
+		&start_y,
+		NULL
+	);
+	drag_col_start = (int)((start_x - w_offset) / cell_size);
+	drag_row_start = (int)((start_y - h_offset) / cell_size);
+	dragged_piece = state.field[drag_row_start][drag_col_start];
+	const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
+	if (pawn_promotion == '-' && strchr(piece_set, state.field[drag_row_start][drag_col_start])){
+		state.field[drag_row_start][drag_col_start] = '-';
+		gtk_drag_set_icon_pixbuf (
+			context,
+			empty_icon,
+			0,
+			0
 		);
-
-		drag_pos_x = (int) (event->x);
-		drag_pos_y = (int) (event->y);
-		drag_col_start = (int)((event->x - w_offset) / cell_size);
-		drag_row_start = (int)((event->y - h_offset) / cell_size);
-		dragged_piece = state.field[drag_row_start][drag_col_start];
-		const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
-		if (strchr(piece_set, state.field[drag_row_start][drag_col_start])){
-			state.field[drag_row_start][drag_col_start] = '-';
-			GdkDragContext *context = gtk_drag_begin_with_coordinates(
-				widget,
-				board_target,
-				GDK_ACTION_MOVE,
-				GDK_BUTTON1_MASK,
-				(GdkEvent*)event,
-				-1,
-				-1
-			);
-			gtk_drag_set_icon_pixbuf (
-				context,
-				//this may memory leak?
-				gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1),
-				0,
-				0
-			);
-		}
+		drag_status = 1;
+	} else {
+		drag_status = 0;
 	}
-	return TRUE;
 }
 
 gboolean
@@ -203,9 +245,11 @@ drag_motion (
   gpointer user_data
 )
 {
-	drag_pos_x = x;
-	drag_pos_y = y;
-	gtk_widget_queue_draw(widget);
+	if (drag_status){
+		drag_pos_x = x;
+		drag_pos_y = y;
+		gtk_widget_queue_draw(widget);
+	}
 	return TRUE;
 }
 
@@ -218,7 +262,6 @@ drag_failed (
 )
 {
 	cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
-	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	gtk_widget_queue_draw(self);
 	return TRUE;
@@ -245,7 +288,7 @@ drag_drop (
 
 	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
 
-	if (is_valid_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col))
+	if (drag_status && is_valid_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col))
 		next_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col);
 	else
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
@@ -253,5 +296,59 @@ drag_drop (
 	gtk_widget_queue_draw(widget);
 	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
+	drag_status = 0;
+	return TRUE;
+}
+
+gboolean
+board_clicked (
+  GtkWidget* widget,
+  GdkEventButton *event,
+  gpointer user_data
+)
+{
+	if (event->type == GDK_BUTTON_RELEASE && pawn_promotion != '-'){
+		gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
+
+		calc_size(widget,
+			&wmargin, &hmargin,
+			&board_size,
+			&cell_size,
+			&w_offset, &h_offset
+		);
+
+		int col = (int)((event->x - w_offset) / cell_size),
+			row = (int)((event->y - h_offset) / cell_size);
+		if (col != pawn_promotion_col) return TRUE;
+		switch (pawn_promotion) {
+			case 'P':
+				if (row < 4){
+					promote_pawn(
+						&state,
+						pawn_promotion_row,
+						pawn_promotion_col,
+						resolve_promotion(row)
+					);
+					pawn_promotion = '-';
+					pawn_promotion_row = pawn_promotion_col = -1;
+					gtk_widget_queue_draw(widget);
+					return TRUE;
+				}
+			case 'p':
+				if (row > 3){
+					promote_pawn(
+						&state,
+						pawn_promotion_row,
+						pawn_promotion_col,
+						resolve_promotion(row)
+					);
+					pawn_promotion = '-';
+					pawn_promotion_row = pawn_promotion_col = -1;
+					gtk_widget_queue_draw(widget);
+					return TRUE;
+				}
+			default: return TRUE;
+		}
+	}
 	return TRUE;
 }

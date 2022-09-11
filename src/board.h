@@ -9,14 +9,17 @@
 extern game_state state;
 extern GtkTargetList* board_target;
 extern GtkGestureDrag* drag_handler;
+extern int pawn_promotion_row, pawn_promotion_col;
+extern char pawn_promotion;
+extern GdkPixbuf *empty_icon;
 
 void load_textures(/* const char* pack */);
 
-gboolean
-drag_start(
-    GtkWidget *widget,
-    GdkEventMotion *event,
-    gpointer data
+void
+drag_begin (
+  GtkWidget* self,
+  GdkDragContext* context,
+  gpointer user_data
 );
 
 gboolean
@@ -44,6 +47,13 @@ drag_drop (
   gint x, gint y,
   guint time,
   gpointer data
+);
+
+gboolean
+board_clicked (
+  GtkWidget* self,
+  GdkEventButton *event,
+  gpointer user_data
 );
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);

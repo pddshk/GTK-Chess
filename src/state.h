@@ -12,6 +12,9 @@ typedef struct {
 
 extern game_state state;
 
+extern int pawn_promotion_row, pawn_promotion_col;
+extern char pawn_promotion;
+
 void init_state(game_state*);
 
 char get_field_by_notation(game_state*, const char*);
@@ -26,7 +29,10 @@ void copy_state(game_state*);
 
 void move(game_state*, char, int, int, int, int);
 void just_move(game_state*, char, int, int);
+char is_castling(game_state*, char, int, int, int, int);
 void castle(game_state*, char, char);
+int is_pawn_promotion(char, int);
+void promote_pawn(game_state*, int, int, char);
 void enpassant(game_state*, char, int, int);
 void cancel_drag(game_state*, char, int, int);
 
@@ -37,6 +43,7 @@ int is_bishop(char);
 int is_knight(char);
 int is_pawn(char);
 
+char resolve_promotion(int);
 //debug
 void print_state(game_state*);
 
