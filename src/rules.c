@@ -4,7 +4,8 @@
 
 int _is_valid_move(game_state *state, char piece, int from_row, int from_col, int to_row, int to_col)
 {
-    if (from_row == to_row && from_col == to_col)
+    if (to_col < 0 || to_row < 0 || to_col > 7 || to_row > 7 ||
+        (from_row == to_row && from_col == to_col))
         return 0;
     if (!is_square_valid(state, piece, to_row, to_col))
         return 0;

@@ -12,6 +12,7 @@ extern GtkGestureDrag* drag_handler;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
 extern GdkPixbuf *empty_icon;
+extern GtkWidget *mate_dialog, *stalemate_dialog;
 
 void load_textures(/* const char* pack */);
 

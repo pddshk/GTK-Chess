@@ -44,6 +44,10 @@ int is_knight(char);
 int is_pawn(char);
 
 char resolve_promotion(int);
+
+int any_moves_possible(game_state*);
+int is_mate(game_state*);
+int is_stalemate(game_state*);
 //debug
 void print_state(game_state*);
 

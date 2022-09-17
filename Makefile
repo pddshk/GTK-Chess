@@ -7,10 +7,10 @@ OBJDIR	= obj
 OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o)
 
 all: prepare $(OBJECTS)
-	$(CC) $(CFLAGS) -o bin/GTKChess $(OBJECTS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o GTKChess $(OBJECTS) $(LDFLAGS)
 
 prepare:
-	mkdir -p obj bin
+	mkdir -p obj
 
 $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -22,4 +22,4 @@ clean:
 	rm -rf $(OBJECTS)
 
 run:
-	bin/GTKChess
+	./GTKChess

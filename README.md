@@ -10,4 +10,4 @@ Linux only. Requires `gtk+-3.0` and `librsvg-2.0`.
 make
 ```
 
-This will produce `bin/GTKChess` executable.
+This will produce `GTKChess` executable.
