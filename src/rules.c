@@ -187,7 +187,7 @@ int is_square_friend(game_state *state, char piece, int row, int col){
 int is_square_threatened(game_state *state, char piece, int row, int col)
 {
     int side = !!strchr("KQNBRP", piece);
-    const char* foes = side ? "kqnbrp" : "KQNBRP";
+    const char* foes = side ? "kqnbr" : "KQNBR";
     for (int i = 0; i < 8; i++){
         for (int j = 0; j < 8; j++){
             char current = state->field[i][j];
