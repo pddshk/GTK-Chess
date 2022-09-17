@@ -34,16 +34,6 @@ char get_field_by_notation(game_state* state, const char* field)
     return state->field[i][j];
 }
 
-void print_state(game_state* state)
-{
-    for (int i = 0; i < 8; i++){
-        for (size_t j = 0; j < 8; j++) {
-            printf("%c\t", state->field[i][j]);
-        }
-        printf("\n");
-    }
-}
-
 int is_enpassant_square(game_state *state, int row, int col)
 {
     return row == state->enpassant_row && col == state->enpassant_col;
@@ -96,7 +86,6 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         set_enpassant(state, to_row-1, to_col);
     else
         clear_enpassant(state);
-
 }
 
 void move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
@@ -214,4 +203,103 @@ void copy_state(game_state *other){
 char resolve_promotion(int row)
 {
     return "QRBNnbrq"[row];
+}
+
+int any_moves_possible(game_state* state)
+{
+    const char* piece_set = state->side_to_move ? "KQRBNP" : "kqrbnp";
+    for (int i=0; i<8; i++) for (int j=0; j<8; j++) {
+        char piece = state->field[i][j];
+        if (strchr(piece_set, piece))
+            switch (piece) {
+                case 'K': case 'k':
+                    return is_valid_move(state, piece, i, j, i-1, j-1) ||
+                            is_valid_move(state, piece, i, j, i-1, j) ||
+                            is_valid_move(state, piece, i, j, i-1, j+1) ||
+                            is_valid_move(state, piece, i, j, i, j-1) ||
+                            is_valid_move(state, piece, i, j, i, j+1) ||
+                            is_valid_move(state, piece, i, j, i+1, j-1) ||
+                            is_valid_move(state, piece, i, j, i+1, j) ||
+                            is_valid_move(state, piece, i, j, i+1, j+1);
+                case 'Q': case 'q':
+                    for (int k = 0; k < 8; k++){
+                        if (is_valid_move(state, piece, i, j, i+k, j) ||
+                            is_valid_move(state, piece, i, j, i, j+k) ||
+                            is_valid_move(state, piece, i, j, i-k, j) ||
+                            is_valid_move(state, piece, i, j, i, j-k) ||
+                            is_valid_move(state, piece, i, j, i+k, j+k) ||
+                            is_valid_move(state, piece, i, j, i+k, j-k) ||
+                            is_valid_move(state, piece, i, j, i-k, j+k) ||
+                            is_valid_move(state, piece, i, j, i-k, j-k)
+                        )
+                            return 1;
+                    }
+                case 'R': case 'r':
+                    for (int k = 0; k < 8; k++){
+                        if (is_valid_move(state, piece, i, j, i+k, j) ||
+                            is_valid_move(state, piece, i, j, i, j+k) ||
+                            is_valid_move(state, piece, i, j, i-k, j) ||
+                            is_valid_move(state, piece, i, j, i, j-k)
+                        )
+                            return 1;
+                    }
+                case 'B': case 'b':
+                    for (int k = 0; k < 8; k++){
+                        if (is_valid_move(state, piece, i, j, i+k, j+k) ||
+                            is_valid_move(state, piece, i, j, i+k, j-k) ||
+                            is_valid_move(state, piece, i, j, i-k, j+k) ||
+                            is_valid_move(state, piece, i, j, i-k, j-k)
+                        )
+                            return 1;
+                    }
+                case 'N': case 'n':
+                    if (is_valid_move(state, piece, i, j, i-2, j-1) ||
+                        is_valid_move(state, piece, i, j, i-2, j+1) ||
+                        is_valid_move(state, piece, i, j, i-1, j-2) ||
+                        is_valid_move(state, piece, i, j, i-1, j+2) ||
+                        is_valid_move(state, piece, i, j, i+1, j-2) ||
+                        is_valid_move(state, piece, i, j, i+1, j+2) ||
+                        is_valid_move(state, piece, i, j, i+2, j-1) ||
+                        is_valid_move(state, piece, i, j, i+2, j+1)
+                    )
+                        return 1;
+                case 'P':
+                    if (is_valid_move(state, piece, i, j, i-1, j-1) ||
+                        is_valid_move(state, piece, i, j, i-1, j) ||
+                        is_valid_move(state, piece, i, j, i-1, j+1) ||
+                        is_valid_move(state, piece, i, j, i-2, j)
+                    )
+                        return 1;
+                case 'p':
+                    if (is_valid_move(state, piece, i, j, i+1, j-1) ||
+                        is_valid_move(state, piece, i, j, i+1, j) ||
+                        is_valid_move(state, piece, i, j, i+1, j+1) ||
+                        is_valid_move(state, piece, i, j, i+2, j)
+                    )
+                        return 1;
+            }
+    }
+    return 0;
+}
+
+int is_mate(game_state *state)
+{
+    return !any_moves_possible(state) &&
+        is_king_threatened(state, state->side_to_move ? 'K' : 'k');
+}
+
+int is_stalemate(game_state *state)
+{
+    return !any_moves_possible(state) &&
+        !is_king_threatened(state, state->side_to_move ? 'K' : 'k');
+}
+
+void print_state(game_state* state)
+{
+    for (int i = 0; i < 8; i++){
+        for (size_t j = 0; j < 8; j++) {
+            printf("%c\t", state->field[i][j]);
+        }
+        printf("\n");
+    }
 }

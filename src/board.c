@@ -12,6 +12,7 @@ char dragged_piece = 0;
 int drag_row_start, drag_col_start;
 int drag_pos_x, drag_pos_y;
 int drag_status = 0;
+int king_threatened_row = -1, king_threatened_col = -1;
 
 const double border_perc=0.05;
 
@@ -297,6 +298,11 @@ drag_drop (
 	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
+	if (is_mate(&state))
+        gtk_dialog_run(GTK_DIALOG (mate_dialog));
+    if (is_stalemate(&state)){
+        gtk_dialog_run(GTK_DIALOG (stalemate_dialog));
+	}
 	return TRUE;
 }
 
