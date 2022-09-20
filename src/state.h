@@ -8,6 +8,8 @@ typedef struct {
     int move_counter;
     char field[8][9];
     int enpassant_row, enpassant_col;
+    int is_active;
+    int flipped;
 } game_state;
 
 extern game_state state;
@@ -18,6 +20,11 @@ extern char pawn_promotion;
 void init_state(game_state*);
 
 char get_field_by_notation(game_state*, const char*);
+void resolve_coord(game_state*, int*, int*);
+int get_field(game_state*, int, int);
+void set_field(game_state*, int, int, char);
+
+int is_active(game_state*);
 
 int is_enpassant_square(game_state*, int,int);
 void set_enpassant(game_state*, int,int);
@@ -48,6 +55,8 @@ char resolve_promotion(int);
 int any_moves_possible(game_state*);
 int is_mate(game_state*);
 int is_stalemate(game_state*);
+int fifty_moves_exceeded(game_state*);
+int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
 

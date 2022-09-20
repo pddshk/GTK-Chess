@@ -13,6 +13,7 @@ extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
 extern GdkPixbuf *empty_icon;
 extern GtkWidget *mate_dialog, *stalemate_dialog;
+extern GtkWidget *Board;
 
 void load_textures(/* const char* pack */);
 
@@ -58,5 +59,7 @@ board_clicked (
 );
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
+
+void flip_board(GtkButton*);
 
 #endif

@@ -5,16 +5,22 @@
 
 void init_state(game_state* state)
 {
-    strcpy(state->field[0], "rnbqkbnr");
-    strcpy(state->field[1], "pppppppp");
-    for (int i = 2; i < 6; strcpy(state->field[i++], "--------"));
-    strcpy(state->field[6], "PPPPPPPP");
-    strcpy(state->field[7], "RNBQKBNR");
+    memcpy(
+        state->field[0],
+        "rnbqkbnr\0pppppppp\0--------\0--------\0--------\0--------\0PPPPPPPP\0RNBQKBNR\0",
+        8*9
+    );
     state->castlings[0] = state->castlings[1] = state->castlings[2] = state->castlings[3] = 1;
     state->side_to_move = 1;
     state->fifty_moves_counter = 0;
     state->move_counter = 0;
     state->enpassant_row = state->enpassant_col = -1;
+    state->is_active = 1;
+    state->flipped = 0;
+}
+
+int is_active(game_state* state){
+    return state->is_active;
 }
 
 char get_field_by_notation(game_state* state, const char* field)
@@ -32,6 +38,30 @@ char get_field_by_notation(game_state* state, const char* field)
     }
     j = field[1] - '0';
     return state->field[i][j];
+}
+
+void resolve_coord(game_state* state, int*row, int*col)
+{
+    if (state->flipped){
+        *row = 7 - *row;
+        *col = 7 - *col;
+    }
+}
+
+int get_field(game_state* state, int row, int col)
+{
+    if (state->flipped)
+        return state->field[7-row][7-col];
+    else
+        return state->field[row][col];
+}
+
+void set_field(game_state* state, int row, int col, char piece)
+{
+    if (state->flipped)
+        state->field[7-row][7-col] = piece;
+    else
+        state->field[row][col] = piece;
 }
 
 int is_enpassant_square(game_state *state, int row, int col)
@@ -186,7 +216,7 @@ void enpassant(game_state* state, char piece, int to_row, int to_col){
 
 void cancel_drag(game_state* state, char piece, int from_row, int from_col)
 {
-    state->field[from_row][from_col] = piece;
+    set_field(state, from_row, from_col, piece);
 }
 
 int is_king(char piece) { return piece == 'K' || piece == 'k'; }
@@ -293,6 +323,13 @@ int is_stalemate(game_state *state)
     return !any_moves_possible(state) &&
         !is_king_threatened(state, state->side_to_move ? 'K' : 'k');
 }
+
+int fifty_moves_exceeded(game_state* state)
+{
+    return state->fifty_moves_counter > 49;
+}
+
+int insufficient_material(game_state* state);
 
 void print_state(game_state* state)
 {

@@ -6,7 +6,7 @@ RsvgHandle *BKing, *BQueen, *BRook, *BBishop, *BKnight, *BPawn,
 		   *WKing, *WQueen, *WRook, *WBishop, *WKnight, *WPawn,
 		   *BPQueen, *BPRook, *BPBishop, *BPKnight,
 		   *WPQueen, *WPRook, *WPBishop, *WPKnight,
-		   *Board;
+		   *BoardImage;
 
 char dragged_piece = 0;
 int drag_row_start, drag_col_start;
@@ -55,7 +55,7 @@ void load_textures(/* const char* pack */)
 	WKnight	= rsvg_handle_new_from_file("src/textures/classic/WKnight.svg",	NULL);
 	BPawn	= rsvg_handle_new_from_file("src/textures/classic/BPawn.svg",	NULL);
 	WPawn	= rsvg_handle_new_from_file("src/textures/classic/WPawn.svg",	NULL);
-	Board	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
+	BoardImage	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
 	BPQueen = rsvg_handle_new_from_file("src/textures/classic/BPQueen.svg",	NULL);
 	BPRook	= rsvg_handle_new_from_file("src/textures/classic/BPRook.svg",	NULL);
 	BPBishop= rsvg_handle_new_from_file("src/textures/classic/BPBishop.svg",NULL);
@@ -123,32 +123,36 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	board_holder.y = h_offset;
 	board_holder.width = board_holder.height = 8*cell_size;
 	rsvg_handle_render_document(
-		Board,
+		BoardImage,
 		cr,
 		&board_holder,
 		NULL
 	);
 	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
 	char q,r,b,n;
+	int dir = state.flipped ? -1 : 1;
+	int _pawn_promotion_col = pawn_promotion_col,
+		_pawn_promotion_row = pawn_promotion_row;
+	resolve_coord(&state, &_pawn_promotion_row, &_pawn_promotion_col);
 	switch (pawn_promotion) {
 		case 'P':
-			q_row=pawn_promotion_row;
-			r_row=pawn_promotion_row+1;
-			b_row=pawn_promotion_row+2;
-			n_row=pawn_promotion_row+3;
+			q_row=_pawn_promotion_row;
+			r_row=_pawn_promotion_row+dir;
+			b_row=_pawn_promotion_row+2*dir;
+			n_row=_pawn_promotion_row+3*dir;
 			q='Q';r='R';b='B';n='N';
 			break;
 		case 'p':
-			q_row=pawn_promotion_row;
-			r_row=pawn_promotion_row-1;
-			b_row=pawn_promotion_row-2;
-			n_row=pawn_promotion_row-3;
+			q_row=_pawn_promotion_row;
+			r_row=_pawn_promotion_row-dir;
+			b_row=_pawn_promotion_row-2*dir;
+			n_row=_pawn_promotion_row-3*dir;
 			q='q';r='r';b='b';n='n';
 			break;
 	}
 	for (int row=0; row<8; row++) for (int col=0; col<8; col++) {
 		RsvgHandle *current_piece = NULL;
-		if (col == pawn_promotion_col) {
+		if (col == _pawn_promotion_col) {
 			if (row == q_row)
 				current_piece = resolve_promoted_piece(q);
 			else if (row == r_row)
@@ -158,9 +162,9 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 			else if (row == n_row)
 				current_piece = resolve_promoted_piece(n);
 			else
-				current_piece=resolve_piece(state.field[row][col]);
+				current_piece=resolve_piece(get_field(&state, row, col));
 		} else
-			current_piece=resolve_piece(state.field[row][col]);
+			current_piece=resolve_piece(get_field(&state, row, col));
 		if (current_piece){
 			gdouble x = col * cell_size, y = row * cell_size;
 			RsvgRectangle piece_holder;
@@ -220,10 +224,10 @@ drag_begin (
 	);
 	drag_col_start = (int)((start_x - w_offset) / cell_size);
 	drag_row_start = (int)((start_y - h_offset) / cell_size);
-	dragged_piece = state.field[drag_row_start][drag_col_start];
+	dragged_piece = get_field(&state, drag_row_start, drag_col_start);
 	const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
-	if (pawn_promotion == '-' && strchr(piece_set, state.field[drag_row_start][drag_col_start])){
-		state.field[drag_row_start][drag_col_start] = '-';
+	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
+		set_field(&state, drag_row_start, drag_col_start,'-');
 		gtk_drag_set_icon_pixbuf (
 			context,
 			empty_icon,
@@ -288,9 +292,11 @@ drag_drop (
 	);
 
 	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
-
-	if (drag_status && is_valid_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col))
-		next_move(&state, dragged_piece, drag_row_start, drag_col_start, row, col);
+	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
+	resolve_coord(&state, &from_row, &from_col);
+	resolve_coord(&state, &to_row, &to_col);
+	if (drag_status && is_valid_move(&state, dragged_piece, from_row, from_col, to_row, to_col))
+		next_move(&state, dragged_piece, from_row, from_col, to_row, to_col);
 	else
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
 
@@ -298,8 +304,9 @@ drag_drop (
 	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
-	if (is_mate(&state))
+	if (is_mate(&state)){
         gtk_dialog_run(GTK_DIALOG (mate_dialog));
+	}
     if (is_stalemate(&state)){
         gtk_dialog_run(GTK_DIALOG (stalemate_dialog));
 	}
@@ -325,6 +332,7 @@ board_clicked (
 
 		int col = (int)((event->x - w_offset) / cell_size),
 			row = (int)((event->y - h_offset) / cell_size);
+		resolve_coord(&state, &row, &col);
 		if (col != pawn_promotion_col) return TRUE;
 		switch (pawn_promotion) {
 			case 'P':
@@ -357,4 +365,10 @@ board_clicked (
 		}
 	}
 	return TRUE;
+}
+
+void flip_board(GtkButton*)
+{
+	state.flipped = !state.flipped;
+	gtk_widget_queue_draw(Board);
 }
