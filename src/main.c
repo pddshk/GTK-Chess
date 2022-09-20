@@ -12,6 +12,7 @@ GdkPixbuf *empty_icon;
 GtkWidget *mate_dialog, *stalemate_dialog;
 int from_engine[2], to_engine[2];
 char *engine="bin/stockfish_15";
+GtkWidget *Board;
 
 int pawn_promotion_row = -1, pawn_promotion_col = -1;
 char pawn_promotion = '-';
@@ -50,7 +51,7 @@ void init_elements()
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
-    GObject *Board=gtk_builder_get_object(builder, "Board");
+    Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
 	empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
 		"GtkDrawingArea",
@@ -83,6 +84,7 @@ void init_elements()
 	g_signal_connect(Board, "drag-motion", G_CALLBACK(drag_motion), NULL);
 	g_signal_connect(Board, "drag-failed", G_CALLBACK(drag_failed), NULL);
 	g_signal_connect(Board, "drag-drop", G_CALLBACK(drag_drop), NULL);
+
 	mate_dialog = gtk_message_dialog_new(
 		GTK_WINDOW(window),
 		GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -99,5 +101,7 @@ void init_elements()
 		"Stalemate"
 	);
 	g_signal_connect(stalemate_dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+	GObject *FlipBoardButton=gtk_builder_get_object(builder, "FlipBoard");
+	g_signal_connect(FlipBoardButton, "clicked", G_CALLBACK(flip_board), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }

@@ -16,7 +16,7 @@ void init_state(game_state* state)
     state->move_counter = 0;
     state->enpassant_row = state->enpassant_col = -1;
     state->is_active = 1;
-    state->flipped = 1;
+    state->flipped = 0;
 }
 
 int is_active(game_state* state){
@@ -102,7 +102,6 @@ void recalc_castlings(game_state* state)
 
 void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
 {
-    printf("move from %d %d to %d %d\n", from_row, from_col, to_row, to_col);
     state->side_to_move = !state->side_to_move;
     state->move_counter++;
     if (is_pawn(piece) || is_square_foe(state, piece, to_row, to_col))

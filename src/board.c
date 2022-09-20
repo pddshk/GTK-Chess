@@ -6,7 +6,7 @@ RsvgHandle *BKing, *BQueen, *BRook, *BBishop, *BKnight, *BPawn,
 		   *WKing, *WQueen, *WRook, *WBishop, *WKnight, *WPawn,
 		   *BPQueen, *BPRook, *BPBishop, *BPKnight,
 		   *WPQueen, *WPRook, *WPBishop, *WPKnight,
-		   *Board;
+		   *BoardImage;
 
 char dragged_piece = 0;
 int drag_row_start, drag_col_start;
@@ -55,7 +55,7 @@ void load_textures(/* const char* pack */)
 	WKnight	= rsvg_handle_new_from_file("src/textures/classic/WKnight.svg",	NULL);
 	BPawn	= rsvg_handle_new_from_file("src/textures/classic/BPawn.svg",	NULL);
 	WPawn	= rsvg_handle_new_from_file("src/textures/classic/WPawn.svg",	NULL);
-	Board	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
+	BoardImage	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
 	BPQueen = rsvg_handle_new_from_file("src/textures/classic/BPQueen.svg",	NULL);
 	BPRook	= rsvg_handle_new_from_file("src/textures/classic/BPRook.svg",	NULL);
 	BPBishop= rsvg_handle_new_from_file("src/textures/classic/BPBishop.svg",NULL);
@@ -123,7 +123,7 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	board_holder.y = h_offset;
 	board_holder.width = board_holder.height = 8*cell_size;
 	rsvg_handle_render_document(
-		Board,
+		BoardImage,
 		cr,
 		&board_holder,
 		NULL
@@ -292,7 +292,6 @@ drag_drop (
 	);
 
 	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
-	//printf("move from %d %d to %d %d\n", drag_row_start, drag_col_start, row, col);
 	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
 	resolve_coord(&state, &from_row, &from_col);
 	resolve_coord(&state, &to_row, &to_col);
@@ -366,4 +365,10 @@ board_clicked (
 		}
 	}
 	return TRUE;
+}
+
+void flip_board(GtkButton*)
+{
+	state.flipped = !state.flipped;
+	gtk_widget_queue_draw(Board);
 }
