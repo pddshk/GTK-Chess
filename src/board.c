@@ -228,12 +228,7 @@ drag_begin (
 	const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
 	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
 		set_field(&state, drag_row_start, drag_col_start,'-');
-		gtk_drag_set_icon_pixbuf (
-			context,
-			empty_icon,
-			0,
-			0
-		);
+		gtk_drag_set_icon_pixbuf(context, empty_icon, 0, 0);
 		drag_status = 1;
 	} else {
 		drag_status = 0;
@@ -310,6 +305,9 @@ drag_drop (
     if (is_stalemate(&state)){
         gtk_dialog_run(GTK_DIALOG (stalemate_dialog));
 	}
+	if (insufficient_material(&state)){
+		gtk_dialog_run(GTK_DIALOG(insufficient_material_dialog));
+	}
 	return TRUE;
 }
 
@@ -367,7 +365,7 @@ board_clicked (
 	return TRUE;
 }
 
-void flip_board(GtkButton*)
+void flip_board(GtkButton* button)
 {
 	state.flipped = !state.flipped;
 	gtk_widget_queue_draw(Board);

@@ -7,12 +7,13 @@
 #include "rules.h"
 
 extern game_state state;
-extern GtkTargetList* board_target;
-extern GtkGestureDrag* drag_handler;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
 extern GdkPixbuf *empty_icon;
-extern GtkWidget *mate_dialog, *stalemate_dialog;
+extern GtkWidget *mate_dialog,
+                 *stalemate_dialog,
+                 *insufficient_material_dialog,
+                 *threefold_repetition_dialog;
 extern GtkWidget *Board;
 
 void load_textures(/* const char* pack */);
