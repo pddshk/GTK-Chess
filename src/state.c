@@ -25,18 +25,7 @@ int is_active(game_state* state){
 
 char get_field_by_notation(game_state* state, const char* field)
 {
-    int i, j;
-    switch (field[0]) {
-        case 'a': i = 0; break;
-        case 'b': i = 1; break;
-        case 'c': i = 2; break;
-        case 'd': i = 3; break;
-        case 'e': i = 4; break;
-        case 'f': i = 5; break;
-        case 'g': i = 6; break;
-        case 'h': i = 7; break;
-    }
-    j = field[1] - '0';
+    int i = field[0] - 'a', j = field[1] - '0';
     return state->field[i][j];
 }
 
@@ -329,7 +318,37 @@ int fifty_moves_exceeded(game_state* state)
     return state->fifty_moves_counter > 49;
 }
 
-int insufficient_material(game_state* state);
+int insufficient_material(game_state* state)
+{
+    int bn = 0, wn = 0, bbb = 0, bwb = 0, wbb = 0, wwb = 0;
+    for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++){
+        switch (state->field[i][j]) {
+            case 'Q': case 'q': case 'R': case 'r': case 'P': case 'p':
+                return 0;
+            case 'N':
+                wn++;
+                break;
+            case 'n':
+                bn++;
+                break;
+            case 'B':
+                if ((i+j)%2)
+                    wwb++;
+                else
+                    wbb++;
+                break;
+            case 'b':
+                if ((i+j)%2)
+                    bwb++;
+                else
+                    bbb++;
+                break;
+        }
+    }
+    int whites = wn + wbb + wwb, blacks = bn + bwb + bbb;
+    return whites * blacks == 0 &&
+        ((wn == 0 && wbb*wwb == 0) || (bn == 0 && bbb*bwb == 0));
+}
 
 void print_state(game_state* state)
 {
