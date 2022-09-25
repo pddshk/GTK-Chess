@@ -25,18 +25,7 @@ int is_active(game_state* state){
 
 char get_field_by_notation(game_state* state, const char* field)
 {
-    int i, j;
-    switch (field[0]) {
-        case 'a': i = 0; break;
-        case 'b': i = 1; break;
-        case 'c': i = 2; break;
-        case 'd': i = 3; break;
-        case 'e': i = 4; break;
-        case 'f': i = 5; break;
-        case 'g': i = 6; break;
-        case 'h': i = 7; break;
-    }
-    j = field[1] - '0';
+    int i = field[0] - 'a', j = field[1] - '0';
     return state->field[i][j];
 }
 

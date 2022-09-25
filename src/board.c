@@ -201,9 +201,10 @@ void
 drag_begin (
   GtkWidget* widget,
   GdkDragContext* context,
-  gpointer user_data
+  gpointer data
 )
 {
+	GdkPixbuf *empty_icon = data;
 	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
 	calc_size(widget,
@@ -274,7 +275,7 @@ drag_drop (
   gint x,
   gint y,
   guint time,
-  gpointer user_data
+  gpointer data
 )
 {
 	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
@@ -299,14 +300,15 @@ drag_drop (
 	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
+	GtkWidget **dialogs = data;
 	if (is_mate(&state)){
-        gtk_dialog_run(GTK_DIALOG (mate_dialog));
+        gtk_dialog_run(GTK_DIALOG (dialogs[0]));
 	}
     if (is_stalemate(&state)){
-        gtk_dialog_run(GTK_DIALOG (stalemate_dialog));
+        gtk_dialog_run(GTK_DIALOG (dialogs[1]));
 	}
 	if (insufficient_material(&state)){
-		gtk_dialog_run(GTK_DIALOG(insufficient_material_dialog));
+		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 	}
 	return TRUE;
 }
@@ -365,8 +367,8 @@ board_clicked (
 	return TRUE;
 }
 
-void flip_board(GtkButton* button)
+void flip_board(GtkButton* button, gpointer Board)
 {
 	state.flipped = !state.flipped;
-	gtk_widget_queue_draw(Board);
+	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }

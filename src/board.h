@@ -9,12 +9,6 @@
 extern game_state state;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
-extern GdkPixbuf *empty_icon;
-extern GtkWidget *mate_dialog,
-                 *stalemate_dialog,
-                 *insufficient_material_dialog,
-                 *threefold_repetition_dialog;
-extern GtkWidget *Board;
 
 void load_textures(/* const char* pack */);
 
@@ -61,6 +55,6 @@ board_clicked (
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 
-void flip_board(GtkButton*);
+void flip_board(GtkButton*, gpointer);
 
 #endif

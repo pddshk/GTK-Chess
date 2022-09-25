@@ -5,8 +5,6 @@
 #include "board.h"
 
 extern game_state state;
-extern GdkPixbuf *empty_icon;
-extern GtkWidget *Board;
 
 void init_elements();
 
