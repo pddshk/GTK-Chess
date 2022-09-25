@@ -372,3 +372,11 @@ void flip_board(GtkButton* button, gpointer Board)
 	state.flipped = !state.flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
+
+void new_game(GtkButton* button, gpointer Board)
+{
+	int flipped = state.flipped;
+	init_state(&state);
+	state.flipped = flipped;
+	gtk_widget_queue_draw(GTK_WIDGET(Board));
+}

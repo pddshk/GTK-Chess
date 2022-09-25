@@ -77,5 +77,8 @@ void init_elements()
 
 	GObject *FlipBoardButton=gtk_builder_get_object(builder, "FlipBoard");
 	g_signal_connect(FlipBoardButton, "clicked", G_CALLBACK(flip_board), Board);
+
+	GObject *NewGameButton=gtk_builder_get_object(builder, "NewGame");
+	g_signal_connect(NewGameButton, "clicked", G_CALLBACK(new_game), Board);
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
