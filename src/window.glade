@@ -24,6 +24,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <signal name="clicked" handler="new_game" object="Board" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -112,6 +113,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <signal name="clicked" handler="flip_board" object="Board" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -218,6 +220,10 @@
                   <object class="GtkDrawingArea" id="Board">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <signal name="button-release-event" handler="board_clicked" swapped="no"/>
+                    <signal name="drag-failed" handler="drag_failed" swapped="no"/>
+                    <signal name="drag-motion" handler="drag_motion" swapped="no"/>
+                    <signal name="draw" handler="draw_board" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>

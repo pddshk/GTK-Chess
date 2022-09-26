@@ -21,7 +21,12 @@ int is_square_friend(game_state*, char piece, int row, int col);
 int is_square_threatened(game_state*, char, int, int);
 int is_king_threatened(game_state*, char);
 
+// inner function that checks if piece can generally move to given position
+// i.e. if it is a valid path, and there's no obstacles on the way
 int _is_valid_move(game_state*,char,int,int,int,int);
+// outer function that calles inner one, and then calculates validness
+// of state if piece is moved to given position
+// i.e. checks if king is threatened after move performed
 int is_valid_move(game_state*, char,int,int,int,int);
 
 #endif
