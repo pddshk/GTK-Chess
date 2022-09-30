@@ -55,8 +55,4 @@ board_clicked (
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
 
-void flip_board(GtkButton*, gpointer);
-
-void new_game(GtkButton*, gpointer);
-
 #endif

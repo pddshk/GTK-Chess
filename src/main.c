@@ -1,47 +1,35 @@
 #include <gtk/gtk.h>
-#include <cairo.h>
 #include <librsvg/rsvg.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include "gui.h"
-#include "engine.h"
+#include "engine_manager.h"
 
 #include "globals.h"
 
 int main(int argc, char** argv)
 {
-	printf("errno is %s\n", strerror(errno));
-	int from_engine_fd[2], to_engine_fd[2];
-	pipe(from_engine_fd);
-	pipe(to_engine_fd);
-	pid_t pid = fork();
+	int from_engine_manager_fd[2], to_engine_manager_fd[2];
+	pipe(from_engine_manager_fd);
+	pipe(to_engine_manager_fd);
+	pid_t pid = -1;
+	for (int i = 0; pid == -1 && i < 100; i++) pid = fork();
 	switch (pid) {
-		case 0:
-			close(to_engine_fd[1]); // close to engine write end
-			close(from_engine_fd[0]); // close from engine read end
-			printf("errno is %d\n", errno);
-			while (dup2(to_engine_fd[0], STDIN_FILENO) == -1 && (errno == EINTR));
-			close(to_engine_fd[0]);
-			while ((dup2(from_engine_fd[1], STDOUT_FILENO) == -1) && (errno == EINTR));
-			close(from_engine_fd[1]);
-
-			execl(engine, "", NULL);
-			break;
+		case 0: // engine manager process
+			close(to_engine_manager_fd[1]); // close to engine manager write end
+			close(from_engine_manager_fd[0]); // close from engine manager read end
+			//engine_manager_main(to_engine_manager_fd[0], from_engine_manager_fd[1]);
+			return EXIT_SUCCESS;
 		case -1:
-			perror("Fork failed. No engine will be available. Try relaunch application\n");
+			perror("Critical: cannot spawn process for engine manager. Try relaunching application\n");
 		default:
-
-			close(from_engine_fd[1]);
-			close(to_engine_fd[0]);
-			from_engine = from_engine_fd[0];
-			to_engine = to_engine_fd[1];
-			int flags = fcntl(from_engine, F_GETFL, 0);
-			printf("from engine is %d blocked\n", flags & O_NONBLOCK);
+			close(from_engine_manager_fd[1]); // close to engine read end
+			close(to_engine_manager_fd[0]); // close from engine write end
+			int from_engine_manager = from_engine_manager_fd[0],
+				to_engine_manager = to_engine_manager_fd[1];
 			gtk_init(&argc, &argv);
 			init_elements();
-			//May get stuck at reading from pipe
-			//init_engine();
+			//g_unix_fd_add(from_engine_manager, G_IO_IN, GUnixFDSourceFunc function, gpointer user_data);
 			gtk_main();
 			break;
 	}

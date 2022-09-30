@@ -2,29 +2,40 @@
 #include <math.h>
 #include <string.h>
 
+// pieces and board textures
 RsvgHandle *BKing, *BQueen, *BRook, *BBishop, *BKnight, *BPawn,
 		   *WKing, *WQueen, *WRook, *WBishop, *WKnight, *WPawn,
 		   *BPQueen, *BPRook, *BPBishop, *BPKnight,
 		   *WPQueen, *WPRook, *WPBishop, *WPKnight,
 		   *BoardImage;
 
+// global state of drag action
+// used to render dragged_piece
+// following mouse pointer
+// and for remembering starting position
+// of drag action
 char dragged_piece = 0;
 int drag_row_start, drag_col_start;
 int drag_pos_x, drag_pos_y;
 int drag_status = 0;
+
+// TODO highlight king when threatened
 int king_threatened_row = -1, king_threatened_col = -1;
 
+// border margin in percent
 const double border_perc=0.05;
 
-void calc_size(GtkWidget* widget,
+// calculates size of board and it cells
+// used to redraw board
+void calc_size(GtkWidget* Board,
 	gdouble *wmargin, gdouble *hmargin,
 	gdouble *board_size,
 	gdouble *cell_size,
 	gdouble *w_offset, gdouble *h_offset
 )
 {
-	guint width = gtk_widget_get_allocated_width(widget),
-		  height = gtk_widget_get_allocated_height(widget);
+	guint width = gtk_widget_get_allocated_width(Board),
+		  height = gtk_widget_get_allocated_height(Board);
 
 	gdouble minimum=fmin(width, height);
 	if (minimum == width) {
@@ -41,7 +52,7 @@ void calc_size(GtkWidget* widget,
 	*h_offset = *hmargin + border_size;
 }
 
-void load_textures(/* const char* pack */)
+void load_textures(/* TODO const char* pack */)
 {
 	BKing	= rsvg_handle_new_from_file("src/textures/classic/BKing.svg",	NULL);
 	WKing	= rsvg_handle_new_from_file("src/textures/classic/WKing.svg", 	NULL);
@@ -66,6 +77,7 @@ void load_textures(/* const char* pack */)
 	WPKnight= rsvg_handle_new_from_file("src/textures/classic/WPKnight.svg",NULL);
 }
 
+// resolves piece texture
 RsvgHandle* resolve_piece(char piece)
 {
 	switch (piece) {
@@ -85,6 +97,7 @@ RsvgHandle* resolve_piece(char piece)
 	}
 }
 
+// promoted pieces textures
 RsvgHandle *resolve_promoted_piece(char piece)
 {
 	switch (piece) {
@@ -96,21 +109,22 @@ RsvgHandle *resolve_promoted_piece(char piece)
 		case 'B': return WPBishop;
 		case 'n': return BPKnight;
 		case 'N': return WPKnight;
-		default: return NULL;
+		default: return NULL; // if there's no piece
 	}
 }
 
-gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
+gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
 {
 	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
-	calc_size(widget,
+	calc_size(Board,
 		&wmargin, &hmargin,
 		&board_size,
 		&cell_size,
 		&w_offset, &h_offset
 	);
 
+	// thick border board
 	cairo_set_source_rgb(cr, 0.05, 0.2, 0.15);
 	cairo_rectangle(
 		cr,
@@ -118,6 +132,7 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 	);
 	cairo_fill(cr);
 
+	// redner board
 	RsvgRectangle board_holder;
 	board_holder.x = w_offset;
 	board_holder.y = h_offset;
@@ -128,6 +143,8 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 		&board_holder,
 		NULL
 	);
+
+	// when pawn is to be promoted
 	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
 	char q,r,b,n;
 	int dir = state.flipped ? -1 : 1;
@@ -150,8 +167,10 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 			q='q';r='r';b='b';n='n';
 			break;
 	}
+	// redner pieces
 	for (int row=0; row<8; row++) for (int col=0; col<8; col++) {
 		RsvgHandle *current_piece = NULL;
+		// if pawn is to be promoted
 		if (col == _pawn_promotion_col) {
 			if (row == q_row)
 				current_piece = resolve_promoted_piece(q);
@@ -165,7 +184,7 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 				current_piece=resolve_piece(get_field(&state, row, col));
 		} else
 			current_piece=resolve_piece(get_field(&state, row, col));
-		if (current_piece){
+		if (current_piece){ // render it
 			gdouble x = col * cell_size, y = row * cell_size;
 			RsvgRectangle piece_holder;
 			piece_holder.x = w_offset + x;
@@ -179,7 +198,7 @@ gboolean draw_board(GtkWidget *widget, cairo_t *cr, gpointer data)
 			);
 		}
 	}
-	if (drag_pos_x != -1){
+	if (drag_status){ // render piece following current cursor position
 		RsvgHandle *current_piece=resolve_piece(dragged_piece);
 		if(current_piece){
 			RsvgRectangle piece_holder;
@@ -204,17 +223,20 @@ drag_begin (
   gpointer data
 )
 {
+	// parse passed data. Emtpy drag icon is to be set instead of default one
 	GdkPixbuf *empty_icon = data;
-	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
+	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 	calc_size(widget,
 		&wmargin, &hmargin,
 		&board_size,
 		&cell_size,
 		&w_offset, &h_offset
 	);
+
 	GdkWindow* window = gtk_widget_get_window(widget);
 	GdkDevice* device = gdk_drag_context_get_device (context);
+	// get starting drag position
 	int start_x, start_y;
 	gdk_window_get_device_position (
 		window,
@@ -226,9 +248,11 @@ drag_begin (
 	drag_col_start = (int)((start_x - w_offset) / cell_size);
 	drag_row_start = (int)((start_y - h_offset) / cell_size);
 	dragged_piece = get_field(&state, drag_row_start, drag_col_start);
+	// check if piece to be moved is of valid side
 	const char* piece_set = state.side_to_move ? "KQRBNP" : "kqrbnp";
 	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
-		set_field(&state, drag_row_start, drag_col_start,'-');
+		// remove dragged piece from state to prevent drawing it
+		set_field(&state, drag_row_start, drag_col_start, '-');
 		gtk_drag_set_icon_pixbuf(context, empty_icon, 0, 0);
 		drag_status = 1;
 	} else {
@@ -246,6 +270,7 @@ drag_motion (
   gpointer user_data
 )
 {
+	// update current drag position and redraw board
 	if (drag_status){
 		drag_pos_x = x;
 		drag_pos_y = y;
@@ -264,6 +289,7 @@ drag_failed (
 {
 	cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
 	drag_pos_x = drag_pos_y = -1;
+	drag_status = 0;
 	gtk_widget_queue_draw(self);
 	return TRUE;
 }
@@ -278,8 +304,8 @@ drag_drop (
   gpointer data
 )
 {
-	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
+	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 	calc_size(widget,
 		&wmargin, &hmargin,
 		&board_size,
@@ -289,8 +315,10 @@ drag_drop (
 
 	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
 	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
+	// resolves coordinates in case board is flipped
 	resolve_coord(&state, &from_row, &from_col);
 	resolve_coord(&state, &to_row, &to_col);
+	// chek if there was move and move is valid
 	if (drag_status && is_valid_move(&state, dragged_piece, from_row, from_col, to_row, to_col))
 		next_move(&state, dragged_piece, from_row, from_col, to_row, to_col);
 	else
@@ -300,19 +328,19 @@ drag_drop (
 	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
-	GtkWidget **dialogs = data;
-	if (is_mate(&state)){
+	// parse incoming data
+	GtkWidget **dialogs = data; // mate stalemate and im dialogs
+	if (is_mate(&state))
         gtk_dialog_run(GTK_DIALOG (dialogs[0]));
-	}
-    if (is_stalemate(&state)){
+	else if (is_stalemate(&state))
         gtk_dialog_run(GTK_DIALOG (dialogs[1]));
-	}
-	if (insufficient_material(&state)){
+	else if (insufficient_material(&state))
 		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
-	}
 	return TRUE;
 }
 
+// TODO: write entering move with 2 clicks
+// now is used to choose promoted piece only
 gboolean
 board_clicked (
   GtkWidget* widget,
@@ -365,18 +393,4 @@ board_clicked (
 		}
 	}
 	return TRUE;
-}
-
-void flip_board(GtkButton* button, gpointer Board)
-{
-	state.flipped = !state.flipped;
-	gtk_widget_queue_draw(GTK_WIDGET(Board));
-}
-
-void new_game(GtkButton* button, gpointer Board)
-{
-	int flipped = state.flipped;
-	init_state(&state);
-	state.flipped = flipped;
-	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
