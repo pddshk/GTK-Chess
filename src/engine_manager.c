@@ -3,13 +3,14 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <sys/poll.h>
 
 char engine_name[128] = "stockfish";
 int to_engine, from_engine;
 
 void engine_manager_main(int from_gui, int to_gui)
 {
-    // make 2 threads 
     while (1) {
         // read engine params from corresponding config file
         engine_params params;
@@ -18,15 +19,23 @@ void engine_manager_main(int from_gui, int to_gui)
         strcat(config_path, ".conf");
         FILE *config = fopen(config_path, "r");
         fgets(params.exec_path, sizeof(params.exec_path), config);
+        params.exec_path[strlen(params.exec_path)-1] = '/';
         fgets(params.exec_file, sizeof(params.exec_file), config);
+        params.exec_file[strlen(params.exec_file)-1] = 0;
+        strcat(params.exec_path, params.exec_file);
+        puts(params.exec_path);
         int nparams;
         fscanf(config, "%d", &nparams);
+        printf("naparms %d\n", nparams);
+        fgetc(config); //skip \n
         params.param_names = malloc(nparams * sizeof *(params.param_names));
         params.param_values = malloc(nparams * sizeof *(params.param_values));
         int i=0;
-        while (!feof(config)){
+        while (!feof(config) && i < nparams){
             char buff[64];
-            fgets(buff, 64, config);
+            fgets(buff, sizeof buff, config);
+            puts(buff);
+            printf("%d %d\n", i, buff[0]);
             char * delim=strstr(buff,"=");
             if (!delim){
                 fputs("Config parse error, no = sign found in parameter specification\n", stderr);
@@ -40,9 +49,12 @@ void engine_manager_main(int from_gui, int to_gui)
             delim++;
             strcpy(params.param_names[i], buff);
             strcpy(params.param_values[i], delim);
+            printf("%s = %s\n", params.param_names[i], params.param_values[i]);
             i++;
         }
         fclose(config);
+
+        printf("execl(\"%s\", \"%s\", NULL)\n", params.exec_path, params.exec_file);
 
         // setup pipes for interacting with engine
         int to_engine_fd[2], from_engine_fd[2];
@@ -51,7 +63,7 @@ void engine_manager_main(int from_gui, int to_gui)
 
         // forking engine process
         pid_t pid = -1;
-        for (int i = 0; pid == -1 && i < 100; i++) pid = fork();
+        for (int i = 0; pid == -1 && i < 10; i++) pid = fork();
         switch (pid) {
             case 0: // engine process
                 close(to_engine_fd[1]); // close from engine manager write end
@@ -62,7 +74,7 @@ void engine_manager_main(int from_gui, int to_gui)
                 close(to_engine_fd[0]);
                 while ((dup2(from_engine_fd[1], STDOUT_FILENO) == -1) && (errno == EINTR));
                 close(from_engine_fd[1]);
-
+                puts(params.exec_path);
                 execl(params.exec_path, params.exec_file, NULL);
                 perror("Cannot start engine");
                 exit(EXIT_FAILURE);
@@ -74,85 +86,127 @@ void engine_manager_main(int from_gui, int to_gui)
                 close(from_engine_fd[1]); // close to engine read end
                 to_engine = to_engine_fd[1];
                 from_engine = from_engine_fd[0];
-                //main_loop(to_engine, from_engine, to_gui, from_gui);
-                tell_engine(to_engine, "quit\n");
-                kill(pid, SIGKILL);
+                sleep(10);
+                interact(to_engine, from_engine, to_gui, from_gui);
                 close(to_engine);
                 close(from_engine);
+                kill(pid, SIGKILL);
         }
     }
 }
 
-void tell_engine(int to_engine, const char* command)
+static void interact(int to_engine, int from_engine, int to_gui, int from_gui)
 {
-    //puts(command);
+    pthread_t thread_id;
+    init_engine(to_engine, from_engine);
+    pthread_create(&thread_id, NULL, engine_to_gui, NULL);
+    while (engine_state == ENGINE_WORKING || engine_state == ENGINE_IDLE) {
+        char buff[256];
+        read(from_gui, buff, sizeof(buff));
+        puts(buff);
+        sleep(10);
+    }
+    pthread_join(thread_id, NULL);
+}
+
+static void *engine_to_gui(void* data)
+{
+    while (engine_state == ENGINE_WORKING || engine_state == ENGINE_IDLE) {
+        char buff[256];
+        read(from_engine, buff, sizeof(buff));
+        puts(buff);
+        sleep(10);
+    }
+}
+
+void tell_engine(const char* command)
+{
+    puts(command);
     write(to_engine, command, strlen(command));
 }
 
-// void init_engine()
-// {
-//     puts("Init engine...");
-//     if (engine_status)
-//         stop_engine();
-//     skip_output();
-//     char buff[4096];
-//     buff[sizeof(buff)-1] = 0;
-//     int nread;
-//     //read(from_engine, buff, sizeof(buff));
-//     tell_engine("uci\n");
-//     do {
-//         puts("reading from engine");
-//         nread = read(from_engine, buff, sizeof(buff)-1);
-//         //buff[nread]= 0;
-//         printf("%d bytes read\n", nread);
-//         puts(buff);
-//     } while(nread == sizeof(buff)-1);
-//     skip_output();
-//     puts("isready");
-//     tell_engine("isready\n");
-//     do {
-//         puts("reading from engine");
-//         nread = read(from_engine, buff, sizeof(buff));
-//         //buff[nread]= 0;
-//         printf("%d bytes read\n", nread);
-//         puts(buff);
-//     } while(nread == sizeof(buff)-1);
-//     puts("Init engine done!");
-// }
+void init_engine()
+{
+    struct pollfd from_engine_fd;
+    from_engine_fd.fd = from_engine;
+    from_engine_fd.events = POLLIN | POLLPRI;
 
-// void skip_output()
-// {
-//     if (engine_status)
-//         printf("Warning! Skipping engine output when it is calculating");
-//     char buff[1024];
-//     int nread;
-//     puts("Skipping");
-//     do {
-//         nread = read(from_engine, buff, sizeof(buff)-1);
-//         printf("read %d bytes\n", nread);
-//         buff[nread] = 0;
-//         puts(buff);
-//     } while(nread == sizeof(buff)-1);
-// }
+    puts("Init engine...");
+    if (engine_state == ENGINE_WORKING)
+        stop_engine();
+    skip_output();
+    char buff[4096];
+    buff[sizeof(buff)-1] = 0;
+    int nread;
+    tell_engine("uci\n");
+    poll(&from_engine_fd, 1, 10);
+    while (from_engine_fd.revents & (POLLIN | POLLPRI)) {
+        puts("reading from engine");
+        nread = read(from_engine, buff, sizeof(buff)-1);
+        //buff[nread]= 0;
+        printf("%d bytes read\n", nread);
+        puts(buff);
+        poll(&from_engine_fd, 1, 10);
+    };
+    buff[5] = 0;
+    if (!strstr(buff, "uciok"))
+        puts("Cannot load engine in UCI mode, it may not be accessible!");
+    puts("isready");
+    int isready=0, tries=0;
+    do {
+        tell_engine("isready\n");
+        poll(&from_engine_fd, 1, 10);
+        while (from_engine_fd.revents & (POLLIN | POLLPRI)) {
+            puts("reading from engine");
+            nread = read(from_engine, buff, sizeof(buff));
+            //buff[nread]= 0;
+            printf("%d bytes read\n", nread);
+            puts(buff);
+            poll(&from_engine_fd, 1, 10);
+        }
+
+    } while(!strstr(buff, "readyok") && tries < 10);
+    puts("Init engine done!");
+}
+
+void skip_output()
+{
+    char buff[1024];
+    int nread;
+    struct pollfd from_engine_fd;
+    from_engine_fd.fd = from_engine;
+    from_engine_fd.events = POLLIN | POLLPRI;
+    poll(&from_engine_fd, 1, 5);
+    while ((from_engine_fd.revents & (POLLIN | POLLPRI))) {
+        puts("Skipping");
+        nread = read(from_engine, buff, sizeof(buff)-1);
+        printf("read %d bytes\n", nread);
+        buff[nread] = 0;
+        puts(buff);
+        poll(&from_engine_fd, 1, 5);
+    }
+}
 
 void start_stop()
 {
     switch (engine_state) {
         case ENGINE_IDLE: {
             char command[128] = "go\n";
-            tell_engine(to_engine, command);
+            tell_engine(command);
             engine_state = ENGINE_WORKING;
             break;
         }
         case ENGINE_WORKING:
             stop_engine();
             break;
+        default:
+            break;
     }
 }
 
 void stop_engine()
 {
-    tell_engine(to_engine, "stop");
+    tell_engine("stop");
     engine_state = ENGINE_IDLE;
 }
 

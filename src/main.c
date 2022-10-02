@@ -13,12 +13,12 @@ int main(int argc, char** argv)
 	pipe(from_engine_manager_fd);
 	pipe(to_engine_manager_fd);
 	pid_t pid = -1;
-	for (int i = 0; pid == -1 && i < 100; i++) pid = fork();
+	for (int i = 0; pid == -1 && i < 10; i++) pid = fork();
 	switch (pid) {
 		case 0: // engine manager process
 			close(to_engine_manager_fd[1]); // close to engine manager write end
 			close(from_engine_manager_fd[0]); // close from engine manager read end
-			//engine_manager_main(to_engine_manager_fd[0], from_engine_manager_fd[1]);
+			engine_manager_main(to_engine_manager_fd[0], from_engine_manager_fd[1]);
 			return EXIT_SUCCESS;
 		case -1:
 			perror("Critical: cannot spawn process for engine manager. Try relaunching application\n");

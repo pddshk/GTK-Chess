@@ -18,7 +18,7 @@ enum EngineState {
     ENGINE_WORKING,
     ENGINE_ERROR
 };
-static enum EngineState engine_state = ENGINE_IDLE;
+static enum EngineState engine_state = ENGINE_OFF;
 
 // enum MessageType {
 //     ENGINE
@@ -40,7 +40,11 @@ struct engine_response{
 
 void engine_manager_main(int, int);
 
-static void tell_engine(int, const char*);
+static void interact(int,int,int,int);
+static void gui_to_engine();
+static void *engine_to_gui(void*);
+
+static void tell_engine(const char*);
 static void init_engine();
 static void skip_output();
 void start_stop(GtkBox*);

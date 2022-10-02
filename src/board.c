@@ -325,9 +325,10 @@ drag_drop (
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
 
 	gtk_widget_queue_draw(widget);
-	drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
+	drag_col_start = drag_row_start = 0;
+	// print_state(&state);
 	// parse incoming data
 	GtkWidget **dialogs = data; // mate stalemate and im dialogs
 	if (is_mate(&state))
@@ -337,6 +338,7 @@ drag_drop (
 	else if (insufficient_material(&state))
 		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 	return TRUE;
+
 }
 
 // TODO: write entering move with 2 clicks
