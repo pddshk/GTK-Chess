@@ -320,12 +320,18 @@ drag_drop (
 	resolve_coord(&state, &to_row, &to_col);
 	// chek if there was move and move is valid
 	if (drag_status && is_valid_move(&state, dragged_piece, from_row, from_col, to_row, to_col))
-		next_move(&state, dragged_piece, from_row, from_col, to_row, to_col);
+		if (is_pawn_promotion(dragged_piece, to_row)){
+			pawn_promotion = dragged_piece;
+	        pawn_promotion_row = to_row;
+	        pawn_promotion_col = to_col;
+		} else {
+			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0);
+		}
 	else
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
 
 	gtk_widget_queue_draw(widget);
-	drag_col_start = drag_row_start = 0;
+	//drag_col_start = drag_row_start = 0;
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
 	// parse incoming data
@@ -362,34 +368,18 @@ board_clicked (
 			row = (int)((event->y - h_offset) / cell_size);
 		resolve_coord(&state, &row, &col);
 		if (col != pawn_promotion_col) return TRUE;
-		switch (pawn_promotion) {
-			case 'P':
-				if (row < 4){
-					promote_pawn(
-						&state,
-						pawn_promotion_row,
-						pawn_promotion_col,
-						resolve_promotion(row)
-					);
-					pawn_promotion = '-';
-					pawn_promotion_row = pawn_promotion_col = -1;
-					gtk_widget_queue_draw(widget);
-					return TRUE;
-				}
-			case 'p':
-				if (row > 3){
-					promote_pawn(
-						&state,
-						pawn_promotion_row,
-						pawn_promotion_col,
-						resolve_promotion(row)
-					);
-					pawn_promotion = '-';
-					pawn_promotion_row = pawn_promotion_col = -1;
-					gtk_widget_queue_draw(widget);
-					return TRUE;
-				}
-			default: return TRUE;
+		if ((pawn_promotion == 'P' && state.side_to_move && row < 4) ||
+			(pawn_promotion == 'p' && !(state.side_to_move) && row > 3)) {
+			next_move(
+				&state,
+				'P',
+				drag_row_start, drag_col_start,
+				pawn_promotion_row, pawn_promotion_col,
+				resolve_promotion(row)
+			);
+			pawn_promotion = '-';
+			pawn_promotion_row = pawn_promotion_col = -1;
+			gtk_widget_queue_draw(widget);
 		}
 	}
 	return TRUE;

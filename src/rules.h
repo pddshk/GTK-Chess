@@ -14,6 +14,8 @@ int pawns_moves(game_state*, char piece, int from_row, int from_col, int to_row,
 int kings_moves(game_state*, char piece, int from_row, int from_col, int to_row, int to_col);
 int can_castle(game_state*, char piece, char side);
 
+// int can_threat_square(game_state*, char, int, int, int, int);
+
 int is_square_valid(game_state*, char piece, int to_row, int to_col);
 int is_square_empty(game_state*, int row, int col);
 int is_square_foe(game_state*, char piece, int row, int col);
