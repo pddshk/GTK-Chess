@@ -13,7 +13,7 @@ void init_state(game_state* state)
     state->castlings[0] = state->castlings[1] = state->castlings[2] = state->castlings[3] = 1;
     state->side_to_move = 1;
     state->fifty_moves_counter = 0;
-    state->move_counter = 0;
+    state->move_counter = 1;
     state->enpassant_row = state->enpassant_col = -1;
     state->is_active = 1;
     state->flipped = 0;
@@ -26,7 +26,16 @@ int is_active(game_state* state){
 char get_field_by_notation(game_state* state, const char* field)
 {
     int i = field[0] - 'a', j = field[1] - '0';
-    return state->field[i][j];
+    return get_field(state, i, j);
+}
+
+void get_move_notation(game_state* state, char* res, int from_row, int from_col, int to_row, int to_col, char promoted)
+{
+    res[0] = from_col + 'a';
+    res[1] = 8 - from_row + '0';
+    res[2] = to_col + 'a';
+    res[3] = 8 - to_row + '0';
+    res[4] = promoted;
 }
 
 void resolve_coord(game_state* state, int*row, int*col)
@@ -89,15 +98,17 @@ void recalc_castlings(game_state* state)
     }
 }
 
-void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
+void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
     state->side_to_move = !state->side_to_move;
-    state->move_counter++;
+    if (state->side_to_move) {
+        state->move_counter++;
+    }
     if (is_pawn(piece) || is_square_foe(state, piece, to_row, to_col))
         state->fifty_moves_counter = 0;
     else
         state->fifty_moves_counter++;
-    move(state, piece, from_row, from_col, to_row, to_col);
+    move(state, promotion ? promotion : piece, from_row, from_col, to_row, to_col);
     recalc_castlings(state);
     if (piece == 'P' && to_row - from_row == -2)
         set_enpassant(state, to_row+1, to_col);
@@ -105,23 +116,24 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         set_enpassant(state, to_row-1, to_col);
     else
         clear_enpassant(state);
+    char move[6];
+    get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
+    if (!state->side_to_move) {
+        printf("%d. %s\n", state->move_counter, move);
+    } else {
+        printf("%d... %s\n", state->move_counter - 1, move);
+    }
 }
 
 void move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
 {
-    if (is_enpassant_square(state, to_row, to_col)){
+    if (is_enpassant_square(state, to_row, to_col))
         enpassant(state, piece, to_row, to_col);
-    }
     char castling_side = is_castling(state, piece, from_row, from_col, to_row, to_col);
-    if (castling_side != '-'){
+    if (castling_side != '-')
         castle(state, piece, castling_side);
-    } else if (is_pawn_promotion(piece, to_row)) {
-        pawn_promotion = piece;
-        pawn_promotion_row = to_row;
-        pawn_promotion_col = to_col;
-    } else {
+    else
         just_move(state, piece, to_row, to_col);
-    }
 }
 
 void just_move(game_state* state, char piece, int to_row, int to_col)

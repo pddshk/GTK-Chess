@@ -2,8 +2,16 @@
 #include <glib-unix.h>
 //#include "engine.h"
 
+enum _EngineState{
+    ENGINE_OFF,
+    ENGINE_IDLE,
+    ENGINE_WORKING,
+    ENGINE_ERROR
+} engine_state;
+
 void init_elements()
 {
+	engine_state = ENGINE_IDLE;
 	init_state(&state);
 	load_textures();
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
@@ -73,6 +81,7 @@ void init_elements()
 
 	g_signal_connect(Board, "drag-drop", G_CALLBACK(drag_drop), dialogs);
 	gtk_builder_connect_signals(builder, NULL);
+	//GObject *EngineToggler=gtk_builder_get_object(builder, "EngineToggler");
 
 	gtk_widget_show(GTK_WIDGET(window));
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -90,4 +99,28 @@ void new_game(GtkButton* button, gpointer Board)
 	init_state(&state);
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
+}
+
+void toggle_engine(GtkButton* self, gpointer data)
+{
+	// switch (engine_state) {
+	// 	case ENGINE_IDLE:
+	// 		puts("Starting engine!");
+	// 		g_output_stream_write(to_engine, "go\n", (sizeof "go\n") - 1, NULL, NULL);
+	// 		engine_state = ENGINE_WORKING;
+	// 		gtk_button_set_label(self, "Stop");
+	// 		break;
+	// 	case ENGINE_WORKING:
+	// 		puts("Stopping engine!");
+	// 		g_output_stream_write(to_engine, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
+	// 		engine_state = ENGINE_IDLE;
+	// 		gtk_button_set_label(self, "Go");
+	// 		break;
+	// 	case ENGINE_OFF:
+	// 		puts("Engine is off!");
+	// 		break;
+	// 	case ENGINE_ERROR:
+	// 		puts("Engine is broken!");
+	// 		break;
+	// }
 }
