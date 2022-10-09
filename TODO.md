@@ -10,6 +10,7 @@ Main features (✗ - not implemented, ✓ - implemented):
     ✗ Work with chess notation
     ✗ Work with chess games databases
     ✗ Battle different engines (from any position)
+    ✗ User can load different textures for pieces and board
 
 Main parts:
     1. Engine manager

@@ -35,7 +35,7 @@ int main()
             fgets(buff, sizeof buff, config);
             char * delim=strstr(buff,"=");
             if (!delim){
-                fputs("Config parse error, no = sign found in parameter specification\n", stderr);
+                fputs("Config parse error, no '=' sign found in parameter specification\n", stderr);
                 // replace with retry
                 // send message to gui about failure
                 // wait for new config
@@ -150,6 +150,7 @@ void *engine_to_manager(void *data)
     	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
     	buff[nread] = 0;
         puts(buff);
+        fflush(stdout);
     	//printf("read %lu bytes from engine:\n%s\n", nread, buff);
     }
 }
