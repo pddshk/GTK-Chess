@@ -30,7 +30,7 @@ int main()
         if (params.param_values) free(params.param_values);
         params.param_names = malloc(params.nparams * sizeof *(params.param_names));
         params.param_values = malloc(params.nparams * sizeof *(params.param_values));
-        for (int i=1; !feof(config) && i < params.nparams; i++){
+        for (int i=0; !feof(config) && i < params.nparams; i++){
             char buff[64];
             fgets(buff, sizeof buff, config);
             char * delim=strstr(buff,"=");
@@ -58,10 +58,14 @@ int main()
 
         to_engine = g_subprocess_get_stdin_pipe(engine);
     	from_engine = g_subprocess_get_stdout_pipe(engine);
-        init_engine(&params);
-        puts("ready");
+        if (init_engine(&params)){
+            puts("ready");
+            fflush(stdout);
+            main_loop();
+        }
+        else
+            puts("init failed");
         fflush(stdout);
-        main_loop();
         g_subprocess_send_signal(engine, SIGTERM);
         g_subprocess_wait(engine, NULL, NULL);
         if (!g_subprocess_get_if_exited(engine))
@@ -84,19 +88,19 @@ void tell_engine(const char* command)
     g_output_stream_flush(to_engine, NULL, NULL);
 }
 
-void init_engine(engine_params* params)
+int init_engine(engine_params* params)
 {
     char buff[2048];
 	gsize nread;
 	//puts("header\n");
 	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
 	buff[nread] = 0;
-	//printf("read %lu bytes:\n%s\n", nread, buff);
+	// printf("read %lu bytes:\n%s\n", nread, buff);
 
 	tell_engine(UCI);
 	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
 	buff[nread] = 0;
-	//printf("read %lu bytes:\n%s\n", nread, buff);
+	// printf("read %lu bytes:\n%s\n", nread, buff);
 
     for (size_t i = 0; i < params->nparams; i++) {
         char command[64] = "setoption name ";
@@ -104,72 +108,15 @@ void init_engine(engine_params* params)
         strcat(command, " value ");
         strcat(command, params->param_values[i]);
         strcat(command, "\n");
-        //puts(command);
+        // puts(command);
         tell_engine(command);
     }
 
 	tell_engine(ISREADY);
 	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
 	buff[nread] = 0;
-	// printf("read %lu bytes:\n%s\n", nread, buff);
-
-    // puts("Init engine done");
-}
-
-    puts("Init engine...");
-    if (engine_state == ENGINE_WORKING)
-        stop_engine();
-    skip_output();
-    char buff[4096];
-    buff[sizeof(buff)-1] = 0;
-    int nread;
-    tell_engine("uci\n");
-    poll(&from_engine_fd, 1, 10);
-    while (from_engine_fd.revents & (POLLIN | POLLPRI)) {
-        puts("reading from engine");
-        nread = read(from_engine, buff, sizeof(buff)-1);
-        //buff[nread]= 0;
-        printf("%d bytes read\n", nread);
-        puts(buff);
-        poll(&from_engine_fd, 1, 10);
-    };
-    buff[5] = 0;
-    if (!strstr(buff, "uciok"))
-        puts("Cannot load engine in UCI mode, it may not be accessible!");
-    puts("isready");
-    int isready=0, tries=0;
-    do {
-        tell_engine("isready\n");
-        poll(&from_engine_fd, 1, 10);
-        while (from_engine_fd.revents & (POLLIN | POLLPRI)) {
-            puts("reading from engine");
-            nread = read(from_engine, buff, sizeof(buff));
-            //buff[nread]= 0;
-            printf("%d bytes read\n", nread);
-            puts(buff);
-            poll(&from_engine_fd, 1, 10);
-        }
-
-    } while(!strstr(buff, "readyok") && tries < 10);
-    puts("Init engine done!");
-}
-
-void skip_output()
-{
-    char buff[1024];
-    int nread;
-    struct pollfd from_engine_fd;
-    from_engine_fd.fd = from_engine;
-    from_engine_fd.events = POLLIN | POLLPRI;
-    poll(&from_engine_fd, 1, 5);
-    while ((from_engine_fd.revents & (POLLIN | POLLPRI))) {
-        puts("Skipping");
-        nread = read(from_engine, buff, sizeof(buff)-1);
-        printf("read %d bytes\n", nread);
-        buff[nread] = 0;
-        puts(buff);
-        poll(&from_engine_fd, 1, 5);
-    }
+    // puts(buff);
+    return !!strstr(buff, "readyok");
 }
 
 void start_stop()

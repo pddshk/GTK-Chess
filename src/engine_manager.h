@@ -39,7 +39,7 @@ GOutputStream *to_engine;
 GInputStream *from_engine;
 
 static void tell_engine(const char*);
-static void init_engine(engine_params*);
+static int init_engine(engine_params*);
 // static void skip_output();
 // void start_stop(GtkBox*);
 void start_stop();
