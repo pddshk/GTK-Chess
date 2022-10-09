@@ -7,8 +7,11 @@ LDFLAGS	+= `pkg-config --libs $(GTK) $(RSVG) $(GIO)` -lm
 OBJDIR	= obj
 OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o gui.o)# engine_manager.o)
 
-all: prepare $(OBJECTS)
-	$(CC) $(CFLAGS) -g -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
+all: prepare engine_manager $(OBJECTS)
+	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
+
+engine_manager: $(OBJDIR)/engine_manager.o
+	$(CC) $(FLAGS) -o engine_manager $< $(LDFLAGS)
 
 prepare:
 	mkdir -p obj
