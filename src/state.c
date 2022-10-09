@@ -118,7 +118,11 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         clear_enpassant(state);
     char move[6];
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
-    printf("Move number %d, 50th moves counter %d, move: %s\n", state->move_counter, state->fifty_moves_counter, move);
+    if (!state->side_to_move) {
+        printf("%d. %s\n", state->move_counter, move);
+    } else {
+        printf("%d... %s\n", state->move_counter - 1, move);
+    }
 }
 
 void move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)

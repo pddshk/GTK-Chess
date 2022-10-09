@@ -1,16 +1,16 @@
 #ifndef ENGINE_H
 #define ENGINE_H
-#include <gtk/gtk.h>
-#include <glib-unix.h>
-#include "state.h"
+#include <gio/gio.h>
 
+#define UCI "uci\n"
+#define ISREADY "isready\n"
+
+char engine_name[128] = "stockfish";
 /*
 Engine manager process is responsible for creating separate process for
 UCI engine and properly set it up for work. It also handles output from
 engine and passes it to GUI
 */
-
-extern game_state state;
 
 enum EngineState {
     ENGINE_OFF,
@@ -18,16 +18,13 @@ enum EngineState {
     ENGINE_WORKING,
     ENGINE_ERROR
 };
-static enum EngineState engine_state = ENGINE_OFF;
 
-// enum MessageType {
-//     ENGINE
-// }
+static enum EngineState engine_state = ENGINE_IDLE;
 
 typedef struct {
     char exec_path[128];
-    char exec_file[16];
-    char (*param_names)[16];
+    int nparams;
+    char (*param_names)[32];
     char (*param_values)[32];
 } engine_params;
 
@@ -38,17 +35,16 @@ struct engine_response{
     char *line;
 };
 
-void engine_manager_main(int, int);
-
-static void interact(int,int,int,int);
-static void gui_to_engine();
-static void *engine_to_gui(void*);
+GOutputStream *to_engine;
+GInputStream *from_engine;
 
 static void tell_engine(const char*);
-static void init_engine();
-static void skip_output();
-void start_stop(GtkBox*);
+static int init_engine(engine_params*);
+// static void skip_output();
+// void start_stop(GtkBox*);
+void start_stop();
 void stop_engine();
-gboolean parse_engine_response(gint, GIOCondition, gpointer);
+void main_loop();
+// gboolean parse_engine_response(gint, GIOCondition, gpointer);
 
 #endif

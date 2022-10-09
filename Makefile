@@ -9,9 +9,11 @@ MAINOBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o gui.o)
 MANAGEROBJECTS = $(addprefix $(OBJDIR)/, engine_manager.o)
 OBJECTS = $(MAINOBJECTS) $(MANAGEROBJECTS)
 
-all: prepare $(OBJECTS)
-	$(CC) -Wall -o engine_manager $(MANAGEROBJECTS)
+all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
+
+engine_manager: $(OBJDIR)/engine_manager.o
+	$(CC) $(FLAGS) -o engine_manager $< $(LDFLAGS)
 
 prepare:
 	mkdir -p obj
