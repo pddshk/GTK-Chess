@@ -83,6 +83,13 @@ void init_elements()
 	gtk_builder_connect_signals(builder, NULL);
 	//GObject *EngineToggler=gtk_builder_get_object(builder, "EngineToggler");
 
+	g_source_set_callback (
+		from_engine_manager_source,
+		G_SOURCE_FUNC(parse_engine_response),
+		builder,
+		NULL
+	);
+
 	gtk_widget_show(GTK_WIDGET(window));
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
@@ -101,26 +108,48 @@ void new_game(GtkButton* button, gpointer Board)
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
+gboolean parse_engine_response(GObject* stream, gpointer data)
+{
+	gssize nread;
+	char buff[2048] = "";
+	GError *error = NULL;
+	nread = g_pollable_input_stream_read_nonblocking(
+		G_POLLABLE_INPUT_STREAM(stream),
+		buff,
+		sizeof buff,
+		NULL,
+		&error
+	);
+	if (error) {
+		puts(error->message);
+		g_error_free(error);
+		return TRUE;
+	}
+	if (nread == G_IO_ERROR_WOULD_BLOCK) return TRUE;
+	puts(buff);
+	return TRUE;
+}
+
 void toggle_engine(GtkButton* self, gpointer data)
 {
-	// switch (engine_state) {
-	// 	case ENGINE_IDLE:
-	// 		puts("Starting engine!");
-	// 		g_output_stream_write(to_engine, "go\n", (sizeof "go\n") - 1, NULL, NULL);
-	// 		engine_state = ENGINE_WORKING;
-	// 		gtk_button_set_label(self, "Stop");
-	// 		break;
-	// 	case ENGINE_WORKING:
-	// 		puts("Stopping engine!");
-	// 		g_output_stream_write(to_engine, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
-	// 		engine_state = ENGINE_IDLE;
-	// 		gtk_button_set_label(self, "Go");
-	// 		break;
-	// 	case ENGINE_OFF:
-	// 		puts("Engine is off!");
-	// 		break;
-	// 	case ENGINE_ERROR:
-	// 		puts("Engine is broken!");
-	// 		break;
-	// }
+	switch (engine_state) {
+		case ENGINE_IDLE:
+			puts("Starting engine!");
+			g_output_stream_write(to_engine_manager, "go\n", (sizeof "go\n") - 1, NULL, NULL);
+			engine_state = ENGINE_WORKING;
+			gtk_button_set_label(self, "Stop");
+			break;
+		case ENGINE_WORKING:
+			puts("Stopping engine!");
+			g_output_stream_write(to_engine_manager, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
+			engine_state = ENGINE_IDLE;
+			gtk_button_set_label(self, "Go");
+			break;
+		case ENGINE_OFF:
+			puts("Engine is off!");
+			break;
+		case ENGINE_ERROR:
+			puts("Engine is broken!");
+			break;
+	}
 }
