@@ -18,22 +18,35 @@ Main parts:
     3. Chess Board
 
 ## Engine manager
+### As separate process
 Engine manager is 2-thread process that fork+exec engine child process and
 synchronously communicates with it. It manages the whole workcycle of different
 UCI engines, i.e. it **loads** engine, **initializes engine parameters**,
 **transfers** commands and information from GUI to engine and vice versa,
 correctly **shuts down** engine, and so on.
 
-### Features implemented:
+#### Features implemented:
     - run engine in child process
     - initialize engine parameters read from $enginename.conf
     - transfers commands from stdin to engine subprocess
     - performs all communication stuff synchronously
-### Features to be implemented:
+#### Features to be implemented:
     - store position state in process
     - API to get/send moves from/to GUI and engine
     - ability to turn off engine and wait for commands from gui (to load engine again)
     - ability to load another engine
+    - engine battle mode
+
+### As part of GUI
+Engine manager should be controlled from GUI, so there should be some form/widget
+that configures work of engine manager. I.e. sets default engine, adds and removes
+engines, and configures engines parameters.
+#### Features implemented
+    - none
+### Features to be implemented
+    - CRUD engines list in some widget
+    - configure engines (update config files)
+
 
 ## Notation editor
 Notation editor is a part of project that is responsible for **showing** game
