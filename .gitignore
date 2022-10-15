@@ -2,3 +2,4 @@ engines
 obj
 GTKChess
 engine_manager
+.vscode

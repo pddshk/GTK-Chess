@@ -10,7 +10,8 @@ extern game_state state;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
 
-void load_textures(/* const char* pack */);
+void init_textures();
+void load_textures(const char* pack);
 
 void
 drag_begin (

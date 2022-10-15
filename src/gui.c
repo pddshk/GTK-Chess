@@ -9,11 +9,12 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-void init_elements()
+void init_elements(char* textures)
 {
 	engine_state = ENGINE_IDLE;
 	init_state(&state);
-	load_textures();
+	init_textures();
+	load_textures(textures);
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
@@ -134,19 +135,19 @@ void toggle_engine(GtkButton* self, gpointer data)
 {
 	switch (engine_state) {
 		case ENGINE_IDLE:
-			puts("Starting engine!");
+			//puts("Starting engine!");
 			g_output_stream_write(to_engine_manager, "go\n", (sizeof "go\n") - 1, NULL, NULL);
 			engine_state = ENGINE_WORKING;
 			gtk_button_set_label(self, "Stop");
 			break;
 		case ENGINE_WORKING:
-			puts("Stopping engine!");
+			//puts("Stopping engine!");
 			g_output_stream_write(to_engine_manager, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
 			engine_state = ENGINE_IDLE;
 			gtk_button_set_label(self, "Go");
 			break;
 		case ENGINE_OFF:
-			puts("Engine is off!");
+			//puts("Engine is off!");
 			break;
 		case ENGINE_ERROR:
 			puts("Engine is broken!");

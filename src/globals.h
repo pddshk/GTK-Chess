@@ -1,6 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+struct _settings{
+    char engine[32];
+    char textures[32];
+} settings;
 game_state state;
 GOutputStream *to_engine_manager;
 // GInputStream *from_engine_manager;
