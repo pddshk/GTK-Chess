@@ -10,7 +10,7 @@ extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
 // extern GInputStream *from_engine;
 
-void init_elements();
+void init_elements(char*);
 
 void flip_board(GtkButton*, gpointer);
 

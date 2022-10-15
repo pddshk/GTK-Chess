@@ -2,18 +2,37 @@
 #include <math.h>
 #include <string.h>
 
+enum {
+	None,
+	WKing, WQueen, WRook, WBishop, WKnight, WPawn,
+	BKing, BQueen, BRook, BBishop, BKnight, BPawn,
+	WPQueen, WPRook, WPBishop, WPKnight,
+    BPQueen, BPRook, BPBishop, BPKnight
+};
+
+enum { Npieces = BPKnight };
+
 // pieces and board textures
-RsvgHandle *BKing, *BQueen, *BRook, *BBishop, *BKnight, *BPawn,
-		   *WKing, *WQueen, *WRook, *WBishop, *WKnight, *WPawn,
-		   *BPQueen, *BPRook, *BPBishop, *BPKnight,
-		   *WPQueen, *WPRook, *WPBishop, *WPKnight,
-		   *BoardImage;
+RsvgHandle *Pieces[Npieces];
+RsvgHandle *BoardImage;
+
+void init_textures(){
+	for (size_t i = 0; i < Npieces; i++)
+		Pieces[i] = NULL;
+	BoardImage = NULL;
+}
 
 // global state of drag action
 // used to render dragged_piece
 // following mouse pointer
 // and for remembering starting position
 // of drag action
+// struct {
+// 	int status = 0;
+// 	char piece = 0;
+// 	int row_start, col_start;
+// 	int pos_x, pos_y;
+// }
 char dragged_piece = 0;
 int drag_row_start, drag_col_start;
 int drag_pos_x, drag_pos_y;
@@ -52,33 +71,35 @@ void calc_size(GtkWidget* Board,
 	*h_offset = *hmargin + border_size;
 }
 
-void load_textures(/* TODO const char* pack */)
+void load_textures(const char* pack)
 {
-	BKing	= rsvg_handle_new_from_file("src/textures/classic/BKing.svg",	NULL);
-	WKing	= rsvg_handle_new_from_file("src/textures/classic/WKing.svg", 	NULL);
-	BQueen	= rsvg_handle_new_from_file("src/textures/classic/BQueen.svg", 	NULL);
-	WQueen	= rsvg_handle_new_from_file("src/textures/classic/WQueen.svg", 	NULL);
-	BRook	= rsvg_handle_new_from_file("src/textures/classic/BRook.svg", 	NULL);
-	WRook   = rsvg_handle_new_from_file("src/textures/classic/WRook.svg", 	NULL);
-	BBishop	= rsvg_handle_new_from_file("src/textures/classic/BBishop.svg",	NULL);
-	WBishop	= rsvg_handle_new_from_file("src/textures/classic/WBishop.svg",	NULL);
-	BKnight	= rsvg_handle_new_from_file("src/textures/classic/BKnight.svg",	NULL);
-	WKnight	= rsvg_handle_new_from_file("src/textures/classic/WKnight.svg",	NULL);
-	BPawn	= rsvg_handle_new_from_file("src/textures/classic/BPawn.svg",	NULL);
-	WPawn	= rsvg_handle_new_from_file("src/textures/classic/WPawn.svg",	NULL);
-	BoardImage	= rsvg_handle_new_from_file("src/textures/classic/Board.svg",	NULL);
-	BPQueen = rsvg_handle_new_from_file("src/textures/classic/BPQueen.svg",	NULL);
-	BPRook	= rsvg_handle_new_from_file("src/textures/classic/BPRook.svg",	NULL);
-	BPBishop= rsvg_handle_new_from_file("src/textures/classic/BPBishop.svg",NULL);
-	BPKnight= rsvg_handle_new_from_file("src/textures/classic/BPKnight.svg",NULL);
-	WPQueen	= rsvg_handle_new_from_file("src/textures/classic/WPQueen.svg",	NULL);
-	WPRook	= rsvg_handle_new_from_file("src/textures/classic/WPRook.svg",	NULL);
-	WPBishop= rsvg_handle_new_from_file("src/textures/classic/WPBishop.svg",NULL);
-	WPKnight= rsvg_handle_new_from_file("src/textures/classic/WPKnight.svg",NULL);
+	const char* const names[] = {
+		"WKing", "WQueen", "WRook", "WBishop", "WKnight", "WPawn",
+		"BKing", "BQueen", "BRook", "BBishop", "BKnight", "BPawn",
+		"WPQueen", "WPRook", "WPBishop", "WPKnight",
+    	"BPQueen", "BPRook", "BPBishop", "BPKnight"
+	};
+	for (size_t i = 1; i < Npieces; i++)
+	{
+		char path[32] = "src/textures/";
+		strcat(path, pack);
+		strcat(path, "/");
+		strcat(path, names[i-1]);
+		strcat(path, ".svg");
+		if (Pieces[i])
+			g_object_unref(Pieces[i]);
+		Pieces[i] = rsvg_handle_new_from_file(path, NULL);
+	}
+	if (BoardImage)
+		g_object_unref(BoardImage);
+	char path[32] = "src/textures/";
+	strcat(path, pack);
+	strcat(path, "/Board.svg");
+	BoardImage = rsvg_handle_new_from_file(path, NULL);
 }
 
 // resolves piece texture
-RsvgHandle* resolve_piece(char piece)
+int resolve_piece(char piece)
 {
 	switch (piece) {
 		case 'k': return BKing;
@@ -93,12 +114,12 @@ RsvgHandle* resolve_piece(char piece)
 		case 'N': return WKnight;
 		case 'p': return BPawn;
 		case 'P': return WPawn;
-		default: return NULL;
+		default: return 0;
 	}
 }
 
 // promoted pieces textures
-RsvgHandle *resolve_promoted_piece(char piece)
+int resolve_promoted_piece(char piece)
 {
 	switch (piece) {
 		case 'q': return BPQueen;
@@ -109,7 +130,7 @@ RsvgHandle *resolve_promoted_piece(char piece)
 		case 'B': return WPBishop;
 		case 'n': return BPKnight;
 		case 'N': return WPKnight;
-		default: return NULL; // if there's no piece
+		default: return 0; // if there's no piece
 	}
 }
 
@@ -169,7 +190,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
 	}
 	// redner pieces
 	for (int row=0; row<8; row++) for (int col=0; col<8; col++) {
-		RsvgHandle *current_piece = NULL;
+		int current_piece=0;
 		// if pawn is to be promoted
 		if (col == _pawn_promotion_col) {
 			if (row == q_row)
@@ -191,7 +212,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
 			piece_holder.y = h_offset + y;
 			piece_holder.width = piece_holder.height = cell_size;
 			rsvg_handle_render_document(
-				current_piece,
+				Pieces[current_piece],
 				cr,
 				&piece_holder,
 				NULL
@@ -199,14 +220,14 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
 		}
 	}
 	if (drag_status){ // render piece following current cursor position
-		RsvgHandle *current_piece=resolve_piece(dragged_piece);
+		int current_piece=resolve_piece(dragged_piece);
 		if(current_piece){
 			RsvgRectangle piece_holder;
 			piece_holder.x = drag_pos_x - cell_size/2;
 			piece_holder.y = drag_pos_y - cell_size/2;
 			piece_holder.width = piece_holder.height = cell_size;
 			rsvg_handle_render_document(
-				current_piece,
+				Pieces[current_piece],
 				cr,
 				&piece_holder,
 				NULL

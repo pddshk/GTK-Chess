@@ -34,18 +34,12 @@ int main()
             char buff[64];
             fgets(buff, sizeof buff, config);
             char * delim=strstr(buff,"=");
-            if (!delim){
-                fputs("Config parse error, no '=' sign found in parameter specification\n", stderr);
-                // replace with retry
-                // send message to gui about failure
-                // wait for new config
-                // continue outer loop
-                exit(EXIT_FAILURE);
+            if (delim){
+                *delim = 0;
+                delim++;
+                strcpy(params.param_names[i], buff);
+                strcpy(params.param_values[i], delim);
             }
-            *delim = 0;
-            delim++;
-            strcpy(params.param_names[i], buff);
-            strcpy(params.param_values[i], delim);
         }
         fclose(config);
         //puts(params.exec_path);
@@ -77,7 +71,6 @@ int main()
 
 void tell_engine(const char* command)
 {
-    //puts(command);
     g_output_stream_write(
         to_engine,
         command,
@@ -149,7 +142,7 @@ void *engine_to_manager(void *data)
         //puts("Reading from engine...");
     	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
     	buff[nread] = 0;
-        puts(buff);
+        fputs(buff, stdout);
         fflush(stdout);
     	//printf("read %lu bytes from engine:\n%s\n", nread, buff);
     }
@@ -170,7 +163,6 @@ void main_loop()
         } else {
             buff[nread] = 0;
         }
-        puts(buff);
         if (strcmp(buff, "quit\n") == 0){
             puts("Shutting down engine...");
             stop_engine();
