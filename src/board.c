@@ -10,7 +10,7 @@ enum {
     BPQueen, BPRook, BPBishop, BPKnight
 };
 
-enum { Npieces = BPKnight };
+enum { Npieces = BPKnight + 1 };
 
 // pieces and board textures
 RsvgHandle *Pieces[Npieces];

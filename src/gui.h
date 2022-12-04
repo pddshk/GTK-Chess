@@ -20,4 +20,6 @@ void toggle_engine(GtkButton*, gpointer);
 
 static gboolean parse_engine_response(GObject*, gpointer);
 
+void tell_engine_manager(int, const void*, size_t);
+
 #endif

@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "interact.h"
 
 int main()
 {
@@ -11,23 +12,47 @@ int main()
     engine_params params;
     params.param_names = NULL;
     params.param_values = NULL;
-    // make 2 threads
-    //while (1) {
-        // read engine params from corresponding config file
+    // wait for engine name
+    while (1)
+    {
+        while (1)
+        {
+            int code;
+            size_t nbytes;
+            read(STDIN_FILENO, &code, sizeof code);
+            
+            fprintf(stderr, "Got message code %d. ", code);
+
+            read(STDIN_FILENO, &nbytes, sizeof nbytes);
+            
+            fprintf(stderr, "Got data length %zu.\n", nbytes);
+           
+            if (code == LOAD_ENGINE){
+                read(STDIN_FILENO, engine_name, nbytes);
+                fprintf(stderr, "%s\n", engine_name);
+                break;
+            } else {
+                char buff[1024];
+                read(STDIN_FILENO, buff, nbytes);
+            }
+        }
+
         char config_path[64] = "config/";
         strcat(config_path, engine_name);
         strcat(config_path, ".conf");
+        
+        fprintf(stderr, "%s\n", config_path);
+        
         FILE *config = fopen(config_path, "r");
         if (!config) {
-            perror("Cannot open file:");
+            perror("Cannot open file");
             exit(EXIT_FAILURE);
         }
+        clear_params(&params);
         fgets(params.exec_path, sizeof(params.exec_path), config);
-        params.exec_path[strlen(params.exec_path) - 1] = 0;
+        params.exec_path[strlen(params.exec_path) - 1] = 0; // trim newline
         fscanf(config, "%d", &(params.nparams)); fgetc(config);
-        //printf("engine location %s\nnparams %d\n", params.exec_path, params.nparams);
-        if (params.param_names) free(params.param_names);
-        if (params.param_values) free(params.param_values);
+        fprintf(stderr, "engine location %s\nnparams %d\n", params.exec_path, params.nparams);
         params.param_names = malloc(params.nparams * sizeof *(params.param_names));
         params.param_values = malloc(params.nparams * sizeof *(params.param_values));
         for (int i=0; !feof(config) && i < params.nparams; i++){
@@ -43,22 +68,14 @@ int main()
         }
         fclose(config);
         //puts(params.exec_path);
-        engine = g_subprocess_new(
-    		G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
-    		NULL,
-    		params.exec_path,
-    		NULL
-    	);
-
-        to_engine = g_subprocess_get_stdin_pipe(engine);
-    	from_engine = g_subprocess_get_stdout_pipe(engine);
-        if (init_engine(&params)){
-            puts("ready");
+        if (run_engine(engine, &params)){
+            fputs("Engine started\n", stderr);
+            tell_gui(DONE, NULL, 0);
             fflush(stdout);
             main_loop();
         }
         else
-            puts("init failed");
+            fprintf(stderr, "init failed");
         fflush(stdout);
         g_subprocess_send_signal(engine, SIGTERM);
         g_subprocess_wait(engine, NULL, NULL);
@@ -66,29 +83,29 @@ int main()
             g_subprocess_force_exit(engine);
         g_output_stream_close(to_engine, NULL, NULL);
         g_input_stream_close(from_engine, NULL, NULL);
-    //}
+    }
 }
 
-void tell_engine(const char* command)
+int run_engine(GSubprocess* engine, engine_params* params)
 {
-    g_output_stream_write(
-        to_engine,
-        command,
-        strlen(command),
+    engine = g_subprocess_new(
+        G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
         NULL,
+        params->exec_path,
         NULL
     );
-    g_output_stream_flush(to_engine, NULL, NULL);
+
+    to_engine = g_subprocess_get_stdin_pipe(engine);
+    from_engine = g_subprocess_get_stdout_pipe(engine);
+    return init_engine(params);
 }
 
 int init_engine(engine_params* params)
 {
     char buff[2048];
 	gsize nread;
-	//puts("header\n");
 	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
 	buff[nread] = 0;
-	// printf("read %lu bytes:\n%s\n", nread, buff);
 
 	tell_engine(UCI);
 	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
@@ -136,14 +153,14 @@ void stop_engine()
 
 void *engine_to_manager(void *data)
 {
+    char buff[2048];
     while (1) {
-        char buff[2048];
-    	gsize nread;
+    	gsize nread=g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
         //puts("Reading from engine...");
-    	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
     	buff[nread] = 0;
-        fputs(buff, stdout);
-        fflush(stdout);
+        //handle outputs from engine
+        fputs(buff, stderr);
+        fflush(stderr);
     	//printf("read %lu bytes from engine:\n%s\n", nread, buff);
     }
 }
@@ -153,9 +170,13 @@ void main_loop()
     pthread_t thread_id;
     pthread_create(&thread_id, NULL, engine_to_manager, NULL);
     while (1) {
+        int code=0;
+        size_t size=0;
+        read(STDIN_FILENO, &code, sizeof code);
+        read(STDIN_FILENO, &size, sizeof size);
         char buff[2048];
         size_t nread;
-        nread = read(STDIN_FILENO, buff, sizeof buff);
+        nread = read(STDIN_FILENO, buff, size);
         if (nread == -1){
             perror("Cannot read from stdin:");
             pthread_cancel(thread_id);
@@ -163,35 +184,16 @@ void main_loop()
         } else {
             buff[nread] = 0;
         }
-        if (strcmp(buff, "quit\n") == 0){
-            puts("Shutting down engine...");
+        if (code == QUIT){
             stop_engine();
             pthread_cancel(thread_id);
+            exit(EXIT_SUCCESS);
             break;
         }
-        tell_engine(buff);
+        //tell_engine(buff);
     }
-    //pthread_join(thread_id, NULL);
+    pthread_join(thread_id, NULL);
 }
-
-// gboolean update_variants(GtkBox *engine_response)
-// {
-//     GList *children1 = gtk_container_get_children(GTK_CONTAINER(engine_response));
-//     GtkActionBar *engine_controls = g_list_nth_data(children1, 0);
-//     GtkActionBar *evaluation_status = g_list_nth_data(children1, 1);
-//     GtkLabel *variants = g_list_nth_data(children1, 2);
-//     GList *children2 = gtk_container_get_children(GTK_CONTAINER(engine_controls));
-//     GtkLabel *position = g_list_nth_data(children2, 0);
-//     GtkButton *engine_toggler = g_list_nth_data(children2, 1);
-//
-//     //char buff[64*1024];
-//     //char *res = NULL;
-//     // do {
-//     //     char *res = fgets(buff, 521, from_engine);
-//     //
-//     // } while(!res);
-//     return TRUE;
-// }
 
 gboolean parse_engine_response(gint from_engine, GIOCondition condition, gpointer object)
 {
@@ -205,4 +207,32 @@ gboolean parse_engine_response(gint from_engine, GIOCondition condition, gpointe
         } while(nread == sizeof(buff));
     }
     return TRUE;
+}
+
+void clear_params(struct _engine_params* params)
+{
+    if (params->param_names) free(params->param_names);
+    if (params->param_values) free(params->param_values);
+    params->nparams=0;
+    params->exec_path[0] = 0;
+}
+
+void tell_gui(int code, const void* data, size_t size)
+{
+    write(STDOUT_FILENO, &code, sizeof code);
+    write(STDOUT_FILENO, &size, sizeof size);
+    if (data)
+        write(STDOUT_FILENO, data, size);
+}
+
+void tell_engine(const char* command)
+{
+    g_output_stream_write(
+        to_engine,
+        command,
+        strlen(command),
+        NULL,
+        NULL
+    );
+    g_output_stream_flush(to_engine, NULL, NULL);
 }

@@ -25,6 +25,9 @@ UCI engines, i.e. it **loads** engine, **initializes engine parameters**,
 **transfers** commands and information from GUI to engine and vice versa,
 correctly **shuts down** engine, and so on.
 
+At application start engine manager should load default engine or wait for
+engine name to load it.
+
 #### Features implemented:
     - run engine in child process
     - initialize engine parameters read from $enginename.conf
@@ -69,7 +72,10 @@ notation and **saving/loading** game files.
             - Notation supports branching variations
               1. e4
               [ 1. d4 d5 2. c4
-                (2. Nf3)
+                (2. Nf3
+                {
+                }
+                )
               ]
               1... e5
               [ 2... c5]
@@ -78,6 +84,7 @@ notation and **saving/loading** game files.
       state will be set to selected move
     - User can scroll through notation with mouse wheel or arrow buttons
     - User can copy/paste [FEN](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation) and copy/paste/load/save [PGN](https://en.wikipedia.org/wiki/Portable_Game_Notation)
+    - Interact with databases
 
 ## Chess Board
 Chess Board is a part of project that is responsible for users ability to perfrom

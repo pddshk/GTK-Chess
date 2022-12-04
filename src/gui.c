@@ -1,6 +1,6 @@
 #include "gui.h"
 #include <glib-unix.h>
-//#include "engine.h"
+#include "interact.h"
 
 enum _EngineState{
     ENGINE_OFF,
@@ -111,13 +111,39 @@ void new_game(GtkButton* button, gpointer Board)
 
 gboolean parse_engine_response(GObject* stream, gpointer data)
 {
+	int code=0;
+	size_t nbytes=0;
 	gssize nread;
 	char buff[2048] = "";
 	GError *error = NULL;
+	g_pollable_input_stream_read_nonblocking(
+		G_POLLABLE_INPUT_STREAM(stream),
+		&code,
+		sizeof code,
+		NULL,
+		&error
+	);
+	if (error) {
+		puts(error->message);
+		g_error_free(error);
+		return TRUE;
+	}
+	g_pollable_input_stream_read_nonblocking(
+		G_POLLABLE_INPUT_STREAM(stream),
+		&nbytes,
+		sizeof nbytes,
+		NULL,
+		&error
+	);
+	if (error) {
+		puts(error->message);
+		g_error_free(error);
+		return TRUE;
+	}
 	nread = g_pollable_input_stream_read_nonblocking(
 		G_POLLABLE_INPUT_STREAM(stream),
 		buff,
-		sizeof buff,
+		nbytes,
 		NULL,
 		&error
 	);
@@ -136,13 +162,15 @@ void toggle_engine(GtkButton* self, gpointer data)
 	switch (engine_state) {
 		case ENGINE_IDLE:
 			//puts("Starting engine!");
-			g_output_stream_write(to_engine_manager, "go\n", (sizeof "go\n") - 1, NULL, NULL);
+			tell_engine_manager(GO, NULL, 0);
+			//g_output_stream_write(to_engine_manager, "go\n", (sizeof "go\n") - 1, NULL, NULL);
 			engine_state = ENGINE_WORKING;
 			gtk_button_set_label(self, "Stop");
 			break;
 		case ENGINE_WORKING:
 			//puts("Stopping engine!");
-			g_output_stream_write(to_engine_manager, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
+			tell_engine_manager(STOP, NULL, 0);
+			//g_output_stream_write(to_engine_manager, "stop\n", (sizeof "stop\n") - 1, NULL, NULL);
 			engine_state = ENGINE_IDLE;
 			gtk_button_set_label(self, "Go");
 			break;
@@ -153,4 +181,13 @@ void toggle_engine(GtkButton* self, gpointer data)
 			puts("Engine is broken!");
 			break;
 	}
+}
+
+void tell_engine_manager(int type, const void* data, size_t size)
+{
+    g_output_stream_write(to_engine_manager, &type, sizeof type, NULL, NULL);
+	g_output_stream_write(to_engine_manager, &size, sizeof size, NULL, NULL);
+    if (size)
+        g_output_stream_write(to_engine_manager, data, size, NULL, NULL);
+    g_output_stream_flush(to_engine_manager, NULL, NULL);
 }

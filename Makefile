@@ -12,16 +12,16 @@ all: prepare engine_manager $(OBJECTS)
 	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/src/textures/classic/WKnight.svg
 
 engine_manager: $(OBJDIR)/engine_manager.o
-	$(CC) $(FLAGS) -o engine_manager $< $(LDFLAGS)
+	$(CC) $(CFLAGS) -o engine_manager $< $(LDFLAGS) -pthread
 
 prepare:
-	mkdir -p obj
+	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 cleaner: clean
-	rm -rf GTKChess
+	rm GTKChess
 
 clean:
 	rm -rf $(OBJECTS)

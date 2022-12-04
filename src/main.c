@@ -4,25 +4,43 @@
 #include <stdlib.h>
 #include "gui.h"
 #include "globals.h"
+#include "interact.h"
 
-int start_engine_manager(GSubprocess*);
+int start_engine_manager(GSubprocess*, struct _settings*);
 
 int read_settings(struct _settings*);
 
 int main(int argc, char** argv)
 {
+	// puts("Main, read settings");
+	
 	read_settings(&settings);
+	
+	// puts("Main, read");
+	
 	GSubprocess *engine_manager = NULL;
 	gtk_init(&argc, &argv);
-	if (!start_engine_manager(engine_manager))
+	
+	// puts("Main, starting engine manager");
+	// puts(settings.engine);
+	
+	if (!start_engine_manager(engine_manager, &settings)){
 		fputs("Error while starting engine!\n", stderr);
+		return EXIT_FAILURE;
+	}
+	// puts("Main, engine manager started");
+	// puts("Main, init elements");
+	
 	init_elements(settings.textures);
+	
+	//puts("Main, starting engine");
+	
 	gtk_main();
-	g_output_stream_write(to_engine_manager,"quit\n",(sizeof "quit\n")-1, NULL, NULL);
-    return EXIT_SUCCESS;
+	tell_engine_manager(QUIT, NULL, 0);
+	return EXIT_SUCCESS;
 }
 
-int start_engine_manager(GSubprocess *engine_manager)
+int start_engine_manager(GSubprocess *engine_manager, struct _settings* settings)
 {
 	engine_manager = g_subprocess_new(
 		G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
@@ -37,7 +55,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 	to_engine_manager = g_subprocess_get_stdin_pipe(engine_manager);
 	GInputStream *from_engine_manager = g_subprocess_get_stdout_pipe(engine_manager);
 	if (!to_engine_manager || !from_engine_manager) {
-		fprintf(stderr, "Cannot create pipes for engine manager. Engine would be unavailable.\n");
+		fprintf(stderr, "Cannot create pipes for engine manager. Engine would be unavailable. Try relaunching application\n");
 		return FALSE;
 	}
 	from_engine_manager_source = NULL;
@@ -49,13 +67,14 @@ int start_engine_manager(GSubprocess *engine_manager)
 		g_source_attach(from_engine_manager_source, NULL); // to default context
 	} else {
 		fprintf(stderr, "Cannot create pollable stream from engine manager!\n");
-		exit(EXIT_FAILURE);
+		return FALSE;
 	}
-	char buff[2048] = "";
-	gsize nread;
-	nread = g_input_stream_read(from_engine_manager, buff, sizeof buff, NULL, NULL);
-	buff[nread] = 0;
-	return !!strstr(buff, "ready");
+	tell_engine_manager(LOAD_ENGINE, settings->engine, strlen(settings->engine));
+	int code=0;
+	size_t size=0;
+	g_input_stream_read(from_engine_manager, &code, sizeof code, NULL, NULL);
+	g_input_stream_read(from_engine_manager, &size, sizeof size, NULL, NULL);
+	return code == DONE;
 }
 
 int read_settings(struct _settings* settings)
