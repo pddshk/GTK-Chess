@@ -153,7 +153,18 @@ gboolean parse_engine_response(GObject* stream, gpointer data)
 		return TRUE;
 	}
 	if (nread == G_IO_ERROR_WOULD_BLOCK) return TRUE;
-	puts(buff);
+	//handle message by code
+	switch (code)
+	{
+	case INFO:
+		printf("info %s\n", buff);
+		break;
+	case BESTMOVE:
+		printf("bestmove %s\n", buff);
+		break;
+	default:
+		break;
+	}
 	return TRUE;
 }
 

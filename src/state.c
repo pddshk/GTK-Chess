@@ -46,7 +46,7 @@ void resolve_coord(game_state* state, int*row, int*col)
     }
 }
 
-int get_field(game_state* state, int row, int col)
+char get_field(game_state* state, int row, int col)
 {
     if (state->flipped)
         return state->field[7-row][7-col];

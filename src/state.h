@@ -24,7 +24,7 @@ void init_state(game_state*);
 char get_field_by_notation(game_state*, const char*);
 void get_move_notation(game_state*, char*, int, int, int, int, char);
 void resolve_coord(game_state*, int*, int*);
-int get_field(game_state*, int, int);
+char get_field(game_state*, int, int);
 void set_field(game_state*, int, int, char);
 
 int is_active(game_state*);

@@ -14,7 +14,7 @@ engine and passes it to GUI
 */
 
 enum EngineState {
-    ENGINE_OFF,
+    ENGINE_NONE,
     ENGINE_IDLE,
     ENGINE_WORKING,
     ENGINE_ERROR
@@ -43,7 +43,6 @@ void clear_params(engine_params*);
 void start_stop();
 void stop_engine();
 static void main_loop();
-static void handle_gui_message();
 // gboolean parse_engine_response(gint, GIOCondition, gpointer);
 
 void tell_gui(int, const void*, size_t);

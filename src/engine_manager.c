@@ -21,15 +21,17 @@ int main()
             size_t nbytes;
             read(STDIN_FILENO, &code, sizeof code);
             
-            fprintf(stderr, "Got message code %d. ", code);
+            // fprintf(stderr, "Got message code %d. ", code);
 
             read(STDIN_FILENO, &nbytes, sizeof nbytes);
             
-            fprintf(stderr, "Got data length %zu.\n", nbytes);
+            // fprintf(stderr, "Got data length %zu.\n", nbytes);
            
             if (code == LOAD_ENGINE){
                 read(STDIN_FILENO, engine_name, nbytes);
-                fprintf(stderr, "%s\n", engine_name);
+                
+                // fprintf(stderr, "%s\n", engine_name);
+                
                 break;
             } else {
                 char buff[1024];
@@ -41,7 +43,7 @@ int main()
         strcat(config_path, engine_name);
         strcat(config_path, ".conf");
         
-        fprintf(stderr, "%s\n", config_path);
+        // fprintf(stderr, "%s\n", config_path);
         
         FILE *config = fopen(config_path, "r");
         if (!config) {
@@ -52,7 +54,9 @@ int main()
         fgets(params.exec_path, sizeof(params.exec_path), config);
         params.exec_path[strlen(params.exec_path) - 1] = 0; // trim newline
         fscanf(config, "%d", &(params.nparams)); fgetc(config);
-        fprintf(stderr, "engine location %s\nnparams %d\n", params.exec_path, params.nparams);
+        
+        // fprintf(stderr, "engine location %s\nnparams %d\n", params.exec_path, params.nparams);
+        
         params.param_names = malloc(params.nparams * sizeof *(params.param_names));
         params.param_values = malloc(params.nparams * sizeof *(params.param_values));
         for (int i=0; !feof(config) && i < params.nparams; i++){
@@ -67,9 +71,10 @@ int main()
             }
         }
         fclose(config);
-        //puts(params.exec_path);
         if (run_engine(engine, &params)){
-            fputs("Engine started\n", stderr);
+            
+            // fputs("Engine started\n", stderr);
+            
             tell_gui(DONE, NULL, 0);
             fflush(stdout);
             main_loop();
@@ -156,12 +161,23 @@ void *engine_to_manager(void *data)
     char buff[2048];
     while (1) {
     	gsize nread=g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
-        //puts("Reading from engine...");
     	buff[nread] = 0;
-        //handle outputs from engine
-        fputs(buff, stderr);
-        fflush(stderr);
-    	//printf("read %lu bytes from engine:\n%s\n", nread, buff);
+        // parse input into lines
+        char *start = buff, *end = strstr(buff, "\n");
+        while (end) {
+            // parse each line
+            *(end++) = 0;
+            char *delim = strstr(start, " ");
+            *(delim++) = 0;
+            // transfer data to gui
+            if (strcmp(start, "info") == 0)
+                tell_gui(INFO, delim, strlen(delim));
+            else if (strcmp(start, "bestmove") == 0)
+                tell_gui(BESTMOVE, delim, strlen(delim));
+            
+            start = end;
+            end = strstr(start, "\n");
+        }
     }
 }
 
@@ -184,10 +200,21 @@ void main_loop()
         } else {
             buff[nread] = 0;
         }
-        if (code == QUIT){
+        switch (code)
+        {
+        case QUIT:
             stop_engine();
             pthread_cancel(thread_id);
             exit(EXIT_SUCCESS);
+            break;
+        case GO:
+            if (engine_state == ENGINE_IDLE)
+                start_stop();
+            break;
+        case STOP:
+            stop_engine();
+            break;
+        default:
             break;
         }
         //tell_engine(buff);
