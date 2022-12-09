@@ -21,7 +21,7 @@ $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 cleaner: clean
-	rm GTKChess
+	rm -f GTKChess
 
 clean:
 	rm -rf $(OBJECTS)
