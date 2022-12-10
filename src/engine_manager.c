@@ -57,8 +57,8 @@ int main()
         
         // fprintf(stderr, "engine location %s\nnparams %d\n", params.exec_path, params.nparams);
         
-        params.param_names = malloc(params.nparams * sizeof *(params.param_names));
-        params.param_values = malloc(params.nparams * sizeof *(params.param_values));
+        params.param_names = calloc(params.nparams, sizeof *(params.param_names));
+        params.param_values = calloc(params.nparams, sizeof *(params.param_values));
         for (int i=0; !feof(config) && i < params.nparams; i++){
             char buff[64];
             fgets(buff, sizeof buff, config);
@@ -76,7 +76,6 @@ int main()
             // fputs("Engine started\n", stderr);
             
             tell_gui(DONE, NULL, 0);
-            fflush(stdout);
             main_loop();
         }
         else
