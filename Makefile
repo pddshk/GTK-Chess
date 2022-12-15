@@ -1,4 +1,4 @@
-CC		= clang
+CC		= clang -std=c99
 GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
