@@ -1,9 +1,11 @@
-CC		= clang -std=c99
+CC		= clang
+STD		?= c17
 GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
-CFLAGS	+= -Wall `pkg-config --cflags $(GTK) $(RSVG) $(GIO)`
-LDFLAGS	+= `pkg-config --libs $(GTK) $(RSVG) $(GIO)` -lm
+PKGCONF	= $(shell which pkg-config)
+CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
+LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 OBJDIR	= obj
 OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o gui.o)
 
@@ -24,7 +26,7 @@ cleaner: clean
 	rm -f GTKChess
 
 clean:
-	rm -rf $(OBJECTS)
+	rm -f $(OBJECTS)
 
 run:
 	./GTKChess

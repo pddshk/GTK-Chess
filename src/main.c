@@ -12,6 +12,7 @@ int read_settings(struct _settings*);
 
 int main(int argc, char** argv)
 {
+	GtkApplication *app = gtk_application_new("GTKChess", G_APPLICATION_DEFAULT_FLAGS);
 	// puts("Main, read settings");
 	
 	read_settings(&settings);
