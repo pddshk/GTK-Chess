@@ -1,6 +1,5 @@
-#include "gui.h"
-#include <glib-unix.h>
-#include "interact.h"
+#include "gtkchessapp.h"
+#include "board.h"
 
 enum _EngineState{
     ENGINE_OFF,
@@ -9,18 +8,89 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-void init_elements(char* textures)
+void gtkchess_app_startup(GApplication *app, gpointer data)
 {
-	engine_state = ENGINE_IDLE;
+    engine_manager = NULL;
+	
+	if (!start_engine_manager(engine_manager)){
+		fputs("Error while starting engine!\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+    printf("initializing app with id %s\n", g_application_get_application_id(app));
+    fflush(stdout);
+    engine_state = ENGINE_IDLE;
 	init_state(&state);
 	init_textures();
-	load_textures(textures);
-	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
-	GObject* window=gtk_builder_get_object(builder, "MainWindow");
+	load_textures("classic");
+}
+
+void gtkchess_app_activate(GApplication *app, gpointer data)
+{
+    GtkBuilder *builder=builder_init();
+    GtkWindow* window=GTK_WINDOW(gtk_builder_get_object(builder, "MainWindow"));
+    gtk_application_add_window(GTK_APPLICATION(app), window);
+    gtk_widget_show_all(GTK_WIDGET(window));
+}
+
+void gtkchess_app_shutdown(GApplication *self, gpointer data)
+{
+    tell_engine_manager(QUIT, NULL, 0);
+    if (G_IS_SUBPROCESS(engine_manager) && !g_subprocess_get_if_exited(engine_manager))
+        g_subprocess_force_exit(engine_manager);
+    puts("Shutting down");
+    
+}
+
+void gtkchess_app_open(GApplication* app, gpointer data)
+{
+
+}
+
+int start_engine_manager(GSubprocess *engine_manager)
+{
+	engine_manager = g_subprocess_new(
+		G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
+		NULL,
+		"./engine_manager",
+		NULL
+	);
+	if (!engine_manager) {
+		fprintf(stderr, "Cannot create subprocess for engine manager! Engine would be unavailable.\n");
+		return FALSE;
+	}
+	to_engine_manager = g_subprocess_get_stdin_pipe(engine_manager);
+	GInputStream *from_engine_manager = g_subprocess_get_stdout_pipe(engine_manager);
+	if (!to_engine_manager || !from_engine_manager) {
+		fprintf(stderr, "Cannot create pipes for engine manager. Engine would be unavailable. Try relaunching application\n");
+		return FALSE;
+	}
+	from_engine_manager_source = NULL;
+	if (g_pollable_input_stream_can_poll(G_POLLABLE_INPUT_STREAM(from_engine_manager))){
+		from_engine_manager_source = g_pollable_input_stream_create_source(
+			G_POLLABLE_INPUT_STREAM(from_engine_manager),
+			NULL
+		);
+		g_source_attach(from_engine_manager_source, NULL); // to default context
+	} else {
+		fprintf(stderr, "Cannot create pollable stream from engine manager!\n");
+		return FALSE;
+	}
+	tell_engine_manager(LOAD_ENGINE, "stockfish", strlen("stockfish"));
+	int code=0;
+	size_t size=0;
+	g_input_stream_read(from_engine_manager, &code, sizeof code, NULL, NULL);
+	g_input_stream_read(from_engine_manager, &size, sizeof size, NULL, NULL);
+	return code == DONE;
+}
+
+GtkBuilder *builder_init()
+{
+    GtkBuilder* builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
+    GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
 
-	GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
+    GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
 		"GtkDrawingArea",
 		GTK_TARGET_SAME_WIDGET,
@@ -84,15 +154,13 @@ void init_elements(char* textures)
 	gtk_builder_connect_signals(builder, NULL);
 	//GObject *EngineToggler=gtk_builder_get_object(builder, "EngineToggler");
 
-	g_source_set_callback (
+	g_source_set_callback(
 		from_engine_manager_source,
 		G_SOURCE_FUNC(parse_engine_response),
 		builder,
 		NULL
 	);
-
-	gtk_widget_show(GTK_WIDGET(window));
-	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    return builder;
 }
 
 void flip_board(GtkButton* button, gpointer Board)

@@ -3,4 +3,5 @@ obj
 GTKChess
 engine_manager
 .vscode
-src/window.glade~
+*~
+src/resources.c

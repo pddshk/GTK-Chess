@@ -6,8 +6,18 @@ GIO		= gio-unix-2.0 gio-2.0
 PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
+
 OBJDIR	= obj
-OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o gui.o)
+NAMES   = main board state rules gtkchessapp
+OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
+
+GLIB_COMPILE_RESOURCES = $(shell $(PKGCONF) --variable=glib_compile_resources gio-2.0)
+BUILT_SRC = src/resources.c
+
+OBJECTS += $(BUILT_SRC:.c=.o)
+
+GRESOURCE = src/gtkchessapp.gresource.xml
+UI = src/window.glade
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
@@ -15,6 +25,9 @@ all: prepare engine_manager $(OBJECTS)
 
 engine_manager: $(OBJDIR)/engine_manager.o
 	$(CC) $(CFLAGS) -o engine_manager $< $(LDFLAGS) -pthread
+
+$(BUILT_SRC): $(GRESOURCE) $(UI)
+	$(GLIB_COMPILE_RESOURCES) $(GRESOURCE) --target=$@ --sourcedir=src --generate-source
 
 prepare:
 	mkdir -p $(OBJDIR)
@@ -27,6 +40,10 @@ cleaner: clean
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f $(BUILT_SRC)
 
 run:
 	./GTKChess
+
+info:
+	$(info "$(GLIB_COMPILE_RESOURCES)")
