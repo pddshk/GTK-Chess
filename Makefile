@@ -12,7 +12,7 @@ NAMES   = main board state rules gtkchessapp
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONF) --variable=glib_compile_resources gio-2.0)
-BUILT_SRC = src/resources.c
+BUILT_SRC = obj/resources.c
 
 OBJECTS += $(BUILT_SRC:.c=.o)
 
@@ -36,14 +36,10 @@ $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 cleaner: clean
-	rm -f GTKChess
+	rm -f GTKChess engine_manager
 
 clean:
-	rm -f $(OBJECTS)
-	rm -f $(BUILT_SRC)
+	rm -f $(OBJDIR)/*
 
 run:
 	./GTKChess
-
-info:
-	$(info "$(GLIB_COMPILE_RESOURCES)")

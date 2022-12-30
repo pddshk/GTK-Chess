@@ -16,8 +16,6 @@ void gtkchess_app_startup(GApplication *app, gpointer data)
 		fputs("Error while starting engine!\n", stderr);
 		exit(EXIT_FAILURE);
 	}
-    printf("initializing app with id %s\n", g_application_get_application_id(app));
-    fflush(stdout);
     engine_state = ENGINE_IDLE;
 	init_state(&state);
 	init_textures();
@@ -26,10 +24,15 @@ void gtkchess_app_startup(GApplication *app, gpointer data)
 
 void gtkchess_app_activate(GApplication *app, gpointer data)
 {
-    GtkBuilder *builder=builder_init();
-    GtkWindow* window=GTK_WINDOW(gtk_builder_get_object(builder, "MainWindow"));
-    gtk_application_add_window(GTK_APPLICATION(app), window);
-    gtk_widget_show_all(GTK_WIDGET(window));
+    GList *windows=gtk_application_get_windows(GTK_APPLICATION(app));
+    if (!windows){
+        builder = builder_init();
+        mainwindow=GTK_WINDOW(gtk_builder_get_object(builder, "MainWindow"));
+        gtk_application_add_window(GTK_APPLICATION(app), mainwindow);
+        gtk_widget_show_all(GTK_WIDGET(mainwindow));
+    } else {
+        gtk_window_present(mainwindow);
+    }
 }
 
 void gtkchess_app_shutdown(GApplication *self, gpointer data)
@@ -37,8 +40,6 @@ void gtkchess_app_shutdown(GApplication *self, gpointer data)
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) && !g_subprocess_get_if_exited(engine_manager))
         g_subprocess_force_exit(engine_manager);
-    puts("Shutting down");
-    
 }
 
 void gtkchess_app_open(GApplication* app, gpointer data)

@@ -9,6 +9,7 @@ GOutputStream *to_engine_manager;
 GSubprocess *engine_manager;
 GSource *from_engine_manager_source;
 GtkBuilder *builder;
+GtkWindow *mainwindow;
 int pawn_promotion_row = -1, pawn_promotion_col = -1;
 char pawn_promotion = '-';
 #endif

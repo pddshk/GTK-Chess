@@ -9,6 +9,8 @@ extern game_state state;
 extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
 extern GSubprocess *engine_manager;
+extern GtkBuilder *builder;
+extern GtkWindow *mainwindow;
 
 GtkBuilder *builder_init();
 
