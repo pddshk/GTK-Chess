@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "state.h"
-#include "arraylist.h"
+#include <glib.h>
+#include <stdio.h>
 
 typedef struct 
 {
@@ -10,14 +11,13 @@ typedef struct
 
 typedef struct 
 {
-  game_state* field;           // поле данных
+  game_state* field;      // поле данных
   tnode *parent;  // родитель
-  arraylist *children; // правый потомок
+  GList* children;
 }tnode;
 
+
+
 tnode * addnode(game_state* _field, tnode *_parent);
-void freemem(tnode *tree);
-
-void treeprint(tnode *tree);
-
 tnode_tree* create_tree();
+void destroy_tree(tnode* tnode);

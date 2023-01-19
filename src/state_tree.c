@@ -1,20 +1,20 @@
 #include "state_tree.h"
 
-
-
 tnode * addnode(game_state* _field, tnode *_parent) 
 {
   tnode* aboba =  (tnode*)malloc(sizeof(aboba)); 
   aboba->field = _field;
-  aboba->children = arraylist_create();
+  aboba->children =  NULL;
+  
   if(_parent!= NULL)
   {
     aboba->parent = _parent;
-    arraylist_add(_parent->children, aboba);
+    _parent->children =g_list_append(_parent->children, aboba);
   }
 
   return aboba;
 }
+
 
 tnode_tree* create_tree()
 {
@@ -22,18 +22,20 @@ tnode_tree* create_tree()
     tnode* abobik = (tnode*)malloc(sizeof(aboba));
     init_state(abobik->field);
     abobik->parent=NULL;
-    abobik->children = arraylist_create();
+    abobik->children = NULL;
     aboba->root = abobik;
     aboba->current = abobik;
+    return aboba;
 }
 
 void destroy_tree(tnode* tnode)
 {
-    for(int i=0; i<(tnode->children->size);i++)
+    for(int i=0; i<(g_list_length (tnode->children));i++)
     {
-        destroy_tree(arraylist_get(tnode->children,i));
+        destroy_tree(g_list_nth(tnode->children,i));
     }
     free(tnode->field);
-    free(tnode->children);
+    g_list_free(tnode->children);
     free(tnode);
 }
+

@@ -18,9 +18,19 @@ void init_elements(char* textures)
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
-    GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
-
+    GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));//220
 	GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
+	//
+	
+	/*GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
+	GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
+	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
+	gtk_text_buffer_set_text (tb,text,strlen(text));
+	gtk_text_view_set_buffer(textArea, tb);*/
+	//330
+	//
+
+
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
 		"GtkDrawingArea",
 		GTK_TARGET_SAME_WIDGET,
