@@ -3,9 +3,13 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include "state.h"
+#include "state_tree.h"
 #include "board.h"
 
 extern game_state state;
+//
+extern state_tree tree;
+//
 extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
 // extern GInputStream *from_engine;

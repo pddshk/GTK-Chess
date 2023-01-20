@@ -1,23 +1,29 @@
+
 #include <stdlib.h>
 #include "state.h"
 #include <glib.h>
 #include <stdio.h>
+#ifndef STATE_TREE_H
+#define STATE_TREE_H
 
-typedef struct 
+typedef struct
+{
+  game_state* field;      // поле данных
+  struct tnode* parent;  // родитель
+  GList* children;
+} tnode;
+
+typedef struct
 {
   tnode* root;
   tnode* current;
-} tnode_tree;
+} state_tree;
 
-typedef struct 
-{
-  game_state* field;      // поле данных
-  tnode *parent;  // родитель
-  GList* children;
-}tnode;
+extern state_tree tree;
 
+void init_tree(state_tree*, game_state*);
+void destroy_tree(state_tree*);
+tnode * addnode(game_state*, tnode *);
+void destroy_tnodes(tnode*);
 
-
-tnode * addnode(game_state* _field, tnode *_parent);
-tnode_tree* create_tree();
-void destroy_tree(tnode* tnode);
+#endif

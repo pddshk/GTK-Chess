@@ -11,8 +11,11 @@ enum _EngineState{
 
 void init_elements(char* textures)
 {
-	engine_state = ENGINE_IDLE;
+	engine_state = ENGINE_IDLE; 
 	init_state(&state);
+	//
+	init_tree(&tree, &state);
+	//
 	init_textures();
 	load_textures(textures);
 	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
@@ -115,6 +118,9 @@ void new_game(GtkButton* button, gpointer Board)
 {
 	int flipped = state.flipped;
 	init_state(&state);
+	//
+	init_tree(&tree, &state);
+	//
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
@@ -163,4 +169,13 @@ void toggle_engine(GtkButton* self, gpointer data)
 			puts("Engine is broken!");
 			break;
 	}
+}
+
+void show_state_tree(GtkWidget *textArea)
+{
+	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
+	gtk_text_buffer_set_text (tb,text,strlen(text));
+	gtk_text_view_set_buffer(textArea, tb);
+	return;
 }

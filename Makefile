@@ -5,7 +5,7 @@ GIO		= gio-unix-2.0 gio-2.0
 CFLAGS	+= -Wall `pkg-config --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `pkg-config --libs $(GTK) $(RSVG) $(GIO)` -lm
 OBJDIR	= obj
-OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o gui.o)
+OBJECTS	= $(addprefix $(OBJDIR)/, main.o board.o state.o rules.o state_tree.o gui.o )
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)

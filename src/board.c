@@ -341,13 +341,19 @@ drag_drop (
 	resolve_coord(&state, &to_row, &to_col);
 	// chek if there was move and move is valid
 	if (drag_status && is_valid_move(&state, dragged_piece, from_row, from_col, to_row, to_col))
+	{
 		if (is_pawn_promotion(dragged_piece, to_row)){
 			pawn_promotion = dragged_piece;
 	        pawn_promotion_row = to_row;
 	        pawn_promotion_col = to_col;
-		} else {
+		} 
+		else 
+		{
 			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0);
+			//след ход
 		}
+		
+	}
 	else
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
 

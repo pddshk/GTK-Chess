@@ -1,5 +1,4 @@
 #include "state_tree.h"
-
 tnode * addnode(game_state* _field, tnode *_parent) 
 {
   tnode* aboba =  (tnode*)malloc(sizeof(aboba)); 
@@ -16,25 +15,33 @@ tnode * addnode(game_state* _field, tnode *_parent)
 }
 
 
-tnode_tree* create_tree()
+void init_tree(state_tree* aboba, game_state* state)
 {
-    tnode_tree* aboba =  (tnode_tree*)malloc(sizeof(aboba)); 
+  /*if(aboba!= NULL)
+  {
+    destroy_tree(aboba);
+  }*/
+    aboba =  (state_tree*)malloc(sizeof(aboba)); 
     tnode* abobik = (tnode*)malloc(sizeof(aboba));
-    init_state(abobik->field);
+    abobik->field = state;
     abobik->parent=NULL;
     abobik->children = NULL;
     aboba->root = abobik;
     aboba->current = abobik;
-    return aboba;
+   
 }
-
-void destroy_tree(tnode* tnode)
+void destroy_tree(state_tree* aboba)
+{
+  //free(aboba);
+  destroy_tnodes(aboba->root);
+}
+void destroy_tnodes(tnode* tnode)
 {
     for(int i=0; i<(g_list_length (tnode->children));i++)
     {
-        destroy_tree(g_list_nth(tnode->children,i));
+        destroy_tnodes(g_list_nth(tnode->children,i)->data);
     }
-    free(tnode->field);
+    //free(tnode->field);
     g_list_free(tnode->children);
     free(tnode);
 }

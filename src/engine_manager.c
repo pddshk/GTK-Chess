@@ -142,7 +142,8 @@ void *engine_to_manager(void *data)
         //puts("Reading from engine...");
     	nread = g_input_stream_read(from_engine, buff, sizeof buff, NULL, NULL);
     	buff[nread] = 0;
-        fputs(buff, stdout);
+        //buffermessage
+        //fputs(buff, stdout);
         fflush(stdout);
     	//printf("read %lu bytes from engine:\n%s\n", nread, buff);
     }
