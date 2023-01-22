@@ -360,7 +360,7 @@ drag_drop (
 	gtk_widget_queue_draw(widget);
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
-	drag_col_start = drag_row_start = 0;
+	drag_col_start = drag_row_start = -1;
 	// print_state(&state);
 	// parse incoming data
 	GtkWidget **dialogs = data; // mate stalemate and im dialogs

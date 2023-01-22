@@ -1,7 +1,9 @@
 #include "state.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "rules.h"
+#include "gui.h"
 
 void init_state(game_state* state)
 {
@@ -119,9 +121,15 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     char move[6];
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
     if (!state->side_to_move) {
-        printf("%d. %s\n", state->move_counter, move);
+        //printf("%d. %s\n", state->move_counter, move);
+        const gchar *text = malloc(sizeof(char)* 1000);
+		sprintf(text, "%d. %s\n", state->move_counter, move);
+        print_notation(text);
     } else {
-        printf("%d... %s\n", state->move_counter - 1, move);
+        //printf("%d... %s\n", state->move_counter - 1, move);
+        const gchar *text = malloc(sizeof(char)* 1000);
+		sprintf(text, "%d... %s\n", state->move_counter - 1, move);
+        print_notation(text);
     }
 }
 

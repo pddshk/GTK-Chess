@@ -1,6 +1,9 @@
 #include "gui.h"
 #include <glib-unix.h>
+#include <string.h>
 //#include "engine.h"
+
+GtkBuilder* builder;
 
 enum _EngineState{
     ENGINE_OFF,
@@ -18,7 +21,7 @@ void init_elements(char* textures)
 	//
 	init_textures();
 	load_textures(textures);
-	GtkBuilder* builder=gtk_builder_new_from_file("src/window.glade");
+	builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));//220
@@ -29,8 +32,8 @@ void init_elements(char* textures)
 	GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
 	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
 	gtk_text_buffer_set_text (tb,text,strlen(text));
-	gtk_text_view_set_buffer(textArea, tb);*/
-	//330
+	gtk_text_view_set_buffer(textArea, tb);
+	*/
 	//
 
 
@@ -178,4 +181,12 @@ void show_state_tree(GtkWidget *textArea)
 	gtk_text_buffer_set_text (tb,text,strlen(text));
 	gtk_text_view_set_buffer(textArea, tb);
 	return;
+}
+
+void print_notation(const gchar *text) {
+	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
+	//GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
+	GtkTextBuffer * tb = gtk_text_view_get_buffer(textArea);
+	gtk_text_buffer_insert_at_cursor(tb,text,strlen(text));
+	gtk_text_view_set_buffer(textArea, tb);
 }
