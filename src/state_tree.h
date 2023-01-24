@@ -1,8 +1,9 @@
-
 #include <stdlib.h>
 #include "state.h"
 #include <glib.h>
 #include <stdio.h>
+//#include <gtk/gtk.h>
+//#include <gio/gio.h>
 #ifndef STATE_TREE_H
 #define STATE_TREE_H
 
@@ -11,6 +12,7 @@ typedef struct
   game_state* field;      // поле данных
   struct tnode* parent;  // родитель
   GList* children;
+  //GtkVbox graphics;
 } tnode;
 
 typedef struct

@@ -1,4 +1,5 @@
 #include "state.h"
+#include "state_tree.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -120,6 +121,9 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         clear_enpassant(state);
     char move[6];
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
+    //
+    tree.current = addnode(&state, tree.current);
+    //
     if (!state->side_to_move) {
         //printf("%d. %s\n", state->move_counter, move);
         const gchar *text = malloc(sizeof(char)* 1000);

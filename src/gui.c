@@ -26,15 +26,6 @@ void init_elements(char* textures)
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));//220
 	GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
-	//
-	
-	/*GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
-	GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
-	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
-	gtk_text_buffer_set_text (tb,text,strlen(text));
-	gtk_text_view_set_buffer(textArea, tb);
-	*/
-	//
 
 
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
@@ -174,6 +165,8 @@ void toggle_engine(GtkButton* self, gpointer data)
 	}
 }
 
+
+
 void show_state_tree(GtkWidget *textArea)
 {
 	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
@@ -183,10 +176,23 @@ void show_state_tree(GtkWidget *textArea)
 	return;
 }
 
+void show_state_tree(GtkVBox *notationBox) {
+	GList* children = gtk_container_get_children(notationBox);
+	g_list_foreach(list, (GFunc)destroy, NULL);
+	GtkHBox
+	gtk_box_pack_end(notationBox, );
+	tnode* root = tree.root;
+	for (int i = 0; i < g_list_length(root->children); i++) {
+
+	}
+}
+
 void print_notation(const gchar *text) {
 	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
 	//GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
 	GtkTextBuffer * tb = gtk_text_view_get_buffer(textArea);
-	gtk_text_buffer_insert_at_cursor(tb,text,strlen(text));
+	GtkTextIter end_iter;
+	gtk_text_buffer_get_end_iter(tb, &end_iter);
+	gtk_text_buffer_insert(tb, &end_iter, text, strlen(text));
 	gtk_text_view_set_buffer(textArea, tb);
 }
