@@ -176,7 +176,7 @@ void show_state_tree(GtkWidget *textArea)
 	return;
 }
 
-void show_state_tree(GtkVBox *notationBox) {
+/*void show_state_tree(GtkVBox *notationBox) {
 	GList* children = gtk_container_get_children(notationBox);
 	g_list_foreach(list, (GFunc)destroy, NULL);
 	GtkHBox
@@ -185,7 +185,7 @@ void show_state_tree(GtkVBox *notationBox) {
 	for (int i = 0; i < g_list_length(root->children); i++) {
 
 	}
-}
+}*/
 
 void print_notation(const gchar *text) {
 	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
