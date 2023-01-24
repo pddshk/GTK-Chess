@@ -177,7 +177,10 @@ void show_state_tree(GtkWidget *textArea)
 }
 
 void show_state(tnode* node) {
-	if (node != tree.root) {
+	if (node==NULL)
+	return;
+	if (node != tree->root) {
+		
 		GtkBox *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 		const char* label = malloc(sizeof(char)* 1000);
 		
@@ -196,7 +199,7 @@ void show_state(tnode* node) {
 		
 	}
 	else {
-		GtkBox *vbox;
+		GtkBox *vbox=GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));;
 		//a function to load main box
 		GList* l = gtk_container_get_children(vbox);
 		while(g_list_length(l) != 0) {

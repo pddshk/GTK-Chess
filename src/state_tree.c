@@ -15,19 +15,19 @@ tnode * addnode(game_state* _field, tnode *_parent)
 }
 
 
-void init_tree(state_tree* aboba, game_state* state)
+void init_tree(state_tree* tree, game_state* state)
 {
   /*if(aboba!= NULL)
   {
     destroy_tree(aboba);
   }*/
-    aboba =  (state_tree*)malloc(sizeof(aboba)); 
-    tnode* abobik = (tnode*)malloc(sizeof(aboba));
+    tree =  (state_tree*)malloc(sizeof(tree)); 
+    tnode* abobik = (tnode*)malloc(sizeof(abobik));
     abobik->field = state;
     abobik->parent=NULL;
     abobik->children = NULL;
-    aboba->root = abobik;
-    aboba->current = abobik;
+    tree->root = abobik;
+    tree->current = abobik;
    
 }
 void destroy_tree(state_tree* aboba)

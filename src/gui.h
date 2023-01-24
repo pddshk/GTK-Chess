@@ -8,7 +8,7 @@
 
 extern game_state state;
 //
-extern state_tree tree;
+extern state_tree *tree;
 //
 extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;

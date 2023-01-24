@@ -123,18 +123,19 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     char move[6];
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
     //
-    tree.current = addnode(&state, tree.current);
+    tree->current = addnode(&state, tree->current);
     //
     if (!state->side_to_move) {
+        show_state(tree->root);
         //printf("%d. %s\n", state->move_counter, move);
-        const gchar *text = malloc(sizeof(char)* 1000);
+        /*const gchar *text = malloc(sizeof(char)* 1000);
 		sprintf(text, "%d. %s\n", state->move_counter, move);
         print_notation(text);
     } else {
         //printf("%d... %s\n", state->move_counter - 1, move);
         const gchar *text = malloc(sizeof(char)* 1000);
 		sprintf(text, "%d... %s\n", state->move_counter - 1, move);
-        print_notation(text);
+        print_notation(text);*/
     }
 }
 

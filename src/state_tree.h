@@ -22,7 +22,7 @@ typedef struct
   tnode* current;
 } state_tree;
 
-extern state_tree tree;
+extern state_tree* tree;
 
 void init_tree(state_tree*, game_state*);
 void destroy_tree(state_tree*);
