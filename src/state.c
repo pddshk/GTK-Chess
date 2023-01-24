@@ -20,6 +20,7 @@ void init_state(game_state* state)
     state->enpassant_row = state->enpassant_col = -1;
     state->is_active = 1;
     state->flipped = 0;
+    state->last_move_notation = malloc(sizeof(char)* 10);
 }
 
 int is_active(game_state* state){

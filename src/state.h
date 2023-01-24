@@ -12,6 +12,7 @@ typedef struct {
     int enpassant_row, enpassant_col;
     int is_active;
     int flipped;
+    char* last_move_notation;
 } game_state;
 
 extern game_state state;

@@ -176,6 +176,41 @@ void show_state_tree(GtkWidget *textArea)
 	return;
 }
 
+void show_state(tnode* node) {
+	if (node != tree.root) {
+		GtkBox *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		const char* label = malloc(sizeof(char)* 1000);
+		
+		if (!node->field->side_to_move) {
+			sprintf(label, "%d. %s\n", node->field->move_counter, node->field->last_move_notation);
+		}
+		else {
+			sprintf(label, "%d... %s\n", node->field->move_counter, node->field->last_move_notation);
+		}
+		GtkButton *button = gtk_button_new_with_label(label);
+		gtk_box_pack_end(vbox, button, TRUE, TRUE, 0);
+		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
+		tnode* p = node->parent;
+		gtk_box_pack_end(g_list_last(gtk_container_get_children(p->graphics)), vbox, TRUE, TRUE, 0);
+		
+	}
+	else {
+		GtkBox *vbox;
+		//a function to load main box
+		GList* l = gtk_container_get_children(vbox);
+		while(g_list_length(l) != 0) {
+			g_list_remove(l, g_list_first(l));
+		}
+		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
+	}
+	for(GList* elem = node->children; elem; elem = elem->next) {
+  		tnode* item = elem->data;
+  		show_state(item);
+	}
+}
+
 /*void show_state_tree(GtkVBox *notationBox) {
 	GList* children = gtk_container_get_children(notationBox);
 	g_list_foreach(list, (GFunc)destroy, NULL);
