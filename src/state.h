@@ -1,5 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
+//#include "state_tree.h"
 
 typedef struct {
     int castlings[4]; // Queenside | Kingside | queenside | kingside
@@ -12,10 +13,10 @@ typedef struct {
     int enpassant_row, enpassant_col;
     int is_active;
     int flipped;
-    char* last_move_notation;
 } game_state;
 
 extern game_state state;
+//extern state_tree* tree;
 
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;

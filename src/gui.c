@@ -16,8 +16,9 @@ void init_elements(char* textures)
 {
 	engine_state = ENGINE_IDLE; 
 	init_state(&state);
+	
 	//
-	init_tree(&tree, &state);
+	tree = init_tree(&state);
 	//
 	init_textures();
 	load_textures(textures);
@@ -113,7 +114,7 @@ void new_game(GtkButton* button, gpointer Board)
 	int flipped = state.flipped;
 	init_state(&state);
 	//
-	init_tree(&tree, &state);
+	tree = init_tree(&state);
 	//
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
@@ -180,50 +181,39 @@ void show_state(tnode* node) {
 	if (node==NULL)
 	return;
 	if (node != tree->root) {
-		
 		GtkBox *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		const char* label = malloc(sizeof(char)* 1000);
-		
-		if (!node->field->side_to_move) {
-			sprintf(label, "%d. %s\n", node->field->move_counter, node->field->last_move_notation);
+		(*node).graphics = vbox;
+		char* label = malloc(sizeof(char)* 1000);
+		if (node->field->side_to_move) {
+			sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
 		}
 		else {
-			sprintf(label, "%d... %s\n", node->field->move_counter, node->field->last_move_notation);
+			sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
 		}
+		
 		GtkButton *button = gtk_button_new_with_label(label);
 		gtk_box_pack_end(vbox, button, TRUE, TRUE, 0);
 		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
 		tnode* p = node->parent;
 		gtk_box_pack_end(g_list_last(gtk_container_get_children(p->graphics)), vbox, TRUE, TRUE, 0);
-		
 	}
 	else {
-		GtkBox *vbox=GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));;
-		//a function to load main box
+		GtkBox *vbox=GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
+		(*node).graphics = vbox;
 		GList* l = gtk_container_get_children(vbox);
 		while(g_list_length(l) != 0) {
 			g_list_remove(l, g_list_first(l));
 		}
 		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
+		
 	}
 	for(GList* elem = node->children; elem; elem = elem->next) {
   		tnode* item = elem->data;
   		show_state(item);
 	}
 }
-
-/*void show_state_tree(GtkVBox *notationBox) {
-	GList* children = gtk_container_get_children(notationBox);
-	g_list_foreach(list, (GFunc)destroy, NULL);
-	GtkHBox
-	gtk_box_pack_end(notationBox, );
-	tnode* root = tree.root;
-	for (int i = 0; i < g_list_length(root->children); i++) {
-
-	}
-}*/
 
 void print_notation(const gchar *text) {
 	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));

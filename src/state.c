@@ -6,6 +6,8 @@
 #include "rules.h"
 #include "gui.h"
 
+extern state_tree* tree;
+
 void init_state(game_state* state)
 {
     memcpy(
@@ -20,7 +22,6 @@ void init_state(game_state* state)
     state->enpassant_row = state->enpassant_col = -1;
     state->is_active = 1;
     state->flipped = 0;
-    state->last_move_notation = malloc(sizeof(char)* 10);
 }
 
 int is_active(game_state* state){
@@ -122,21 +123,27 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         clear_enpassant(state);
     char move[6];
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
+
     //
-    tree->current = addnode(&state, tree->current);
+    game_state* state_storage = (game_state*) malloc(sizeof(game_state));
+    *state_storage = *state;
+    (*tree).current =  addnode(state_storage, tree->current, move);
+    show_state(tree->root);
     //
-    if (!state->side_to_move) {
-        show_state(tree->root);
+    
+    /*if (!state->side_to_move) {
+        
+        
         //printf("%d. %s\n", state->move_counter, move);
-        /*const gchar *text = malloc(sizeof(char)* 1000);
+        const gchar *text = malloc(sizeof(char)* 1000);
 		sprintf(text, "%d. %s\n", state->move_counter, move);
         print_notation(text);
     } else {
         //printf("%d... %s\n", state->move_counter - 1, move);
         const gchar *text = malloc(sizeof(char)* 1000);
 		sprintf(text, "%d... %s\n", state->move_counter - 1, move);
-        print_notation(text);*/
-    }
+        print_notation(text);
+    }*/
 }
 
 void move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)

@@ -14,6 +14,7 @@ typedef struct
   struct tnode* parent;  // родитель
   GList* children;
   GtkBox* graphics;
+  char* last_move_notation;
 } tnode;
 
 typedef struct
@@ -22,11 +23,11 @@ typedef struct
   tnode* current;
 } state_tree;
 
-extern state_tree* tree;
+//extern state_tree* tree;
 
-void init_tree(state_tree*, game_state*);
+state_tree* init_tree(game_state*);
 void destroy_tree(state_tree*);
-tnode * addnode(game_state*, tnode *);
+tnode * addnode(game_state*, tnode*, char* last_move);
 void destroy_tnodes(tnode*);
 
 #endif
