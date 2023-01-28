@@ -3,8 +3,10 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
 {
   tnode* aboba =  (tnode*)malloc(48); 
   aboba->field = _field;
+
   aboba->children =  NULL;
   aboba->last_move_notation = last_move;
+  
   if(_parent!= NULL)
   {
     aboba->parent = (struct tnode*)_parent;

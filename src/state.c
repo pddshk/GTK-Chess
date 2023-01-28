@@ -127,8 +127,10 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     //
     game_state* state_storage = (game_state*) malloc(sizeof(game_state));
     *state_storage = *state;
-    (*tree).current =  addnode(state_storage, tree->current, move);
-    free(state_storage);
+    char* move_storage = (char*)malloc(sizeof( char)* (sizeof(move)/sizeof(move[0]) +1) );
+    *move_storage = *move;
+    (*tree).current =  addnode(state_storage, tree->current, move_storage); 
+
     show_state(tree->root,0);
     //
     

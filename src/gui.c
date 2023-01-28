@@ -36,7 +36,7 @@ char* get_sign(int number)
 {
 	char* st = (char*)malloc(sizeof(char)*(number+2));
 	char* basic = "|_";
-	char* space = " ";
+	char* space = "_";
 	for(int i=0; i<number;i++)
 	{
 		concat(st,space);
@@ -50,12 +50,14 @@ char* get_sign(int number)
 char* get_label( tnode* node)
 {
 	char* label = malloc(sizeof(char)* 16);
-		if (node->field->side_to_move) {
-			sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
-		}
-		else {
-			sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
-		}
+	if (node->field->side_to_move) 
+	{
+		sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
+	}
+	else 
+	{
+		sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
+	}
 	return label;
 
 }
@@ -232,6 +234,7 @@ void show_state(tnode* node, int level)
 	switch(level){
 		case 0:
 		{
+			printf("case 0\n");
 		GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
 		
 		GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
@@ -252,9 +255,10 @@ void show_state(tnode* node, int level)
 		}
 		case 1:
 		{
+			printf("case 1\n");
 		tnode* parent = node->parent;
 		GtkBox *vbox=parent->graphics;
-
+		(*node).graphics = vbox; 
 		char* label = get_label(node);
 
 		GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
@@ -268,20 +272,15 @@ void show_state(tnode* node, int level)
 			int j=0;
 			for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
 			{
-				//printf("loop\n");
+				tnode* item = elem->data;
 				if(j==0)
 				{
 					j=1;
-					node->graphics=vbox;
-					show_state(elem->data,1);
-
+					show_state(item,1);
 					continue;
 				}
-  				tnode* item = elem->data;
 				level++;
   				show_state(item,level);
-				
-				//printf("end loop iteration\n");
 			}
 		}
 		gtk_widget_show_all(GTK_WIDGET(vbox));
@@ -290,6 +289,7 @@ void show_state(tnode* node, int level)
 		default:
 		{
 		//add button in parent hbox
+		printf("case default\n");
 		if(g_list_length(node->children)!=NULL)
 		{
 			
@@ -314,7 +314,7 @@ void show_state(tnode* node, int level)
 		break;
 		}
 	}
-
+}
 	/*
 	if (node != tree->root) {
 		printf("if\n");
@@ -395,7 +395,7 @@ void show_state(tnode* node, int level)
 		printf("end loop iteration\n");
 	}*/
 	
-}
+
 /*
 void print_notation(const gchar *text) {
 	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
