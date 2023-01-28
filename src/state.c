@@ -121,32 +121,15 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         set_enpassant(state, to_row-1, to_col);
     else
         clear_enpassant(state);
-    char move[6];
+    char *move = malloc(sizeof(char) * 6);
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
-
+    
     //
     game_state* state_storage = (game_state*) malloc(sizeof(game_state));
     *state_storage = *state;
-    char* move_storage = (char*)malloc(sizeof( char)* (sizeof(move)/sizeof(move[0]) +1) );
-    *move_storage = *move;
-    (*tree).current =  addnode(state_storage, tree->current, move_storage); 
-
+    (*tree).current =  addnode(state_storage, tree->current, move); 
     show_state(tree->root,0);
     //
-    
-    /*if (!state->side_to_move) {
-        
-        
-        //printf("%d. %s\n", state->move_counter, move);
-        const gchar *text = malloc(sizeof(char)* 1000);
-		sprintf(text, "%d. %s\n", state->move_counter, move);
-        print_notation(text);
-    } else {
-        //printf("%d... %s\n", state->move_counter - 1, move);
-        const gchar *text = malloc(sizeof(char)* 1000);
-		sprintf(text, "%d... %s\n", state->move_counter - 1, move);
-        print_notation(text);
-    }*/
 }
 
 void move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)

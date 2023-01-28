@@ -234,84 +234,81 @@ void show_state(tnode* node, int level)
 	switch(level){
 		case 0:
 		{
-			printf("case 0\n");
-		GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
-		
-		GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
-		for(l; l!=NULL;l=l->next)
-		{
-			gtk_container_remove(GTK_CONTAINER(vbox),l->data);
-		}
-		(*node).graphics = vbox; 
-		if(g_list_length(node->children)!=NULL)
-		{
-			for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+			GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
+			
+			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
+			for(l; l!=NULL;l=l->next)
 			{
-				tnode* item = elem->data;
-  				show_state(item,1);
+				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 			}
-		}
-		break;
+			(*node).graphics = vbox; 
+			if(g_list_length(node->children)!=NULL)
+			{
+				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+				{
+					tnode* item = elem->data;
+					show_state(item,1);
+				}
+			}
+			break;
 		}
 		case 1:
 		{
-			printf("case 1\n");
-		tnode* parent = node->parent;
-		GtkBox *vbox=parent->graphics;
-		(*node).graphics = vbox; 
-		char* label = get_label(node);
+			tnode* parent = node->parent;
+			GtkBox *vbox=parent->graphics;
+			(*node).graphics = vbox; 
+			char* label = get_label(node);
 
-		GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
-		gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
-		
-		if(g_list_length(node->children)!=NULL)
-		{
-			//вывод элемента и далее вывод первого дочернего элемента
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
 			
-			
-			int j=0;
-			for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+			if(g_list_length(node->children)!=NULL)
 			{
-				tnode* item = elem->data;
-				if(j==0)
+				//вывод элемента и далее вывод первого дочернего элемента
+				
+				
+				int j=0;
+				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
 				{
-					j=1;
-					show_state(item,1);
-					continue;
+					tnode* item = elem->data;
+					if(j==0)
+					{
+						j=1;
+						show_state(item,1);
+						continue;
+					}
+					level++;
+					show_state(item,level);
 				}
-				level++;
-  				show_state(item,level);
 			}
-		}
-		gtk_widget_show_all(GTK_WIDGET(vbox));
-		break;
+			gtk_widget_show_all(GTK_WIDGET(vbox));
+			break;
 		}
 		default:
 		{
-		//add button in parent hbox
-		printf("case default\n");
-		if(g_list_length(node->children)!=NULL)
-		{
-			
-			
-			int j=0;
-			for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
+			//add button in parent hbox
+			if(g_list_length(node->children)!=NULL)
 			{
-				//printf("loop\n");
-				if(j==0)
+				
+				
+				int j=0;
+				for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
 				{
-					j=1;
-					
-					
-					continue;
+					//printf("loop\n");
+					if(j==0)
+					{
+						j=1;
+						
+						
+						continue;
+					}
+					tnode* item = elem->data;
+					level++;
+					show_state(item,level);
+					//printf("end loop iteration\n");
 				}
-  				tnode* item = elem->data;
-				level++;
-  				show_state(item,level);
-				//printf("end loop iteration\n");
 			}
-		}
-		break;
+			break;
 		}
 	}
 }
