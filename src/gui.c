@@ -50,13 +50,15 @@ char* get_sign(int number)
 char* get_label( tnode* node)
 {
 	char* label = malloc(sizeof(char)* 16);
+	int actual_move = node->field->move_counter;
+	if (node->field->side_to_move != 0) actual_move--;
 	if (node->field->side_to_move) 
 	{
-		sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
+		sprintf(label, "%d... %s\n", actual_move, node->last_move_notation);
 	}
 	else 
 	{
-		sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
+		sprintf(label, "%d. %s\n", actual_move, node->last_move_notation);
 	}
 	return label;
 

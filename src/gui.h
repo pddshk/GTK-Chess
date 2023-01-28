@@ -15,6 +15,12 @@ extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
 // extern GInputStream *from_engine;
 
+char* concat(char *s1, char *s2);
+
+char* get_sign(int number);
+
+char* get_label( tnode* node);
+
 void init_elements(char*);
 
 void flip_board(GtkButton*, gpointer);
