@@ -8,6 +8,7 @@ struct _settings{
 game_state state;
 GOutputStream *to_engine_manager;
 //my var
+GtkBuilder* builder;
 state_tree*tree;
 // GInputStream *from_engine_manager;
 GSource *from_engine_manager_source;

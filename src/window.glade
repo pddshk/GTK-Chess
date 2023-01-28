@@ -336,13 +336,10 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <child>
-                                      <object class="GtkBox" id = "Notation">
+                                      <object class="GtkBox" id="Notation">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
                                         <property name="orientation">vertical</property>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
                                         <child>
                                           <placeholder/>
                                         </child>
@@ -461,20 +458,20 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="TopMove">
+                              <object class="GtkLabel" id="CurrentDepth">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">1. ...e5</property>
+                                <property name="label" translatable="yes">Depth = 0</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="CurrentDepth">
+                              <object class="GtkLabel" id="TopMove">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Depth = 0</property>
+                                <property name="label" translatable="yes">1. ...e5</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>

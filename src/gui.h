@@ -8,6 +8,7 @@
 
 extern game_state state;
 //
+extern GtkBuilder* builder;
 extern state_tree *tree;
 //
 extern GOutputStream *to_engine_manager;
@@ -21,6 +22,7 @@ void flip_board(GtkButton*, gpointer);
 void new_game(GtkButton*, gpointer);
 
 void toggle_engine(GtkButton*, gpointer);
+void show_state(tnode*,int);
 
 static gboolean parse_engine_response(GObject*, gpointer);
 

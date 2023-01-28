@@ -7,7 +7,7 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
   aboba->last_move_notation = last_move;
   if(_parent!= NULL)
   {
-    aboba->parent = _parent;
+    aboba->parent = (struct tnode*)_parent;
     _parent->children =g_list_append(_parent->children, aboba);
   }
   return aboba;

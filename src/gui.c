@@ -3,7 +3,7 @@
 #include <string.h>
 //#include "engine.h"
 
-GtkBuilder* builder;
+
 
 enum _EngineState{
     ENGINE_OFF,
@@ -11,6 +11,54 @@ enum _EngineState{
     ENGINE_WORKING,
     ENGINE_ERROR
 } engine_state;
+
+
+char* concat(char *s1, char *s2) {
+
+        size_t len1 = strlen(s1);
+        size_t len2 = strlen(s2);                      
+
+        char *result = malloc(len1 + len2 + 1);
+
+        if (!result) {
+            fprintf(stderr, "malloc() failed: insufficient memory!\n");
+            return NULL;
+        }
+
+        memcpy(result, s1, len1);
+        memcpy(result + len1, s2, len2 + 1);    
+
+        return result;
+}
+
+
+char* get_sign(int number)
+{
+	char* st = (char*)malloc(sizeof(char)*(number+2));
+	char* basic = "|_";
+	char* space = " ";
+	for(int i=0; i<number;i++)
+	{
+		concat(st,space);
+	}
+	concat(st, basic);
+	return st;
+
+}
+
+
+char* get_label( tnode* node)
+{
+	char* label = malloc(sizeof(char)* 16);
+		if (node->field->side_to_move) {
+			sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
+		}
+		else {
+			sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
+		}
+	return label;
+
+}
 
 void init_elements(char* textures)
 {
@@ -28,7 +76,7 @@ void init_elements(char* textures)
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));//220
 	GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
 
-
+	//GtkBox *vbox=GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
 		"GtkDrawingArea",
 		GTK_TARGET_SAME_WIDGET,
@@ -168,21 +216,111 @@ void toggle_engine(GtkButton* self, gpointer data)
 
 
 
-void show_state_tree(GtkWidget *textArea)
+/*void show_state_tree(GtkWidget *textArea)
 {
 	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
 	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
 	gtk_text_buffer_set_text (tb,text,strlen(text));
 	gtk_text_view_set_buffer(textArea, tb);
 	return;
-}
+}*/
 
-void show_state(tnode* node) {
+void show_state(tnode* node, int level) 
+{
 	if (node==NULL)
 	return;
+	switch(level){
+		case 0:
+		{
+		GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
+		
+		GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
+		for(l; l!=NULL;l=l->next)
+		{
+			gtk_container_remove(GTK_CONTAINER(vbox),l->data);
+		}
+		(*node).graphics = vbox; 
+		if(g_list_length(node->children)!=NULL)
+		{
+			for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+			{
+				tnode* item = elem->data;
+  				show_state(item,1);
+			}
+		}
+		break;
+		}
+		case 1:
+		{
+		tnode* parent = node->parent;
+		GtkBox *vbox=parent->graphics;
+
+		char* label = get_label(node);
+
+		GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+		gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
+		
+		if(g_list_length(node->children)!=NULL)
+		{
+			//вывод элемента и далее вывод первого дочернего элемента
+			
+			
+			int j=0;
+			for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+			{
+				//printf("loop\n");
+				if(j==0)
+				{
+					j=1;
+					node->graphics=vbox;
+					show_state(elem->data,1);
+
+					continue;
+				}
+  				tnode* item = elem->data;
+				level++;
+  				show_state(item,level);
+				
+				//printf("end loop iteration\n");
+			}
+		}
+		gtk_widget_show_all(GTK_WIDGET(vbox));
+		break;
+		}
+		default:
+		{
+		//add button in parent hbox
+		if(g_list_length(node->children)!=NULL)
+		{
+			
+			
+			int j=0;
+			for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
+			{
+				//printf("loop\n");
+				if(j==0)
+				{
+					j=1;
+					
+					
+					continue;
+				}
+  				tnode* item = elem->data;
+				level++;
+  				show_state(item,level);
+				//printf("end loop iteration\n");
+			}
+		}
+		break;
+		}
+	}
+
+	/*
 	if (node != tree->root) {
-		GtkBox *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		(*node).graphics = vbox;
+		printf("if\n");
+		GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
+		
+		node->graphics = vbox;
 		char* label = malloc(sizeof(char)* 1000);
 		if (node->field->side_to_move) {
 			sprintf(label, "%d. %s\n", node->field->move_counter, node->last_move_notation);
@@ -190,31 +328,75 @@ void show_state(tnode* node) {
 		else {
 			sprintf(label, "%d... %s\n", node->field->move_counter, node->last_move_notation);
 		}
+		label = "sosite";
+		//GtkBox *vbox1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 		
-		GtkButton *button = gtk_button_new_with_label(label);
-		gtk_box_pack_end(vbox, button, TRUE, TRUE, 0);
-		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
-		tnode* p = node->parent;
-		gtk_box_pack_end(g_list_last(gtk_container_get_children(p->graphics)), vbox, TRUE, TRUE, 0);
+		//gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(button), TRUE, TRUE, 0);
+		//gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(vbox1));
+		//gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
+		//GtkBox *hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+		
+		//gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(hbox), TRUE, TRUE, 0);
+		//gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
+		printf("l\n");
+		tnode* p = (tnode*)node->parent;
+		
+		//gtk_box_pack_end(GTK_BOX(g_list_last(gtk_container_get_children(GTK_CONTAINER(p->graphics)))), GTK_WIDGET(vbox), TRUE, TRUE, 0);
+		gtk_widget_show_all(GTK_WIDGET(vbox));
+		printf("end if\n");
+		
 	}
-	else {
-		GtkBox *vbox=GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
-		(*node).graphics = vbox;
-		GList* l = gtk_container_get_children(vbox);
-		while(g_list_length(l) != 0) {
-			g_list_remove(l, g_list_first(l));
+	else 
+	{
+		printf("else\n");
+		GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
+		//gtk_widget_queue_draw(GTK_WIDGET(vbox));
+		//gtk_widget_queue_draw(GTK_WIDGET(vbox));
+		(*node).graphics = vbox; 
+		GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
+		for(l; l!=NULL;l=l->next)
+		{
+			gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 		}
+		//GtkBox *hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+		//gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(hbox), TRUE, TRUE, 0);
+		//gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
+		printf("end else\n");
+		char* label = "sosite_zhopu";
 		GtkBox *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-		gtk_box_pack_end(vbox, hbox, TRUE, TRUE, 0);
+		GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+		const gchar *text = "|_\n|_";
+		gtk_text_buffer_set_text (tb,text,strlen(text));
+		GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
+		gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
+		for(int i=0; i<15;i++)
+		{
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
+		}
+
+		//gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(button), TRUE, TRUE, 0);
+		gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
+
+		//GObject* window=gtk_builder_get_object(builder, "MainWindow");
+		gtk_widget_show_all(GTK_WIDGET(vbox));
 		
-	}
-	for(GList* elem = node->children; elem; elem = elem->next) {
+		
+	}*/
+	
+	
+	
+	/*GList* elem = node->children;
+	for(elem = list; elem!=NULL; elem = elem->next) {
+		printf("loop\n");
   		tnode* item = elem->data;
   		show_state(item);
-	}
+		printf("end loop iteration\n");
+	}*/
+	
 }
-
+/*
 void print_notation(const gchar *text) {
 	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
 	//GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
@@ -223,4 +405,4 @@ void print_notation(const gchar *text) {
 	gtk_text_buffer_get_end_iter(tb, &end_iter);
 	gtk_text_buffer_insert(tb, &end_iter, text, strlen(text));
 	gtk_text_view_set_buffer(textArea, tb);
-}
+}*/
