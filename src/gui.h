@@ -27,6 +27,8 @@ void flip_board(GtkButton*, gpointer);
 
 void new_game(GtkButton*, gpointer);
 
+void select_state(GtkButton*, gpointer);
+
 void toggle_engine(GtkButton*, gpointer);
 void show_state(tnode*,int);
 

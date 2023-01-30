@@ -172,6 +172,11 @@ void new_game(GtkButton* button, gpointer Board)
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
+void select_state(GtkButton* button, gpointer node) {
+	state = *(((tnode*)node)->field);
+	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+}
+
 gboolean parse_engine_response(GObject* stream, gpointer data)
 {
 	gssize nread;
@@ -218,17 +223,6 @@ void toggle_engine(GtkButton* self, gpointer data)
 	}
 }
 
-
-
-/*void show_state_tree(GtkWidget *textArea)
-{
-	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-	const gchar *text = "\ns\ns\ns\ns\ns\ns\ns\ns\ns\ns";
-	gtk_text_buffer_set_text (tb,text,strlen(text));
-	gtk_text_view_set_buffer(textArea, tb);
-	return;
-}*/
-
 void show_state(tnode* node, int level) 
 {
 	if (node==NULL)
@@ -262,6 +256,7 @@ void show_state(tnode* node, int level)
 			char* label = get_label(node);
 
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
 			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
 			
 			if(g_list_length(node->children)!=NULL)
@@ -394,14 +389,3 @@ void show_state(tnode* node, int level)
 		printf("end loop iteration\n");
 	}*/
 	
-
-/*
-void print_notation(const gchar *text) {
-	GtkWidget *textArea = GTK_WIDGET(gtk_builder_get_object(builder, "Notation"));
-	//GtkTextBuffer * tb = gtk_text_buffer_new (NULL);
-	GtkTextBuffer * tb = gtk_text_view_get_buffer(textArea);
-	GtkTextIter end_iter;
-	gtk_text_buffer_get_end_iter(tb, &end_iter);
-	gtk_text_buffer_insert(tb, &end_iter, text, strlen(text));
-	gtk_text_view_set_buffer(textArea, tb);
-}*/
