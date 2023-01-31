@@ -45,7 +45,8 @@ void destroy_tnodes(tnode* tnode)
         destroy_tnodes(g_list_nth(tnode->children,i)->data);
     }
     free(tnode->field);
-    free(tnode->graphics);
+    free(tnode->hbox);
+    free(tnode->vbox);
     free(tnode->last_move_notation);
     g_list_free(tnode->children);
     free(tnode);

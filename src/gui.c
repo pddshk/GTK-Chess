@@ -30,7 +30,6 @@ char* concat(char *s1, char *s2) {
         return result;
 }
 
-
 char* get_sign(int number)
 {
 	char* st = (char*)malloc(sizeof(char)*(number+2));
@@ -276,15 +275,16 @@ void show_state(tnode* node, int level)
 	switch(level){
 		case 0:
 		{
+			//printf("0\n");
 			GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
 			
 			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
-			for(l; l!=NULL;l=l->next)
+			for(; l!=NULL;l=l->next)
 			{
 				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 			}
-			(*node).graphics = vbox; 
-			if(g_list_length(node->children)!=NULL)
+			(*node).vbox = vbox; 
+			if(g_list_length(node->children)!=0)
 			{
 				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
 				{
@@ -296,9 +296,10 @@ void show_state(tnode* node, int level)
 		}
 		case 1:
 		{
+			//printf("1\n");
 			tnode* parent = node->parent;
-			GtkBox *vbox=parent->graphics;
-			(*node).graphics = vbox; 
+			GtkBox *vbox=parent->vbox;
+			(*node).vbox = vbox; 
 			char* label = get_label(node);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			if (node == tree->current) {
@@ -308,11 +309,11 @@ void show_state(tnode* node, int level)
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
 			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
 			
-			if(g_list_length(node->children)!=NULL)
+			if(g_list_length(node->children)!=0)
 			{
 				//вывод элемента и далее вывод первого дочернего элемента
 				
-				
+				tnode* first_item;
 				int j=0;
 				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
 				{
@@ -320,40 +321,84 @@ void show_state(tnode* node, int level)
 					if(j==0)
 					{
 						j=1;
-						show_state(item,1);
+						first_item = item;
+						//show_state(item,1);
 						continue;
 					}
 					level++;
 					show_state(item,level);
 				}
+				show_state(first_item,1);
 			}
 			gtk_widget_show_all(GTK_WIDGET(vbox));
 			break;
 		}
 		default:
 		{
-			//add button in parent hbox
-			if(g_list_length(node->children)!=NULL)
+
+			tnode* parent = node->parent;
+			GtkBox *vbox=parent->vbox;
+			(*node).vbox = vbox;
+			GtkBox *hbox;
+
+			char* label=get_label(node);
+			
+			if(GTK_IS_CONTAINER(node->hbox))
 			{
-				
-				
+				hbox = (*node).hbox; 
+				//label = get_label(node);}
+			}
+			else
+			{
+				hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+				(*node).hbox = hbox;
+				gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
+				//label=get_sign_label(node,level);
+			 //sprintf(label,"%s %s", get_label(node), get_sign(level));
+			 	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+				char *text = get_sign(level);
+				gtk_text_buffer_set_text (tb,text,strlen(text));
+				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
+				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
+			}
+
+			
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+
+			
+			//printf("button creation\n");
+			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
+			if (node == tree->current) 
+			{
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
+				gtk_style_context_add_class(context,"selected");
+			}
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			//printf("button fail&\n");
+			if(g_list_length(node->children)!=0)
+			{
+				tnode* first_item;
+				int t_level = level ;
 				int j=0;
 				for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
 				{
-					//printf("loop\n");
+					tnode* item = elem->data;
 					if(j==0)
 					{
 						j=1;
-						
-						
+						item->hbox=hbox;
+						first_item=item;
 						continue;
 					}
-					tnode* item = elem->data;
 					level++;
 					show_state(item,level);
-					//printf("end loop iteration\n");
+					
 				}
+				
+				show_state(first_item,t_level);
 			}
+			//printf("first level default\n");
+			gtk_widget_show_all(GTK_WIDGET(vbox));
 			break;
 		}
 	}

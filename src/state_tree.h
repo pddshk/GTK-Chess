@@ -13,7 +13,8 @@ typedef struct
   game_state* field;      // поле данных
   struct tnode* parent;  // родитель
   GList* children;
-  GtkBox* graphics;
+  GtkBox* vbox;
+  GtkBox* hbox;
   char* last_move_notation;
 } tnode;
 
