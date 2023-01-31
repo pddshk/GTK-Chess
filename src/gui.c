@@ -74,6 +74,13 @@ void init_elements(char* textures)
 	//
 	init_textures();
 	load_textures(textures);
+	/////////////
+	void* provider = gtk_css_provider_new();
+	void* display = gdk_display_get_default();
+	void* screen = gdk_display_get_default_screen (display);
+	gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider),"./src/selected.css",NULL);
+	/////////////
 	builder=gtk_builder_new_from_file("src/window.glade");
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
@@ -174,7 +181,9 @@ void new_game(GtkButton* button, gpointer Board)
 
 void select_state(GtkButton* button, gpointer node) {
 	state = *(((tnode*)node)->field);
+	(*tree).current = (tnode*)node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+	show_state(tree->root, 0);
 }
 
 gboolean parse_engine_response(GObject* stream, gpointer data)
@@ -254,8 +263,14 @@ void show_state(tnode* node, int level)
 			GtkBox *vbox=parent->graphics;
 			(*node).graphics = vbox; 
 			char* label = get_label(node);
-
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			if (node == tree->current) {
+				GtkStyleContext *context = gtk_widget_get_style_context(button);
+				gtk_style_context_add_class(context,"selected");
+				//GdkColor color;
+				//gdk_color_parse ("red", &color);
+				//gtk_widget_modify_bg ( GTK_WIDGET(button), GTK_STATE_NORMAL, &color);
+			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
 			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
 			
