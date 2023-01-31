@@ -12,7 +12,6 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-
 char* concat(char *s1, char *s2) {
 
         size_t len1 = strlen(s1);
@@ -179,6 +178,44 @@ void new_game(GtkButton* button, gpointer Board)
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
+void get_FEN (GtkWidget *widget, gint response_id, gpointer data)
+{
+    GtkEntry* entry = data;
+    FEN_to_state(gtk_entry_get_text(entry));
+	tree = init_tree(&state);
+	show_state(tree->root, 0);
+    gtk_widget_destroy (widget); // This will close the dialog
+	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+}
+
+void paste_FEN(GtkButton* main_window_button, gpointer data) {
+    GtkWidget *window = gtk_builder_get_object(builder, "MainWindow");
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *label;
+    GtkWidget *button;
+    static GtkEntry *textbox;
+
+    dialog = gtk_dialog_new_with_buttons ("Get Text",
+                                          window,
+                                          GTK_DIALOG_MODAL,
+                                          GTK_STOCK_OK,
+                                          GTK_RESPONSE_OK,
+                                          NULL);
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    grid = gtk_grid_new();
+    gtk_container_add (GTK_CONTAINER (content_area), grid);
+
+    label = gtk_label_new("Paste FEN: ");
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+    textbox = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), textbox, 1, 0, 1, 1);
+
+    gtk_widget_show_all (dialog);
+    g_signal_connect (GTK_DIALOG (dialog), "response", G_CALLBACK (get_FEN), textbox);
+}
+
 void select_state(GtkButton* button, gpointer node) {
 	state = *(((tnode*)node)->field);
 	(*tree).current = (tnode*)node;
@@ -267,9 +304,6 @@ void show_state(tnode* node, int level)
 			if (node == tree->current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(button);
 				gtk_style_context_add_class(context,"selected");
-				//GdkColor color;
-				//gdk_color_parse ("red", &color);
-				//gtk_widget_modify_bg ( GTK_WIDGET(button), GTK_STATE_NORMAL, &color);
 			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
 			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
@@ -403,4 +437,3 @@ void show_state(tnode* node, int level)
   		show_state(item);
 		printf("end loop iteration\n");
 	}*/
-	

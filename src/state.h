@@ -64,5 +64,6 @@ int fifty_moves_exceeded(game_state*);
 int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
+void FEN_to_state(char*);
 
 #endif

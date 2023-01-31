@@ -26,6 +26,7 @@ void init_elements(char*);
 void flip_board(GtkButton*, gpointer);
 
 void new_game(GtkButton*, gpointer);
+void paste_FEN(GtkButton*, gpointer);
 
 void select_state(GtkButton*, gpointer);
 

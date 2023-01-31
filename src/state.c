@@ -378,3 +378,58 @@ void print_state(game_state* state)
         printf("\n");
     }
 }
+
+void FEN_to_state(char* fen) {
+    char delim[] = " ";
+    game_state newstate;
+    char* placement = strtok(fen, delim);
+    char field_ptr = 0;
+    for(int i = 0; i < strlen(placement); field_ptr++) {
+        if (placement[i] < '0' || placement[i] > '9') {
+            if (placement[i] == '/') {
+                newstate.field[field_ptr / 9][field_ptr % 9] = '\0';
+            }
+            else {
+                newstate.field[field_ptr / 9][field_ptr % 9] = placement[i];
+            }
+            i++;
+        }
+        else {
+            placement[i]--;
+            newstate.field[field_ptr / 9][field_ptr % 9] = '-';
+            if (placement[i] == '0') i++;
+        }
+    }
+    char* color = strtok(NULL, delim);
+    if (color[0] == 'w') {
+        newstate.side_to_move = 1;
+    }
+    else {
+        newstate.side_to_move = 0;
+    }
+    char* castling = strtok(NULL, delim);
+    for(int i = 0; i < strlen(castling); i++) {
+        if (castling[i] == 'K') {
+            newstate.castlings[1] = 1;
+        }
+        if (castling[i] == 'Q') {
+            newstate.castlings[0] = 1;
+        }
+        if (castling[i] == 'k') {
+            newstate.castlings[3] = 1;
+        }
+        if (castling[i] == 'Q') {
+            newstate.castlings[2] = 1;
+        }
+    }
+    char* enpassant = strtok(NULL, delim);
+    if (enpassant[0] != '-') {
+        newstate.enpassant_col = enpassant[0] - 'a';
+        newstate.enpassant_row = enpassant[1] - '0';
+    }
+    char* fiftymoves = strtok(NULL, delim);
+    sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
+    char* fullmove = strtok(NULL, delim);
+    sscanf(fullmove, "%d", &newstate.move_counter);
+    state = newstate;
+}
