@@ -6,7 +6,9 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
 
   aboba->children =  NULL;
   aboba->last_move_notation = last_move;
-  
+  aboba->hbox = NULL;
+  aboba->vbox = NULL;
+
   if(_parent!= NULL)
   {
     aboba->parent = (struct tnode*)_parent;
@@ -18,16 +20,14 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
 
 state_tree* init_tree(game_state* state)
 {
-  /*if(aboba!= NULL)
-  {
-    destroy_tree(aboba);
-  }*/
     state_tree* tree =  (state_tree*)malloc(48); 
     tnode* abobik = (tnode*)malloc(48);
     abobik->field = state;
     abobik->parent=NULL;
     abobik->children = NULL;
     abobik->last_move_notation = "beg";
+    abobik->hbox = NULL;
+    abobik->vbox = NULL;
     tree->root = abobik;
     tree->current = abobik;
     return tree;
