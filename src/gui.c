@@ -12,34 +12,18 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-char* concat(char *s1, char *s2) {
 
-        size_t len1 = strlen(s1);
-        size_t len2 = strlen(s2);                      
-
-        char *result = malloc(len1 + len2 + 1);
-
-        if (!result) {
-            fprintf(stderr, "malloc() failed: insufficient memory!\n");
-            return NULL;
-        }
-
-        memcpy(result, s1, len1);
-        memcpy(result + len1, s2, len2 + 1);    
-
-        return result;
-}
-
-char* get_sign(int number)
+gchar* get_sign(int number)
 {
-	char* st = (char*)malloc(sizeof(char)*(number+2));
-	char* basic = "|_";
-	char* space = "_";
+	number--;
+	gchar* st = (gchar*)malloc(sizeof(gchar)*number*29);
+
 	for(int i=0; i<number;i++)
 	{
-		concat(st,space);
+		for(int j=(i)*10; j<(i+1)*29;j++)
+		st[j]= ' ';
 	}
-	concat(st, basic);
+	
 	return st;
 
 }
@@ -47,7 +31,7 @@ char* get_sign(int number)
 
 char* get_label( tnode* node)
 {
-	char* label = malloc(sizeof(char)* 16);
+	char* label = malloc(sizeof(char)* 10);
 	int actual_move = node->field->move_counter;
 	if (node->field->side_to_move != 0) actual_move--;
 	if (node->field->side_to_move) 
@@ -56,7 +40,7 @@ char* get_label( tnode* node)
 	}
 	else 
 	{
-		sprintf(label, "%d. %s\n", actual_move, node->last_move_notation);
+		sprintf(label, "%d.   %s  \n", actual_move, node->last_move_notation);
 	}
 	return label;
 
@@ -298,7 +282,7 @@ void show_state(tnode* node, int level)
 			char* label = get_label(node);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			if (node == tree->current) {
-				GtkStyleContext *context = gtk_widget_get_style_context(button);
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
@@ -336,23 +320,35 @@ void show_state(tnode* node, int level)
 		}
 		default:
 		{
-			tnode* parent = node->parent;
+			tnode* parent = (tnode*)node->parent;
 			//vbox = node->vbox;
 			GtkBox* subtreebox = node->vbox;
-			GtkBox *hbox;
+			GtkBox *hbox=NULL;
 			char* label=get_label(node);
 			//hbox is NOT set here
 			//PLEASE MOVE THE |_ THING TO SOME OTHER PLACE
-			if((node->hbox) != NULL)
+			if((*node).hbox_status != 0)
 			{
 				hbox = node->hbox; 
 			}
 			else	//else we create it and draw the |_ thing (this can only be if node is NOT the first child)
 			{
+				hbox = node->hbox;
+				GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+				//gchar* text = get_sign(level);
+				gchar *text =  get_sign(level); 
+				//g_convert(text, sizeof(text),NULL, "UTF-8",NULL, NULL, NULL);
+				//printf("%d\n",sizeof(text)/sizeof(text[0]));
+				//printf("%s %d\n", text, sizeof(gchar)*level*10);
+				gtk_text_buffer_set_text (tb,text,sizeof(gchar)*(level-1)*29);
+
+				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
+				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
+				free(text);
 				//the |_ thing is temporary disabled
 				/*
 			 	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-				char *text = get_sign(level);
+				const char *text = get_sign(level);
 				gtk_text_buffer_set_text (tb,text,strlen(text));
 				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
@@ -383,6 +379,7 @@ void show_state(tnode* node, int level)
 					if(j==0)
 					{
 						j=1;
+						(*item).hbox_status=1;
 						(*item).hbox=hbox;
 						first_item=item;
 						continue;

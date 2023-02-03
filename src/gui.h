@@ -17,10 +17,10 @@ extern GSource *from_engine_manager_source;
 
 char* concat(char *s1, char *s2);
 
-char* get_sign(int number);
+gchar* get_sign(int number);
 
 char* get_label( tnode* node);
-char* get_sign_label(tnode* node, int level);
+
 void init_elements(char*);
 
 void flip_board(GtkButton*, gpointer);
