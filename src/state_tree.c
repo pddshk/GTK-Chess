@@ -27,6 +27,8 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
 
         return item;
       }
+      free(label_1);
+      free(label_2);
     }
     
     _parent->children =g_list_append(_parent->children, aboba);
