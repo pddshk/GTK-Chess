@@ -29,7 +29,7 @@ gchar* get_sign(int number)
 }
 
 
-char* get_label( tnode* node)
+/*char* get_label( tnode* node)
 {
 	char* label = malloc(sizeof(char)* 10);
 	int actual_move = node->field->move_counter;
@@ -44,7 +44,7 @@ char* get_label( tnode* node)
 	}
 	return label;
 
-}
+}*/
 
 void init_elements(char* textures)
 {
@@ -307,11 +307,11 @@ void show_state(tnode* node, int level)
 						first_item = item;
 						continue;
 					}
-					level++;
+					//level++;
 					(*item).vbox = subtreebox;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
-					show_state(item,level);
+					show_state(item,2);
 				}
 				show_state(first_item,1);
 			}
@@ -365,7 +365,8 @@ void show_state(tnode* node, int level)
 				gtk_style_context_add_class(context,"selected");
 			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
-
+			
+			free(label);
 			//going through children
 			if(g_list_length(node->children)!=0)
 			{

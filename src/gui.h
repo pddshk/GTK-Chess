@@ -19,7 +19,7 @@ char* concat(char *s1, char *s2);
 
 gchar* get_sign(int number);
 
-char* get_label( tnode* node);
+//char* get_label( tnode* node);
 
 void init_elements(char*);
 
