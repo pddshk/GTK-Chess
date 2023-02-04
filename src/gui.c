@@ -155,6 +155,7 @@ void new_game(GtkButton* button, gpointer Board)
 	int flipped = state.flipped;
 	init_state(&state);
 	//
+	destroy_tree(tree);
 	tree = init_tree(&state);
 	//
 	state.flipped = flipped;
@@ -267,13 +268,16 @@ void show_state(tnode* node, int level)
 			{
 				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 			}
+			g_list_free(l);
 			if(g_list_length(node->children)!=0)
 			{
-				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+				GList* elem = node->children;
+				for(; elem!=NULL; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					show_state(item,1);
 				}
+				g_list_free(elem);
 			}
 			break;
 		}
@@ -282,6 +286,7 @@ void show_state(tnode* node, int level)
 			//printf("1\n");
 			char* label = get_label(node);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			free(label);
 			if (node == tree->current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
@@ -299,7 +304,8 @@ void show_state(tnode* node, int level)
 			{
 				tnode* first_item;
 				int j=0;
-				for(GList* elem = node->children; elem!=NULL; elem = elem->next) 
+				GList* elem = node->children;
+				for(; elem!=NULL; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					if(j==0)
@@ -314,6 +320,7 @@ void show_state(tnode* node, int level)
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
 					show_state(item,2);
 				}
+				g_list_free(elem);
 				show_state(first_item,1);
 			}
 			gtk_widget_show_all(GTK_WIDGET(vbox));
@@ -375,7 +382,8 @@ void show_state(tnode* node, int level)
 				int t_level = level ;
 				level++;
 				int j=0;
-				for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
+				GList* elem = node->children ;
+				for(; elem!=NULL; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					(*item).vbox = subtreebox;
@@ -393,7 +401,7 @@ void show_state(tnode* node, int level)
 					show_state(item,level);
 					
 				}
-				
+				g_list_free(elem);
 				show_state(first_item,t_level);
 			}
 			//printf("first level default\n");

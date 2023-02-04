@@ -13,15 +13,22 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
   if(_parent!= NULL)
   {
     aboba->parent = (struct tnode*)_parent;
-    
-    for(GList* elem = _parent->children; elem!=NULL; elem = elem->next) 
+    GList* elem = _parent->children;
+    for( ; elem!=NULL; elem = elem->next) 
 		{
       tnode* item = elem->data;
-      if(strcmp(get_label(item),get_label(aboba))==0)//compare game state
+      char* label_1 = get_label(item);
+      char* label_2 = get_label(aboba);
+      if(strcmp(label_1,label_2)==0)//compare game state
       {
+        free(label_1);
+        free(label_2);
+       
+
         return item;
       }
     }
+    
     _parent->children =g_list_append(_parent->children, aboba);
   }
   return aboba;
@@ -46,21 +53,29 @@ state_tree* init_tree(game_state* state)
 }
 void destroy_tree(state_tree* aboba)
 {
-  //free(aboba);
   destroy_tnodes(aboba->root);
+  free(aboba);
 }
-void destroy_tnodes(tnode* tnode)
+void destroy_tnodes(tnode* node)
 {
-    for(int i=0; i<(g_list_length (tnode->children));i++)
-    {
-        destroy_tnodes(g_list_nth(tnode->children,i)->data);
+  if(g_list_length(node->children)!=0)
+	{
+    GList* elem = node->children;
+		for(; elem!=NULL; elem = elem->next) 
+		{
+      tnode* item = elem->data;
+      destroy_tnodes(item);
     }
-    free(tnode->field);
-    free(tnode->hbox);
-    free(tnode->vbox);
-    free(tnode->last_move_notation);
-    g_list_free(tnode->children);
-    free(tnode);
+     
+  }
+  
+  //free(node->field);
+  //free(node->hbox);
+  //free(node->vbox);
+  //free(node->last_move_notation);
+  
+  free(node);
+  return;
 }
 
 char* get_label( tnode* node)
