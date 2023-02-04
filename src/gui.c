@@ -159,6 +159,7 @@ void new_game(GtkButton* button, gpointer Board)
 	//
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
+	show_state(tree->root,0);
 }
 
 void get_FEN (GtkWidget *widget, gint response_id, gpointer data)
@@ -372,6 +373,7 @@ void show_state(tnode* node, int level)
 			{
 				tnode* first_item;
 				int t_level = level ;
+				level++;
 				int j=0;
 				for(GList* elem = node->children ; elem!=NULL; elem = elem->next) 
 				{
@@ -388,7 +390,7 @@ void show_state(tnode* node, int level)
 					//level++;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
-					show_state(item,level+1);
+					show_state(item,level);
 					
 				}
 				
