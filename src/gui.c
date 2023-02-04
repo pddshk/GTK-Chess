@@ -385,10 +385,10 @@ void show_state(tnode* node, int level)
 						first_item=item;
 						continue;
 					}
-					level++;
+					//level++;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
-					show_state(item,level);
+					show_state(item,level+1);
 					
 				}
 				
