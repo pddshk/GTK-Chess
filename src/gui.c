@@ -15,7 +15,7 @@ enum _EngineState{
 
 gchar* get_sign(int number)
 {
-	//number--;
+	number--;
 	//printf("%d/n", number);
 	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*33 + 1));
 	for(int i = 0; i< number * 33;i++) {
@@ -298,8 +298,13 @@ void show_state(tnode* node, int level)
 					(*item).indent++;
 					(*item).vbox = subtreebox;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
-					//gtk_box_set_homogeneous((*item).hbox, TRUE);
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
+					//reordering
+					GValue targetIndex = G_VALUE_INIT;
+					g_value_init (&targetIndex, G_TYPE_INT);
+					gtk_container_child_get_property(subtreebox,GTK_WIDGET(node->hbox),"position",&targetIndex);
+					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
+					//
 					show_state(item,2);
 				}
 				g_list_free(elem);
@@ -314,17 +319,14 @@ void show_state(tnode* node, int level)
 			GtkBox* subtreebox = node->vbox;
 			GtkBox *hbox=node->hbox;
 			char* label=get_label(node);
-
 			if((*node).hbox_status == 0)
 			{
-				//gtk_box_set_homogeneous(hbox, TRUE);
-				GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
 				gchar *text =  get_sign(node->indent); 
 				gtk_text_buffer_set_text (tb,text,strlen(text));
-
 				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
-				free(text);
+				free(text); 
 			}
 
 			//button creation
@@ -362,6 +364,13 @@ void show_state(tnode* node, int level)
 					}
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
+					//reordering
+					GValue targetIndex = G_VALUE_INIT;
+					g_value_init (&targetIndex, G_TYPE_INT);
+					gtk_container_child_get_property(subtreebox,GTK_WIDGET(node->hbox),"position",&targetIndex);
+					puts("afsd");
+					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
+					//
 					show_state(item,level);
 					
 				}
