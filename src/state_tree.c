@@ -8,8 +8,9 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
   aboba->children =  NULL;
   aboba->last_move_notation = last_move;
   aboba->hbox = NULL;
-  aboba->vbox = NULL;
+ aboba->vbox = NULL;
  (*aboba).hbox_status=0;
+ (*aboba).indent=0;
   if(_parent!= NULL)
   {
     aboba->parent = (struct tnode*)_parent;
@@ -46,6 +47,7 @@ state_tree* init_tree(game_state* state)
     abobik->children = NULL;
     abobik->last_move_notation = "beg";
     (*abobik).hbox_status=0;
+    (*abobik).indent=0;
     abobik->hbox = NULL;
     abobik->vbox = NULL;
     tree->root = abobik;

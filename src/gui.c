@@ -15,36 +15,16 @@ enum _EngineState{
 
 gchar* get_sign(int number)
 {
-	number--;
-	gchar* st = (gchar*)malloc(sizeof(gchar)*number*29);
-
-	for(int i=0; i<number;i++)
-	{
-		for(int j=(i)*10; j<(i+1)*29;j++)
-		st[j]= ' ';
+	//number--;
+	//printf("%d/n", number);
+	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*33 + 1));
+	for(int i = 0; i< number * 33;i++) {
+		st[i] = ' ';
 	}
-	
+	st[number * 33] = '\0';
 	return st;
 
 }
-
-
-/*char* get_label( tnode* node)
-{
-	char* label = malloc(sizeof(char)* 10);
-	int actual_move = node->field->move_counter;
-	if (node->field->side_to_move != 0) actual_move--;
-	if (node->field->side_to_move) 
-	{
-		sprintf(label, "%d... %s\n", actual_move, node->last_move_notation);
-	}
-	else 
-	{
-		sprintf(label, "%d.   %s  \n", actual_move, node->last_move_notation);
-	}
-	return label;
-
-}*/
 
 void init_elements(char* textures)
 {
@@ -308,15 +288,17 @@ void show_state(tnode* node, int level)
 				for(; elem!=NULL; elem = elem->next) 
 				{
 					tnode* item = elem->data;
+					(*item).indent = node->indent; 
 					if(j==0)
 					{
 						j=1;
 						first_item = item;
 						continue;
 					}
-					//level++;
+					(*item).indent++;
 					(*item).vbox = subtreebox;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					//gtk_box_set_homogeneous((*item).hbox, TRUE);
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
 					show_state(item,2);
 				}
@@ -329,43 +311,25 @@ void show_state(tnode* node, int level)
 		default:
 		{
 			tnode* parent = (tnode*)node->parent;
-			//vbox = node->vbox;
 			GtkBox* subtreebox = node->vbox;
-			GtkBox *hbox=NULL;
+			GtkBox *hbox=node->hbox;
 			char* label=get_label(node);
-			//hbox is NOT set here
-			//PLEASE MOVE THE |_ THING TO SOME OTHER PLACE
-			if((*node).hbox_status != 0)
+
+			if((*node).hbox_status == 0)
 			{
-				hbox = node->hbox; 
-			}
-			else	//else we create it and draw the |_ thing (this can only be if node is NOT the first child)
-			{
-				hbox = node->hbox;
+				//gtk_box_set_homogeneous(hbox, TRUE);
 				GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-				//gchar* text = get_sign(level);
-				gchar *text =  get_sign(level); 
-				//g_convert(text, sizeof(text),NULL, "UTF-8",NULL, NULL, NULL);
-				//printf("%d\n",sizeof(text)/sizeof(text[0]));
-				//printf("%s %d\n", text, sizeof(gchar)*level*10);
-				gtk_text_buffer_set_text (tb,text,sizeof(gchar)*(level-1)*29);
+				gchar *text =  get_sign(node->indent); 
+				gtk_text_buffer_set_text (tb,text,strlen(text));
 
 				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
 				free(text);
-				//the |_ thing is temporary disabled
-				/*
-			 	GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-				const char *text = get_sign(level);
-				gtk_text_buffer_set_text (tb,text,strlen(text));
-				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
-				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
-				*/
 			}
-			//END OF OUTDATED PART 
 
 			//button creation
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			gtk_widget_set_size_request(GTK_WIDGET(button), 100, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
 			if (node == tree->current) 
 			{
@@ -387,6 +351,7 @@ void show_state(tnode* node, int level)
 				{
 					tnode* item = elem->data;
 					(*item).vbox = subtreebox;
+					(*item).indent = (node->indent) + 1; 
 					if(j==0)
 					{
 						j=1;
@@ -395,7 +360,6 @@ void show_state(tnode* node, int level)
 						first_item=item;
 						continue;
 					}
-					//level++;
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
 					show_state(item,level);

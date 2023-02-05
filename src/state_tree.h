@@ -14,6 +14,7 @@ typedef struct
   struct tnode* parent;  // родитель
   GList* children;
   int hbox_status;
+  int indent;
   GtkBox* hbox;
   GtkBox* vbox;
   char* last_move_notation;
