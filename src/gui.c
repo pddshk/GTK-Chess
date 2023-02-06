@@ -297,13 +297,15 @@ void show_state(tnode* node, int level)
 					}
 					(*item).indent++;
 					(*item).vbox = subtreebox;
-					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
-					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
+					GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					(*item).hbox = subtreehbox;
+					
+					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(subtreehbox));
 					//reordering
 					GValue targetIndex = G_VALUE_INIT;
 					g_value_init (&targetIndex, G_TYPE_INT);
-					gtk_container_child_get_property(subtreebox,GTK_WIDGET(node->hbox),"position",&targetIndex);
-					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
+					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(subtreehbox),"position",&targetIndex);
+					gtk_box_reorder_child (GTK_BOX(subtreebox),GTK_WIDGET(subtreehbox),g_value_get_int(&targetIndex) + 1);
 					//
 					show_state(item,2);
 				}
@@ -324,7 +326,7 @@ void show_state(tnode* node, int level)
 	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
 				gchar *text =  get_sign(node->indent); 
 				gtk_text_buffer_set_text (tb,text,strlen(text));
-				GtkEntry *textArea = gtk_text_view_new_with_buffer(tb);
+				GtkEntry *textArea = (gtk_text_view_new_with_buffer(tb));
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
 				free(text); 
 			}
@@ -367,8 +369,8 @@ void show_state(tnode* node, int level)
 					//reordering
 					GValue targetIndex = G_VALUE_INIT;
 					g_value_init (&targetIndex, G_TYPE_INT);
-					gtk_container_child_get_property(subtreebox,GTK_WIDGET(node->hbox),"position",&targetIndex);
-					puts("afsd");
+					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(node->hbox),"position",&targetIndex);
+					//puts("afsd");
 					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
 					//
 					show_state(item,level);
