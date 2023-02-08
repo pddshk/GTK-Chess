@@ -9,6 +9,7 @@
 extern game_state state;
 //
 extern GtkBuilder* builder;
+extern GtkBox*  vbox;
 extern state_tree *tree;
 //
 extern GOutputStream *to_engine_manager;

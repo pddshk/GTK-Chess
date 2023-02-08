@@ -59,6 +59,7 @@ void destroy_tree(state_tree* aboba)
 {
   destroy_tnodes(aboba->root);
   free(aboba);
+  //puts("tree destroyed\n");
 }
 void destroy_tnodes(tnode* node)
 {
@@ -70,6 +71,7 @@ void destroy_tnodes(tnode* node)
       tnode* item = elem->data;
       destroy_tnodes(item);
     }
+    g_list_free(elem);
      
   }
   

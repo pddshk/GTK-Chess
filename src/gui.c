@@ -26,6 +26,13 @@ gchar* get_sign(int number)
 
 }
 
+void quit_app()
+{
+	destroy_tree(tree);
+	gtk_main_quit();
+	
+}
+
 void init_elements(char* textures)
 {
 	engine_state = ENGINE_IDLE; 
@@ -44,6 +51,7 @@ void init_elements(char* textures)
 	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider),"./src/selected.css",NULL);
 	/////////////
 	builder=gtk_builder_new_from_file("src/window.glade");
+	vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
 	GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));//220
@@ -121,7 +129,7 @@ void init_elements(char* textures)
 	);
 
 	gtk_widget_show(GTK_WIDGET(window));
-	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(window, "destroy", G_CALLBACK(quit_app), NULL);
 }
 
 void flip_board(GtkButton* button, gpointer Board)
@@ -238,7 +246,7 @@ void show_state(tnode* node, int level)
 {
 	if (node==NULL)
 	return;
-	GtkBox *vbox=GTK_BOX(gtk_builder_get_object(builder, "Notation"));
+	
 	switch(level){
 		case 0:
 		{

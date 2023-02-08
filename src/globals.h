@@ -9,6 +9,7 @@ game_state state;
 GOutputStream *to_engine_manager;
 //my var
 GtkBuilder* builder;
+GtkBox* vbox;
 state_tree*tree;
 // GInputStream *from_engine_manager;
 GSource *from_engine_manager_source;
