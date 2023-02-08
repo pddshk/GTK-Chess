@@ -93,7 +93,7 @@ char* get_label( tnode* node)
 	}
 	else 
 	{
-		sprintf(label, "%d.   %s  \n", actual_move, node->last_move_notation);
+		sprintf(label, "%d. %s  \n", actual_move, node->last_move_notation);
 	}
 	return label;
 

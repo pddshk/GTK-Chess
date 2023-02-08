@@ -17,11 +17,11 @@ gchar* get_sign(int number)
 {
 	number--;
 	//printf("%d/n", number);
-	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*33 + 1));
-	for(int i = 0; i< number * 33;i++) {
+	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*40 + 1));
+	for(int i = 0; i< number * 40;i++) {
 		st[i] = ' ';
 	}
-	st[number * 33] = '\0';
+	st[number * 40] = '\0';
 	return st;
 
 }
@@ -264,6 +264,9 @@ void show_state(tnode* node, int level)
 		case 1:
 		{
 			//printf("1\n");
+
+			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			char* label = get_label(node);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
@@ -272,7 +275,10 @@ void show_state(tnode* node, int level)
 				gtk_style_context_add_class(context,"selected");
 			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
-			gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(button));
+
+			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
+			
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(button));
 			//if there is more than 1 child we create a vbox for them
 			GtkBox* subtreebox = NULL;
 			if (g_list_length(node->children) > 1) {
@@ -298,6 +304,7 @@ void show_state(tnode* node, int level)
 					(*item).indent++;
 					(*item).vbox = subtreebox;
 					GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					//gtk_widget_set_size_request(GTK_WIDGET(subtreehbox), 300, 100);
 					(*item).hbox = subtreehbox;
 					
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(subtreehbox));
@@ -333,7 +340,7 @@ void show_state(tnode* node, int level)
 
 			//button creation
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
-			gtk_widget_set_size_request(GTK_WIDGET(button), 100, 50);
+			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
 			if (node == tree->current) 
 			{
