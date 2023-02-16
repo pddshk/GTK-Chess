@@ -10,6 +10,8 @@ extern game_state state;
 //
 extern GtkBuilder* builder;
 extern GtkBox*  vbox;
+//extern GObject* scrl_window;
+//extern GObject* viewport;
 extern state_tree *tree;
 //
 extern GOutputStream *to_engine_manager;
@@ -28,7 +30,7 @@ void flip_board(GtkButton*, gpointer);
 
 void new_game(GtkButton*, gpointer);
 void paste_FEN(GtkButton*, gpointer);
-
+void paste_PGN(GtkButton*, gpointer);
 void select_state(GtkButton*, gpointer);
 
 void toggle_engine(GtkButton*, gpointer);

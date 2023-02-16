@@ -11,6 +11,8 @@ GOutputStream *to_engine_manager;
 GtkBuilder* builder;
 GtkBox* vbox;
 state_tree*tree;
+//GObject* scrl_window;
+//GObject* viewport;
 // GInputStream *from_engine_manager;
 GSource *from_engine_manager_source;
 int pawn_promotion_row = -1, pawn_promotion_col = -1;
