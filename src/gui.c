@@ -185,7 +185,7 @@ void new_game(GtkButton* button, gpointer Board)
 void get_FEN(GtkButton* button, gpointer data)
 {
 	GtkWidget* widget = GTK_WIDGET(data);
-	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (data));
+	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
 	GtkWidget *grid = children->data;
 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
@@ -224,22 +224,25 @@ void paste_FEN(GtkButton* main_window_button, gpointer data) {
 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
     gtk_widget_show_all(dialog);
-	GList* list = gtk_container_get_children(dialog);
-	int len = g_list_length(list);
-	printf("%d\n",len);
-	/*GList* s_list = gtk_container_get_children(list->data);
-	 len = g_list_length(s_list);
-	printf("%d\n",len);*/
-	//g_signal_connect (list->data, "response", G_CALLBACK (get_FEN), textbox);
+
     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_FEN), dialog);
 }
 
-void get_PGN(GtkWidget *widget, gint response_id, gpointer data)
+void get_PGN(GtkButton* button, gpointer data)
 {
-    GtkEntry* entry = data;
 	//PGN_to_tree(gtk_entry_get_text(entry));
+	//destroy_tree(tree);GtkWidget* widget = GTK_WIDGET(data);
+	GtkWidget* widget = GTK_WIDGET(data);
+	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
+	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
+	GtkWidget *grid = children->data;
+	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
 	//destroy_tree(tree);
+	
+    GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
 	PGN_to_tree(gtk_entry_get_text(entry));
+	//show_state(tree->root, 0);
+    gtk_widget_destroy(widget); 
 	//show_state(tree->root, 0);
     //gtk_widget_destroy (widget); // This will close the dialog
 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
@@ -247,7 +250,7 @@ void get_PGN(GtkWidget *widget, gint response_id, gpointer data)
 
 void paste_PGN(GtkButton* main_window_button, gpointer data) 
 {
-	GtkWidget *window = gtk_builder_get_object(builder, "MainWindow");
+	 GtkWidget *window = gtk_builder_get_object(builder, "MainWindow");
     GtkWidget *dialog;
     GtkWidget *content_area;
     GtkWidget *grid;
@@ -258,10 +261,9 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
     dialog = gtk_dialog_new_with_buttons ("Get Text",
                                           window,
                                           GTK_DIALOG_MODAL,
-                                          GTK_STOCK_OK,
-                                          GTK_RESPONSE_OK,
+										 
                                           NULL);
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
     grid = gtk_grid_new();
     gtk_container_add (GTK_CONTAINER (content_area), grid);
 
@@ -269,9 +271,11 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
     textbox = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), textbox, 1, 0, 1, 1);
+	GtkWidget *okbutton = gtk_button_new_with_label("OK");
+	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
+    gtk_widget_show_all(dialog);
 
-    gtk_widget_show_all (dialog);
-    g_signal_connect (GTK_DIALOG (dialog), "response", G_CALLBACK (get_PGN), textbox);
+    g_signal_connect (okbutton, "clicked", G_CALLBACK (get_PGN), dialog);
 }
 
 void select_state(GtkButton* button, gpointer node) {

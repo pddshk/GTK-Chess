@@ -441,70 +441,46 @@ void PGN_to_tree(char* fen)
     {
        move_strings = strtok(NULL,"\n");
     }
-    move_strings = strtok(NULL,"\0");//string with moves
-    game_state newstate;
+    //string with moves
+       
 
-    printf("%s\n",move_strings);
-    /*while(move_strings != NULL)
+    //move_strings = strtok(NULL," ");
+    //printf("%s first string \n",move_strings);
+    
+    //game_state* state_storage = (game_state*) malloc(sizeof(game_state)); 
+    //tree=init_tree(state_storage);
+    GList* list;
+    int b=0;
+    while (1)
     {
-        printf("%s\n",move_strings);
-        move_strings= strtok(NULL,"\n");
-    }*/
-    //move_strings = strtok(NULL," \n");
-    //printf("324%s\n",move_strings);
+        move_strings = strtok(NULL," \n");
+        if(move_strings==NULL)
+        break;
+        
+        else if(move_strings[0] =='{')
+        {
+            b=1;
+            continue;
+        }
+        else if(b==1)
+        {
+            
+            if(move_strings[strlen(move_strings)-1]=='}')
+            b=0;
+            continue;
+        }
+        char word[8];
+        strcpy(word, move_strings);
+        printf("%s generic string\n",word);
+        
+        g_list_append(list, word);
+        /*char *move = malloc(sizeof(char) * 6);
+        get_move_notation(state_storage, move, from_row, from_col, to_row, to_col, promotion);
     
-    
-    
-    /*char delim[] = " ";
-    game_state newstate;
-    char* placement = strtok(fen, delim);
-    char field_ptr = 0;
-    for(int i = 0; i < strlen(placement); field_ptr++) {
-        if (placement[i] < '0' || placement[i] > '9') {
-            if (placement[i] == '/') {
-                newstate.field[field_ptr / 9][field_ptr % 9] = '\0';
-            }
-            else {
-                newstate.field[field_ptr / 9][field_ptr % 9] = placement[i];
-            }
-            i++;
-        }
-        else {
-            placement[i]--;
-            newstate.field[field_ptr / 9][field_ptr % 9] = '-';
-            if (placement[i] == '0') i++;
-        }
+        
+        
+        (*tree).current =  addnode(state_storage, tree->current, move); 
+        show_state(tree->root,0);*/
+        
     }
-    char* color = strtok(NULL, delim);
-    if (color[0] == 'w') {
-        newstate.side_to_move = 1;
-    }
-    else {
-        newstate.side_to_move = 0;
-    }
-    char* castling = strtok(NULL, delim);
-    for(int i = 0; i < strlen(castling); i++) {
-        if (castling[i] == 'K') {
-            newstate.castlings[1] = 1;
-        }
-        if (castling[i] == 'Q') {
-            newstate.castlings[0] = 1;
-        }
-        if (castling[i] == 'k') {
-            newstate.castlings[3] = 1;
-        }
-        if (castling[i] == 'Q') {
-            newstate.castlings[2] = 1;
-        }
-    }
-    char* enpassant = strtok(NULL, delim);
-    if (enpassant[0] != '-') {
-        newstate.enpassant_col = enpassant[0] - 'a';
-        newstate.enpassant_row = enpassant[1] - '0';
-    }
-    char* fiftymoves = strtok(NULL, delim);
-    sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
-    char* fullmove = strtok(NULL, delim);
-    sscanf(fullmove, "%d", &newstate.move_counter);
-    state = newstate;*/
 }

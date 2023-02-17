@@ -58,6 +58,7 @@ state_tree* init_tree(game_state* state)
 void destroy_tree(state_tree* aboba)
 {
   destroy_tnodes(aboba->root);
+  //free(aboba->root->last_move_notation);
   free(aboba);
   //puts("tree destroyed\n");
 }
@@ -81,7 +82,8 @@ void destroy_tnodes(tnode* node)
   //free(node->last_move_notation);
   
   free(node);
-  return;
+  //free(node->last_move_notation);
+
 }
 
 char* get_label( tnode* node)

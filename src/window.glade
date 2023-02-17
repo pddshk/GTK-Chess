@@ -76,7 +76,7 @@
                 <property name="can-focus">False</property>
                 <child>
                   <object class="GtkButton" id="PasteFEN">
-                    <property name="label" translatable="yes">Paste FEN</property>
+                    <property name="label" translatable="yes">FEN</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -90,7 +90,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="PastePGN">
-                    <property name="label" translatable="yes">Paste PGN</property>
+                    <property name="label" translatable="yes">PGN</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
