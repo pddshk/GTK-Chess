@@ -127,7 +127,8 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     //
     game_state* state_storage = (game_state*) malloc(sizeof(game_state));
     *state_storage = *state;
-    (*tree).current =  addnode(state_storage, tree->current, move); 
+    (*tree).current =  addnode(state_storage, tree->current,  move); 
+    printf("%s\n",move);
     show_state(tree->root,0);
     //
 }
@@ -437,27 +438,26 @@ void FEN_to_state(char* fen) {
 void PGN_to_tree(char* fen) 
 {
     char* move_strings= strtok(fen,"\n");
-    for(int i=0; i<9;i++)
+    /*for(int i=0; i<9;i++)
     {
        move_strings = strtok(NULL,"\n");
-    }
+    }*/
     //string with moves
        
 
     //move_strings = strtok(NULL," ");
     //printf("%s first string \n",move_strings);
     
-    //game_state* state_storage = (game_state*) malloc(sizeof(game_state)); 
-    //tree=init_tree(state_storage);
-    GList* list;
+    
+    GList* list = NULL;
     int b=0;
     while (1)
     {
-        move_strings = strtok(NULL," \n");
+        move_strings = strtok(NULL," \n;");
         if(move_strings==NULL)
         break;
         
-        else if(move_strings[0] =='{')
+        else if((move_strings[0] =='{')||(move_strings[0]=='['))
         {
             b=1;
             continue;
@@ -465,22 +465,55 @@ void PGN_to_tree(char* fen)
         else if(b==1)
         {
             
-            if(move_strings[strlen(move_strings)-1]=='}')
+            if((move_strings[strlen(move_strings)-1]=='}')||(move_strings[strlen(move_strings)-1]==']'))
             b=0;
             continue;
         }
+        //else if(move_strings[0]<=57&&move_strings[0]>=48)
+        //continue;
         char word[8];
         strcpy(word, move_strings);
         printf("%s generic string\n",word);
         
-        g_list_append(list, word);
-        /*char *move = malloc(sizeof(char) * 6);
-        get_move_notation(state_storage, move, from_row, from_col, to_row, to_col, promotion);
-    
-        
-        
-        (*tree).current =  addnode(state_storage, tree->current, move); 
-        show_state(tree->root,0);*/
+        list=g_list_append(list, word);
         
     }
+    int len = g_list_length(list);
+    printf("len %d\n",len);
+    int m=1,k=1;
+    
+    list=list->next;
+    list=list->next;
+    
+    for(int j=0;j<len-3;j++)
+    {   
+        if(k==2)
+        {
+            m++;
+            printf("m=%d\n",m);
+            k=0;
+            continue;
+        }
+        
+        k++;
+
+    }
+    //printf("first: %s\n",list->data);
+    /*tree initializing function
+    game_state* state_storage = (game_state*) malloc(sizeof(game_state)); 
+
+    
+    tree=init_tree(state_storage);
+    */
+
+    /*list=list->next;
+    for(int i=0; i<len-4; i++)
+    {
+        //printf("%s\n",list->data);
+        //regular data add (*tree).current =  addnode(state_storage, tree->current, move); 
+        //list=list->next;
+    }*/
+    //last element is not needed cause it's winrate
+    //show_state(tree->root,0);
+
 }
