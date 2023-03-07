@@ -567,7 +567,7 @@ list=list->next;
 game_state current_state;
 init_state(&current_state);
 
-for(int j=0;j<len-3;j++)
+for(int j=0;j<len-2;j++)
 {   
     
     
@@ -1040,7 +1040,7 @@ for(int j=0;j<len-3;j++)
                 { 
                     
                     to_col=6;
-                    if(k==1)
+                    if(k==2)
                     {
                         to_row = 7; 
                         
@@ -1069,7 +1069,7 @@ for(int j=0;j<len-3;j++)
                 else//queenside
                 {
                     to_col=2;
-                    if(k==1)
+                    if(k==2)
                     {
                         to_row = 7; 
                         
@@ -1181,7 +1181,7 @@ for(int j=0;j<len-3;j++)
     printf("str %d %s\n",j,current_data);
     
 
-    //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0)
+    //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0);
     list=list->next;
 }
 g_list_free(list);
