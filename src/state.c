@@ -566,7 +566,7 @@ int k=0;
 list=list->next;
 game_state current_state;
 init_state(&current_state);
-
+/*
 for(int j=0;j<len-3;j++)
 {   
     
@@ -1158,7 +1158,7 @@ for(int j=0;j<len-3;j++)
 
     //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0)
     
-}
+}*/
 g_list_free(list);
 }
 
