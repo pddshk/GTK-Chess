@@ -521,7 +521,7 @@ while (1)
         
         //printf("com1 %d\n",com1);
         
-        /*for(int r=0;r<com;r++)
+        for(int r=0;r<com;r++)
         {
             temp_memory[r]=move_strings[r];
         }
@@ -529,9 +529,9 @@ while (1)
         strcpy(word, temp_memory);
 
         printf("%s generic string after comment\n",word);
-        list=g_list_append(list, word);*/
+        list=g_list_append(list, word);
         //move_strings =strtok(NULL,"\n");
-/*
+
         
 
         continue;
@@ -561,23 +561,47 @@ free(temp_fen);
 
 int len = g_list_length(list);
 printf("len %d\n",len);
-int k=0;
+int k=1;
 
 list=list->next;
 game_state current_state;
 init_state(&current_state);
-/*
+
 for(int j=0;j<len-3;j++)
 {   
     
-    list=list->next;
+    
     char white_figures[] = {'R','N','B','Q','K','P'};
     char black_figures[] = {'r','n','b','q','k','p'};
     char figures[6];
+    
+    
+    if(k==0)
+    {
+        printf("skip str %d %s\n",j,list->data);
+        list=list->next;
+        k++;
+        continue;
+    }
+    else if(k==1)
+    {
+        printf("normal ");
+
+        sprintf(figures,"%s",white_figures);
+
+    }
+    else
+    {
+        printf("normal ");
+        sprintf(figures,"%s",black_figures);
+        k=-1;
+    }
     k++;
+    /*
     switch(k)
     {
-        case 0:
+        case -1:
+        printf("skip\n");
         continue;
         break;
         case 1:
@@ -588,7 +612,7 @@ for(int j=0;j<len-3;j++)
         k=0;
         break;
 
-    }
+    }*/
     
 
     char* current_data= list->data;
@@ -706,7 +730,7 @@ for(int j=0;j<len-3;j++)
                                 break;
 
                             }
-                            }
+                        }
                     }
                 }
                     
@@ -1155,12 +1179,12 @@ for(int j=0;j<len-3;j++)
 
     
     printf("str %d %s\n",j,current_data);
-  
+    
 
     //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0)
-    
+    list=list->next;
 }
-g_list_free(list);*/
+g_list_free(list);
 }
 
 
