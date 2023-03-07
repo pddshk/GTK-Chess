@@ -492,7 +492,7 @@ char* com;
 
 while (1)
 {
-    char word[8];
+    char* word = (char*)malloc(sizeof(char)*8);
     move_strings = strtok(NULL," \n");
     if(move_strings==NULL)
     break;
@@ -570,7 +570,7 @@ init_state(&current_state);
 for(int j=0;j<len-3;j++)
 {   
     
-
+    list=list->next;
     char white_figures[] = {'R','N','B','Q','K','P'};
     char black_figures[] = {'r','n','b','q','k','p'};
     char figures[6];
@@ -1072,7 +1072,7 @@ for(int j=0;j<len-3;j++)
                 state.fifty_moves_counter++;
 
             }
-            else
+            else//pawn
             {
                 dragged_piece=figures[5];
                 if(strrchr(current_data,'=')!=NULL)
@@ -1154,12 +1154,13 @@ for(int j=0;j<len-3;j++)
         
 
     
-    
+    printf("str %d %s\n",j,current_data);
+  
 
     //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0)
     
-}*/
-g_list_free(list);
+}
+g_list_free(list);*/
 }
 
 
