@@ -8,6 +8,7 @@
 
 extern state_tree* tree;
 
+
 void init_state(game_state* state)
 {
     memcpy(
@@ -28,6 +29,19 @@ int is_active(game_state* state){
     return state->is_active;
 }
 
+void swap(int* mas, int a, int b)
+{
+    int t = mas[a];
+    mas[b]=mas[a];
+    mas[a]=t;
+}
+void min_el(int* mas, int mas_size)
+{
+    for(int i=0;i<mas_size;i++)
+    {
+        mas[i]*=-1;
+    }
+}
 char get_field_by_notation(game_state* state, const char* field)
 {
     int i = field[0] - 'a', j = field[1] - '0';
@@ -105,6 +119,7 @@ void recalc_castlings(game_state* state)
 
 void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
+    printf("%c\n",piece);
     state->side_to_move = !state->side_to_move;
     if (state->side_to_move) {
         state->move_counter++;
@@ -385,7 +400,8 @@ void FEN_to_state(char* fen) {
     game_state newstate;
     char* placement = strtok(fen, delim);
     char field_ptr = 0;
-    for(int i = 0; i < strlen(placement); field_ptr++) {
+    for(int i = 0; i < strlen(placement); field_ptr++) 
+    {
         if (placement[i] < '0' || placement[i] > '9') {
             if (placement[i] == '/') {
                 newstate.field[field_ptr / 9][field_ptr % 9] = '\0';
@@ -435,85 +451,720 @@ void FEN_to_state(char* fen) {
     state = newstate;
 }
 
+
+void removeChar(char *str, char garbage) {
+
+    char *src, *dst;
+    for (src = dst = str; *src != '\0'; src++) {
+        *dst = *src;
+        if (*dst != garbage) dst++;
+    }
+    *dst = '\0';
+}
+
+
 void PGN_to_tree(char* fen) 
 {
-    char* move_strings= strtok(fen,"\n");
-    /*for(int i=0; i<9;i++)
-    {
-       move_strings = strtok(NULL,"\n");
-    }*/
-    //string with moves
-       
 
-    //move_strings = strtok(NULL," ");
-    //printf("%s first string \n",move_strings);
-    
-    
-    GList* list = NULL;
-    int b=0;
-    while (1)
+char* t_com = strchr(fen,';');
+while(t_com!=NULL)
+{
+    int index = (int)(t_com - fen);
+    while(t_com!='\n'||t_com!='\0')
     {
-        move_strings = strtok(NULL," \n;");
-        if(move_strings==NULL)
-        break;
-        
-        else if((move_strings[0] =='{')||(move_strings[0]=='['))
-        {
-            b=1;
-            continue;
-        }
-        else if(b==1)
-        {
-            
-            if((move_strings[strlen(move_strings)-1]=='}')||(move_strings[strlen(move_strings)-1]==']'))
-            b=0;
-            continue;
-        }
-        //else if(move_strings[0]<=57&&move_strings[0]>=48)
-        //continue;
-        char word[8];
-        strcpy(word, move_strings);
-        printf("%s generic string\n",word);
-        
-        list=g_list_append(list, word);
-        
+        t_com++;
+        if(t_com==' ')
+        t_com='_';
     }
-    int len = g_list_length(list);
-    printf("len %d\n",len);
-    int m=1,k=1;
-    
-    list=list->next;
-    list=list->next;
-    
-    for(int j=0;j<len-3;j++)
-    {   
-        if(k==2)
-        {
-            m++;
-            printf("m=%d\n",m);
-            k=0;
-            continue;
-        }
-        
-        k++;
-
-    }
-    //printf("first: %s\n",list->data);
-    /*tree initializing function
-    game_state* state_storage = (game_state*) malloc(sizeof(game_state)); 
-
-    
-    tree=init_tree(state_storage);
-    */
-
-    /*list=list->next;
-    for(int i=0; i<len-4; i++)
-    {
-        //printf("%s\n",list->data);
-        //regular data add (*tree).current =  addnode(state_storage, tree->current, move); 
-        //list=list->next;
-    }*/
-    //last element is not needed cause it's winrate
-    //show_state(tree->root,0);
-
+    t_com=strchr(fen,';');
 }
+char* temp_fen = (char*)malloc((strlen(fen)+4));
+sprintf(temp_fen, "%s%s"," \n",fen);
+
+
+char* move_strings= strtok(temp_fen,"\n");
+
+GList* list = NULL;
+int b=0;
+char* com;
+
+
+
+while (1)
+{
+    char word[8];
+    move_strings = strtok(NULL," \n");
+    if(move_strings==NULL)
+    break;
+
+    /*else if((com =strchr(move_strings, ';')) != NULL)
+    {
+        
+        
+        //printf("com %d\n",com);
+        int index = (int)(com - move_strings);
+        char* temp_memory = (char*)malloc(sizeof(char)*(index));
+        for(int j=0; j<index;j++)
+        {
+            temp_memory[j]=move_strings[j];
+        }
+        temp_memory[index]='\0';
+        strcpy(word, temp_memory);
+        
+        //free(temp_memory);
+        printf("%s generic string after comment\n",word);
+        list=g_list_append(list, word);
+        //if(move_strings[strlen(move_strings)-1]!="\n")
+        //move_strings = strtok(NULL,"\n");
+
+        
+        
+        //printf("com1 %d\n",com1);
+        
+        /*for(int r=0;r<com;r++)
+        {
+            temp_memory[r]=move_strings[r];
+        }
+        //move_strings=strtok(NULL,";");
+        strcpy(word, temp_memory);
+
+        printf("%s generic string after comment\n",word);
+        list=g_list_append(list, word);*/
+        //move_strings =strtok(NULL,"\n");
+/*
+        
+
+        continue;
+        
+    }*/
+    else if((move_strings[0] =='{')||(move_strings[0]=='['))
+    {
+        b=1;
+        continue;
+    }
+    else if(b==1)
+    {
+        
+        if((move_strings[strlen(move_strings)-1]=='}')||(move_strings[strlen(move_strings)-1]==']'))
+        b=0;
+        continue;
+    }
+
+    strcpy(word, move_strings);
+    printf("%s generic string\n",word);
+    
+    list=g_list_append(list, word);
+    
+}
+
+free(temp_fen);
+
+int len = g_list_length(list);
+printf("len %d\n",len);
+int k=0;
+
+list=list->next;
+game_state current_state;
+init_state(&current_state);
+
+for(int j=0;j<len-3;j++)
+{   
+    
+
+    char white_figures[] = {'R','N','B','Q','K','P'};
+    char black_figures[] = {'r','n','b','q','k','p'};
+    char figures[6];
+    k++;
+    switch(k)
+    {
+        case 0:
+        continue;
+        break;
+        case 1:
+        sprintf(figures,"%s",white_figures);
+        break;
+        case 2:
+        sprintf(figures,"%s",black_figures);
+        k=0;
+        break;
+
+    }
+    
+
+    char* current_data= list->data;
+
+
+    char dragged_piece;
+    int from_row=-1, from_col=-1, to_row=-1, to_col=-1;
+
+    int len = strlen(current_data);
+    state.side_to_move=1;
+    char first_letter = current_data[0];
+    if(strchr(figures,first_letter))
+    {
+                
+                if(strrchr(current_data,'x')!=NULL)
+                {
+                    state.fifty_moves_counter=0;
+
+                    to_row = current_data[3]-97;
+                    to_col = current_data[2]-49;
+
+                    if(strlen(current_data)==5)
+                    {
+                        if(current_data[1]<97)
+                        from_row = current_data[1];
+                        else
+                        from_col = current_data[1];
+                        
+
+                        to_row = current_data[4]-97;
+                        to_col = current_data[3]-49;
+                    }
+                }
+                else
+                {
+                    
+                    state.fifty_moves_counter++;
+
+                    to_row = current_data[2]-97;
+                    to_col = current_data[1]-49;
+
+                    if(strlen(current_data)==4)
+                    {
+                        if(current_data[1]<97)
+                        from_row = current_data[1];
+                        else
+                        from_col = current_data[1];
+
+                        to_row = current_data[3]-97;
+                        to_col = current_data[2]-49;
+                    }
+                }
+                dragged_piece=first_letter;
+                if(first_letter==figures[0])
+                {
+                    if(from_row<0&&from_col<0)
+                    {
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[i][to_col]==figures[0])
+                            {
+                                from_row=i;
+                                from_col = to_col;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[0];
+                                
+                                break;
+
+                            }
+                        }
+
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[to_row][i]==figures[0])
+                            {
+                                from_col=i;
+                                from_row = to_row;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[0];
+                                
+                                break;
+
+                            }
+                        }
+                    }
+                    else if(from_row<0)
+                    {
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[i][from_col]==figures[0])
+                            {
+                                from_row=i;
+                                
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[0];
+                                
+                                break;
+
+                            }
+                        }
+
+
+                    }
+                    else if(from_col<0)
+                    {
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[from_row][i]==figures[0])
+                            {
+                                from_col=i;
+                                
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[0];
+                                
+                                break;
+
+                            }
+                            }
+                    }
+                }
+                    
+
+                    if(first_letter==figures[1])
+                    {
+                    if(from_row<0&&from_col<0)
+                    {
+                        int ab[] = {2,1};
+                        int cd[] = {-2,-1};
+                        int t=0;
+                        for(int i=0; i<8; i++)
+                        {
+                            swap(&ab,0,1);
+                            swap(&cd,0,1);
+                            t++;
+                            if(t==2)
+                            {
+                                ab[0]*=-1;
+                                ab[1]*=-1;
+                                cd[0]*=-1;
+                                cd[1]*=-1;
+                            }
+                            int a = to_row+ab[0], b =to_col+cd[0];
+                            if(a>-1&&b>-1&&a<8&&b<8)
+                            if(state.field[a][b]==figures[1])
+                            {
+                                from_row=to_row+ab[0];
+                                from_col = to_col+cd[0];
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[1];
+                                
+                                break;
+
+                            }
+                        }
+                    }
+                    else if(from_row<0)
+                    {
+                        int ab[] = {2,1};
+                        int t=0;
+                        for(int i=0; i<8; i++)
+                        {
+                            swap(&ab,0,1);
+                            t++;
+                            if(t==2)
+                            {
+                                ab[0]*=-1;
+                                ab[1]*=-1;
+                            }
+                            int a = to_row+ab[0];
+                            if(a>-1&&a<8)
+                            if(state.field[a][from_col]==figures[1])
+                            {
+                                from_row=to_row+ab[0];
+                                
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[1];
+                                
+                                break;
+
+                            }
+                        }
+
+
+                    }
+                    else if(from_col<0)
+                    {
+                        
+                        int cd[] = {-2,-1};
+                        int t=0;
+                        for(int i=0; i<8; i++)
+                        {
+                            swap(&cd,0,1);
+                            t++;
+                            if(t==2)
+                            {
+                                cd[0]*=-1;
+                                cd[1]*=-1;
+                            }
+                            int b =to_col+cd[0];
+                            if(b>-1&&b<8)
+                            if(state.field[from_row][b]==figures[1])
+                            {
+                                from_col=to_col+cd[0];
+                                
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[1];
+                                
+                                break;
+
+                            }
+                        }
+                    }
+                    }
+
+                    if(first_letter==figures[2])
+                    {
+                    if(from_row<0&&from_col<0)
+                    {
+                        int a[] = {-1,-2,-3,-4};
+                        int b[] = {-1,-2,-3,-4};
+                        
+                        for(int i=0; i<4; i++)
+                        {
+                            switch(i)
+                            {
+                                case 1:
+                                min_el(&b,3);
+                                break;
+                                case 2:
+                                min_el(&a,3);
+                                min_el(&b,3);
+                                break;
+                                case 3:
+                                min_el(&b,3);
+                                break;
+                            }
+                            
+                            for(int j=0; j<4;j++)
+                            {
+                                int c = to_row+a[j];
+                                int d = to_col+b[j];
+                                if(c>-1&&d>-1&&c<8&&d<8)
+                                if(state.field[c][d]==figures[2])
+                                {
+                                    from_row = c;
+                                    from_col = d;
+                                    state.field[from_row][from_col]='-';
+                                    state.field[to_row][to_col]=figures[2];
+                                }
+                            }
+                            
+                        }
+                    }
+                    else if(from_row<0)
+                    {
+                        
+                        
+                        int b[] = {-1,-2,-3};
+                        
+                        for(int i=0; i<4; i++)
+                        {
+                            switch(i)
+                            {
+                                case 1:
+                                min_el(&b,3);
+                                break;
+                                case 2:
+                                
+                                min_el(&b,3);
+                                break;
+                                case 3:
+                                min_el(&b,3);
+                                break;
+                            }
+                            
+                            for(int j=0; j<3;j++)
+                            {
+                                
+                                int d = to_col+b[j];
+                                if(d>-1&&d<8)
+                                if(state.field[from_row][d]==figures[2])
+                                {
+                                    
+                                    from_col = d;
+                                    state.field[from_row][from_col]='-';
+                                    state.field[to_row][to_col]=figures[2];
+                                }
+                            }
+                            
+                        }
+
+
+                    }
+                    else if(from_col<0)
+                    {
+                        int a[] = {-1,-2,-3,-4};
+                        
+                        
+                        for(int i=0; i<4; i++)
+                        {
+                            
+                            if(i==2)
+                            min_el(&a,3);
+                            for(int j=0; j<4;j++)
+                            {
+                                int d = to_col+a[j];
+                                if(d>-1&&d<8)
+                                if(state.field[from_row][d]==figures[2])
+                                {
+
+                                    from_col = d;
+                                    state.field[from_row][from_col]='-';
+                                    state.field[to_row][to_col]=figures[2];
+                                }
+                            }
+                            
+                        }
+                    }
+                    }
+
+                    
+                    if(first_letter==figures[3])
+                    {
+                        int a[] = {-1,-2,-3,-4};
+                        int b[] = {-1,-2,-3,-4};
+                        int t=0;
+                        for(int i=0; i<8; i++)
+                        {
+                            switch(t)
+                            {
+                                case 2:
+                                min_el(&a,4);
+                                break;
+                                case 4:
+                                min_el(&b,4);
+                                break;
+                                case 6:
+                                min_el(&a,4);
+                                break;
+                            }
+                            if(t%2==0)
+                            for(int j=0; j<4;j++)
+                            {
+                                int c = to_row+a[j];
+                                int d = to_col+b[j];
+                                if(c>-1&&d>-1&&c<8&&d<8)
+                                if(state.field[c][d]==figures[3])
+                                {
+                                    from_row = c;
+                                    from_col = d;
+                                    state.field[from_row][from_col]='-';
+                                    state.field[to_row][to_col]=figures[3];
+                                }
+                            }
+                            
+                            t++;
+                        }
+                        if(from_col<0|from_row<0)
+                        for(int i=0; i<8; i++)
+                        {
+                                    if(state.field[i][to_col]==figures[3])
+                                    {
+                                    from_row=i;
+                                    from_col = to_col;
+                                    state.field[from_row][from_col]='-';
+                                    state.field[to_row][to_col]=figures[3];
+                                
+                                    break;
+
+                                    }
+                        }
+                        if(from_col<0||from_row<0)
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[to_row][i]==figures[3])
+                            {
+                                from_col=i;
+                                from_row = to_row;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[3];
+                                
+                                break;
+
+                            }
+                        }
+                        
+
+                    }
+
+                    if(first_letter==figures[4])
+                    {
+                    
+                    
+                        int ab[] = {0,-1,1,-1,1,0,1,1,-1,1,-1,1,-1,0,-1,-1};
+                        
+                        for(int i=0; i<15; i+=2)
+                        {
+                            
+                            int a = to_row+ab[i], b =to_col+ab[i+1];
+                            if(a>-1&&b>-1&&a<8&&b<8)
+                            if(state.field[a][b]==figures[4])
+                            {
+                                from_row=to_row+a;
+                                from_col = to_col+b;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[4];
+                                
+                                break;
+
+                            }
+                        }
+                    
+
+                    }
+                    
+                }
+            
+            else if(first_letter=='O')
+            {
+                dragged_piece=figures[4];
+                from_col=5;
+
+                int l = strlen(current_data);
+                if(l<5)//kingside
+                { 
+                    
+                    to_col=6;
+                    if(k==1)
+                    {
+                        to_row = 7; 
+                        
+                        from_row=7;
+                        
+                        
+                    }
+                    else
+                    {
+                        to_row = 0; 
+                        
+                        from_row=0;
+                        
+                        
+                    }
+                    
+
+                    state.field[from_row][7] = '-';
+                    state.field[from_row][from_col] = '-';
+                    
+                    state.field[from_row][5] = figures[0];
+                    state.field[from_row][to_col] = figures[4];
+                    
+
+                }
+                else//queenside
+                {
+                    to_col=2;
+                    if(k==1)
+                    {
+                        to_row = 7; 
+                        
+                        from_row=7;
+                        
+                        
+                    }
+                    else
+                    {
+                        to_row = 0; 
+                        
+                        from_row=0;
+                        
+                        
+                    }
+
+                    state.field[to_row][0] = '-';
+                    state.field[to_row][from_col] = '-';
+
+                    state.field[to_row][3] = figures[0];
+                    state.field[to_row][2] = figures[4];
+                    
+                }
+                state.fifty_moves_counter++;
+
+            }
+            else
+            {
+                dragged_piece=figures[5];
+                if(strrchr(current_data,'=')!=NULL)
+                {
+                    if(strrchr(current_data,'x')!=NULL)
+                    state.fifty_moves_counter=0;
+                    else
+                    state.fifty_moves_counter++;
+                    //pawn promotion
+
+                }
+                
+                else if(strchr(current_data,'x')!=NULL)//enpassant
+                {
+                    state.fifty_moves_counter=0;
+                    to_row = current_data[3]-97;
+                    to_col = current_data[2]-49;
+                    
+                    if(state.field[to_row][to_col]=='-')
+                    {
+                        //enpassant code
+                        from_col = current_data[0]-49;
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[i][from_col]==figures[5])
+                            {
+                                from_row=i;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[5];
+
+                                int e=1;
+                                if(k==2)
+                                e*=-1;
+
+                                state.field[to_row][to_col+e]='-';
+                                break;
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        from_col = current_data[0]-49;
+                        for(int i=0; i<8; i++)
+                        {
+                            if(state.field[i][from_col]==figures[5])
+                            {
+                                from_row=i;
+                                state.field[from_row][from_col]='-';
+                                state.field[to_row][to_col]=figures[5];
+                                break;
+
+                            }
+                        }
+                    }
+                }
+                
+                else
+                {
+                    to_row = current_data[1]-97;
+                    to_col = current_data[0]-49;
+                    from_col = to_col;
+                    state.fifty_moves_counter++;
+                    for(int i=0; i<8; i++)
+                    {
+                        if(state.field[i][to_col]==figures[5])
+                        {
+                            from_row=i;
+                            state.field[from_row][from_col]='-';
+                            state.field[to_row][to_col]=figures[5];
+                            break;
+
+                        }
+                    }
+                }
+            }
+            
+
+        
+
+    
+    
+
+    //next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0)
+    
+}
+g_list_free(list);
+}
+
+
+
+
+
+
+
