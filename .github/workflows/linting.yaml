@@ -1,0 +1,26 @@
+name: Lint and Syntax Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc clang cppcheck gtk+-3.0 librsvg2-dev
+
+      - name: Lint and Syntax Check
+        run: |
+          find . -name '*.c' -o -name '*.h' | xargs gcc -Wall -Wextra -pedantic -std=c99 -fsyntax-only
+          find . -name '*.c' -o -name '*.h' | xargs clang -Wall -Wextra -pedantic -std=c99 -fsyntax-only
+          find . -name '*.c' -o -name '*.h' | xargs cppcheck --enable=all --std=c99 --error-exitcode=1
