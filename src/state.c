@@ -120,7 +120,6 @@ void recalc_castlings(game_state* state)
 
 void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
-    printf("%c\n",piece);
     state->side_to_move = !state->side_to_move;
     if (state->side_to_move) {
         state->move_counter++;
@@ -144,7 +143,6 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     game_state* state_storage = (game_state*) malloc(sizeof(game_state));
     *state_storage = *state;
     (*tree).current =  addnode(state_storage, tree->current,  move); 
-    printf("%s\n",move);
     show_state(tree->root,0);
     //
 }
@@ -639,7 +637,6 @@ void PGN_to_tree(char* pgn)
     }
 
     int len = g_list_length(list);
-    //printf("len %d\n",len);
     char figures[] = {'R','N','B','Q','K','P'};
     char promotion = 0; 
     int bw = 1; // black/white
@@ -654,6 +651,7 @@ void PGN_to_tree(char* pgn)
         if (isdigit(first_letter)) {
             continue;
         }
+        //printf("%d\n", j);
 
         bw = (bw + 1) % 2;
 
@@ -667,37 +665,37 @@ void PGN_to_tree(char* pgn)
                     
             if(strrchr(current_word,'x')!=NULL)//capture
             {
-                if(!isdigit(current_word[3])) //disambiguation check
+                if(len > 4 && !isdigit(current_word[4])) //disambiguation check
                 {
-                    if(current_word[1]<97)    // is row or column disambiguated
+                    if(isdigit(current_word[1]))    // is row or column disambiguated
                     from_row = current_word[1];
                     else
                     from_col = current_word[1];
                     
 
-                    to_row = current_word[4]-97;
-                    to_col = current_word[3]-49;
+                    to_row = current_word[4]-49;
+                    to_col = current_word[3]-97;
                 }
                 else {
-                    to_row = current_word[3]-97;
-                    to_col = current_word[2]-49;
+                    to_row = current_word[3]-49;
+                    to_col = current_word[2]-97;
                 }
             }
             else//non capture
             {
-                if(!isdigit(current_word[2]))     //disambiguation check
+                if(len > 3 && !isdigit(current_word[3]))     //disambiguation check
                 {
-                    if(current_word[1]<97)      // is row or column disambiguated
+                    if(isdigit(current_word[1]))      // is row or column disambiguated
                     from_row = current_word[1];
                     else
                     from_col = current_word[1];
 
-                    to_row = current_word[3]-97;
-                    to_col = current_word[2]-49;
+                    to_row = current_word[3]-49;
+                    to_col = current_word[2]-97;
                 }
                 else {
-                    to_row = current_word[2]-97;
-                    to_col = current_word[1]-49;                   
+                    to_row = current_word[2]-49;
+                    to_col = current_word[1]-97;                   
                 }
             }
             dragged_piece=first_letter;
@@ -730,7 +728,7 @@ void PGN_to_tree(char* pgn)
                     }
                 }
             }
-
+            
             if(toupper(dragged_piece)==figures[2])//bishop
             {
                 bishop_search(dragged_piece, to_row, &from_row, to_col, &from_col);
@@ -742,11 +740,10 @@ void PGN_to_tree(char* pgn)
                rook_search(dragged_piece, to_row, &from_row, to_col, &from_col);
                bishop_search(dragged_piece, to_row, &from_row, to_col, &from_col);
             }
-
+            
             if(toupper(dragged_piece)==figures[4])//king
             {
                 int a[] = {-1, 0, 1};
-
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
                         int row = to_row + a[i], col = to_col + a[j];
@@ -759,100 +756,97 @@ void PGN_to_tree(char* pgn)
                     }
                 }
             }
+            
         }
         
-        else /*if castling or pawn*/ if(first_letter=='O')//castling
+        else /*if castling or pawn*/ 
         {
-            dragged_piece='K';
-            if (bw == 1) {             //if black
-                dragged_piece = tolower(dragged_piece);
-            }
-
-            from_col=5;
-            int l = strlen(current_word);
-            if(l<5)//kingside
-            { 
-                to_col=6;
-                if(bw == 1)     //black
-                {
-                    to_row = 7; 
-                    from_row=7;
-                }
-                else
-                {
-                    to_row = 0; 
-                    from_row=0;
-                }
-            }
-            else//queenside
+            if(first_letter=='O')//castling
             {
-                to_col=2;
-                if(bw == 1)     //black
-                {
-                    to_row = 7; 
-                    from_row=7; 
-                }
-                else
-                {
-                    to_row = 0; 
-                    from_row=0;
-                }
-            }
-        }
-        else//pawn
-        {
-            dragged_piece =' P';
-            if (bw == 1) {             //if black
-                dragged_piece = tolower(dragged_piece);
-            }
-
-            if(strchr(current_word,'=')!=NULL) {                //if promoted
-                promotion = strchr(current_word,'=')[1];
+                dragged_piece='K';
                 if (bw == 1) {             //if black
-                    promotion = tolower(promotion);
+                    dragged_piece = tolower(dragged_piece);
                 }
-            }
-            if(strchr(current_word,'x')!=NULL)//capture by pawn
-            {
-                to_row = current_word[3]-97;
-                to_col = current_word[2]-49;
-                from_col = current_word[0]-97;
-                if (bw == 0) from_row = to_row - 1; else from_row = to_row + 1;
-            }
-            
-            else// if not capture
-            {
-                to_row = current_word[1]-97;
-                to_col = current_word[0]-49;
-                from_col = to_col;
-                if (bw == 0) {
-                    if(state.field[to_row - 1][to_col] == dragged_piece)
+
+                from_col=5;
+                int l = strlen(current_word);
+                if(l<5)//kingside
+                { 
+                    to_col=6;
+                    if(bw == 1)     //black
                     {
-                        from_row = to_row - 1;
+                        to_row = 7; 
+                        from_row=7;
                     }
-                    else {
-                        from_row = to_row - 2;
+                    else
+                    {
+                        to_row = 0; 
+                        from_row=0;
                     }
                 }
-                else {
-                    if(state.field[to_row + 1][to_col] == dragged_piece)
+                else//queenside
+                {
+                    to_col=2;
+                    if(bw == 1)     //black
                     {
-                        from_row = to_row + 1;
+                        to_row = 7; 
+                        from_row=7; 
+                    }
+                    else
+                    {
+                        to_row = 0; 
+                        from_row=0;
+                    }
+                }
+            }
+            else//pawn
+            {
+                dragged_piece =' P';
+                if (bw == 1) {             //if black
+                    dragged_piece = tolower(dragged_piece);
+                }
+
+                if(strchr(current_word,'=')!=NULL) {                //if promoted
+                    promotion = strchr(current_word,'=')[1];
+                    if (bw == 1) {             //if black
+                        promotion = tolower(promotion);
+                    }
+                }
+                if(strchr(current_word,'x')!=NULL)//capture by pawn
+                {
+                    to_row = current_word[3]-97;
+                    to_col = current_word[2]-49;
+                    from_col = current_word[0]-97;
+                    if (bw == 0) from_row = to_row - 1; else from_row = to_row + 1;
+                }
+                
+                else// if not capture
+                {
+                    to_row = current_word[1]-97;
+                    to_col = current_word[0]-49;
+                    from_col = to_col;
+                    if (bw == 0) {
+                        if(state.field[to_row - 1][to_col] == dragged_piece)
+                        {
+                            from_row = to_row - 1;
+                        }
+                        else {
+                            from_row = to_row - 2;
+                        }
                     }
                     else {
-                        from_row = to_row + 2;
+                        if(state.field[to_row + 1][to_col] == dragged_piece)
+                        {
+                            from_row = to_row + 1;
+                        }
+                        else {
+                            from_row = to_row + 2;
+                        }
                     }
                 }
             }
         }
-                
-
-            
-
-        
-        printf("%d %s %s\n",j,current_word);
-        
-
+        printf("%d %d %d %d\n", from_col, from_row, to_col, to_row);
         next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,promotion);
         list=list->next;
     }
