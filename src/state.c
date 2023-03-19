@@ -502,6 +502,116 @@ char* remove_PGN_comments(char* pgn) {
     return newpgnResize;
 }
 
+void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, int* from_col_ptr) {
+    int from_col = *(from_col_ptr);
+    int from_row = *(from_row_ptr);
+    int row = to_row, col = to_col;
+    do {
+        row--;
+        col--;
+        if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+        if (from_row >= 0 && from_row != row) continue;
+        if(state.field[row][col]==dragged_piece) {
+            *(from_row_ptr) = row;
+            *(from_col_ptr) = col;
+            break;
+        }
+    } while (row >= 0 && col >= 0);
+    do {
+        row++;
+        col++;
+        if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+        if (from_row >= 0 && from_row != row) continue;
+        if(state.field[row][col]==dragged_piece) {
+            *(from_row_ptr) = row;
+            *(from_col_ptr) = col;
+            break;
+        }
+    } while (row < 8 && col < 8);
+    do {
+        row++;
+        col--;
+        if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+        if (from_row >= 0 && from_row != row) continue;
+        if(state.field[row][col]==dragged_piece) {
+            *(from_row_ptr) = row;
+            *(from_col_ptr) = col;
+            break;
+        }
+    } while (row < 8 && col > 0);
+    do {
+        row--;
+        col++;
+        if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+        if (from_row >= 0 && from_row != row) continue;
+        if(state.field[row][col]==dragged_piece) {
+            *(from_row_ptr) = row;
+            *(from_col_ptr) = col;
+            break;
+        }
+    } while (row > 0 && col < 8);
+}
+
+void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, int* from_col_ptr) {
+    int from_col = *(from_col_ptr);
+    int from_row = *(from_row_ptr);
+    if (from_row < 0) {
+        int row = to_row, col = to_col;
+        do {
+            row++;
+            if(state.field[row][col]==dragged_piece)
+            {
+                *(from_row_ptr) = row;
+                *(from_col_ptr) = col;
+                break;
+            }
+            else if (state.field[row][col] != '-') {
+                break;
+            }
+        } while (row < 8);
+        do {
+            row--;
+            if(state.field[row][col]==dragged_piece)
+            {
+                *(from_row_ptr) = row;
+                *(from_col_ptr) = col;
+                break;
+            }
+            else if (state.field[row][col] != '-') {
+                break;
+            }
+        } while (row >= 0); 
+    }
+    
+    if (from_col < 0) {
+        int row = to_row, col = to_col;
+        do {
+            col++;
+            if(state.field[row][col]==dragged_piece)
+            {
+                *(from_row_ptr) = row;
+                *(from_col_ptr) = col;
+                break;
+            }
+            else if (state.field[row][col] != '-') {
+                break;
+            }
+        } while (col < 8);
+        do {
+            col--;
+            if(state.field[row][col]==dragged_piece)
+            {
+                *(from_row_ptr) = row;
+                *(from_col_ptr) = col;
+                break;
+            }
+            else if (state.field[row][col] != '-') {
+                break;
+            }
+        } while (col >= 0);
+    }
+}
+
 
 void PGN_to_tree(char* pgn) 
 {
@@ -536,7 +646,7 @@ void PGN_to_tree(char* pgn)
 
     init_state(&state);
 
-    //analysing words?
+    //analysing words
     for(int j=0;j<len-2;j++)
     {   
         char* current_word= list->data;
@@ -557,12 +667,9 @@ void PGN_to_tree(char* pgn)
                     
             if(strrchr(current_word,'x')!=NULL)//capture
             {
-                to_row = current_word[3]-97;
-                to_col = current_word[2]-49;
-
-                if(strlen(current_word)==5)
+                if(!isdigit(current_word[3])) //disambiguation check
                 {
-                    if(current_word[1]<97)
+                    if(current_word[1]<97)    // is row or column disambiguated
                     from_row = current_word[1];
                     else
                     from_col = current_word[1];
@@ -571,16 +678,16 @@ void PGN_to_tree(char* pgn)
                     to_row = current_word[4]-97;
                     to_col = current_word[3]-49;
                 }
+                else {
+                    to_row = current_word[3]-97;
+                    to_col = current_word[2]-49;
+                }
             }
             else//non capture
             {
-
-                to_row = current_word[2]-97;
-                to_col = current_word[1]-49;
-
-                if(strlen(current_word)==4)
+                if(!isdigit(current_word[2]))     //disambiguation check
                 {
-                    if(current_word[1]<97)
+                    if(current_word[1]<97)      // is row or column disambiguated
                     from_row = current_word[1];
                     else
                     from_col = current_word[1];
@@ -588,317 +695,67 @@ void PGN_to_tree(char* pgn)
                     to_row = current_word[3]-97;
                     to_col = current_word[2]-49;
                 }
+                else {
+                    to_row = current_word[2]-97;
+                    to_col = current_word[1]-49;                   
+                }
             }
             dragged_piece=first_letter;
+            if (bw == 1) {             //if black
+                dragged_piece = tolower(dragged_piece);
+            }
 
 
-            if(first_letter==figures[0])//rook
+            if(toupper(dragged_piece)==figures[0])//rook
             {
-                if(from_row<0&&from_col<0)
-                {
-                    for(int i=0; i<8; i++)
-                    {
-                        if(state.field[i][to_col]==figures[0])
-                        {
-                            from_row=i;
-                            from_col = to_col;
-                            state.field[from_row][from_col]='-';
-                            state.field[to_row][to_col]=figures[0];
-                            
-                            break;
-
-                        }
-                    }
-
-                    for(int i=0; i<8; i++)
-                    {
-                        if(state.field[to_row][i]==figures[0])
-                        {
-                            from_col=i;
-                            from_row = to_row;
-                            state.field[from_row][from_col]='-';
-                            state.field[to_row][to_col]=figures[0];
-                            
-                            break;
-
-                        }
-                    }
-                }
-                else if(from_row<0)
-                {
-                    for(int i=0; i<8; i++)
-                    {
-                        if(state.field[i][from_col]==figures[0])
-                        {
-                            from_row=i;
-                            
-                            state.field[from_row][from_col]='-';
-                            state.field[to_row][to_col]=figures[0];
-                            
-                            break;
-
-                        }
-                    }
-
-
-                }
-                else if(from_col<0)
-                {
-                    for(int i=0; i<8; i++)
-                    {
-                        if(state.field[from_row][i]==figures[0])
-                        {
-                            from_col=i;
-                            
-                            state.field[from_row][from_col]='-';
-                            state.field[to_row][to_col]=figures[0];
-                            
-                            break;
-
-                        }
-                    }
-                }
+                rook_search(dragged_piece, to_row, &from_row, to_col, &from_col);
             }
                 
 
-            if(first_letter==figures[1])//knight
+            if(toupper(dragged_piece)==figures[1])//knight
             {
-                if(from_row<0&&from_col<0)
-                {
-                    int ab[] = {2,1};
-                    int cd[] = {-2,-1};
-                    int t=0;
-                    for(int i=0; i<8; i++)
-                    {
-                        swap(&ab,0,1);
-                        swap(&cd,0,1);
-                        t++;
-                        if(t==2)
-                        {
-                            ab[0]*=-1;
-                            ab[1]*=-1;
-                            cd[0]*=-1;
-                            cd[1]*=-1;
-                        }
-                        int a = to_row+ab[0], b =to_col+cd[0];
-                        if(a>-1&&b>-1&&a<8&&b<8)
-                        if(state.field[a][b]==figures[1])
-                        {
-                            from_row=to_row+ab[0];
-                            from_col = to_col+cd[0];
-                            break;
+                int a[] = {-2, -2, -1, -1, 1, 1, 2, 2};
+                int b[] = {-1, 1, -2, 2, -2, 2, -1, 1};
 
-                        }
-                    }
-                }
-                else if(from_row<0)
-                {
-                    int ab[] = {2,1};
-                    int t=0;
-                    for(int i=0; i<8; i++)
-                    {
-                        swap(&ab,0,1);
-                        t++;
-                        if(t==2)
-                        {
-                            ab[0]*=-1;
-                            ab[1]*=-1;
-                        }
-                        int a = to_row+ab[0];
-                        if(a>-1&&a<8)
-                        if(state.field[a][from_col]==figures[1])
-                        {
-                            from_row=to_row+ab[0];  
-                            break;
-                        }
-                    }
-                }
-                else if(from_col<0)
-                {
-                    int cd[] = {-2,-1};
-                    int t=0;
-                    for(int i=0; i<8; i++)
-                    {
-                        swap(&cd,0,1);
-                        t++;
-                        if(t==2)
-                        {
-                            cd[0]*=-1;
-                            cd[1]*=-1;
-                        }
-                        int b =to_col+cd[0];
-                        if(b>-1&&b<8)
-                        if(state.field[from_row][b]==figures[1])
-                        {
-                            from_col=to_col+cd[0];
-                            break;
+                for (int i = 0; i < 8; i++) {                       //checking all possible knight moves
+                    int row = to_row + a[i], col = to_col + b;
+                    if (row < 0 || row >= 8 || col < 0 || row >= 8) continue;       //out of field
+                    if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+                    if (from_row >= 0 && from_row != row) continue;
 
-                        }
+                    if(state.field[row][col]==dragged_piece) {
+                        from_row = row;
+                        from_col = col;
+                        break;
                     }
                 }
             }
 
-            if(first_letter==figures[2])//bishop
+            if(toupper(dragged_piece)==figures[2])//bishop
             {
-                if(from_row<0&&from_col<0)
-                {
-                    int a[] = {-1,-2,-3,-4};
-                    int b[] = {-1,-2,-3,-4};
-                    
-                    for(int i=0; i<4; i++)
-                    {
-                        switch(i)
-                        {
-                            case 1:
-                            min_el(&b,3);
-                            break;
-                            case 2:
-                            min_el(&a,3);
-                            min_el(&b,3);
-                            break;
-                            case 3:
-                            min_el(&b,3);
-                            break;
-                        }
-                        
-                        for(int j=0; j<4;j++)
-                        {
-                            int c = to_row+a[j];
-                            int d = to_col+b[j];
-                            if(c>-1&&d>-1&&c<8&&d<8)
-                            if(state.field[c][d]==figures[2])
-                            {
-                                from_row = c;
-                                from_col = d;
-                            }
-                        }
-                        
-                    }
-                }
-                else if(from_row<0)
-                {
-                    int b[] = {-1,-2,-3};
-                    
-                    for(int i=0; i<4; i++)
-                    {
-                        switch(i)
-                        {
-                            case 1:
-                            min_el(&b,3);
-                            break;
-                            case 2:
-                            
-                            min_el(&b,3);
-                            break;
-                            case 3:
-                            min_el(&b,3);
-                            break;
-                        }
-                        
-                        for(int j=0; j<3;j++)
-                        {
-                            
-                            int d = to_col+b[j];
-                            if(d>-1&&d<8)
-                            if(state.field[from_row][d]==figures[2])
-                            {
-                                from_col = d;
-                            }
-                        }
-                    }
-                }
-                else if(from_col<0)
-                {
-                    int a[] = {-1,-2,-3,-4};
-                    for(int i=0; i<4; i++)
-                    {
-                        
-                        if(i==2)
-                        min_el(&a,3);
-                        for(int j=0; j<4;j++)
-                        {
-                            int d = to_col+a[j];
-                            if(d>-1&&d<8)
-                            if(state.field[from_row][d]==figures[2])
-                            {
-                                from_col = d;
-                            }
-                        }
-                    }
-                }
+                bishop_search(dragged_piece, to_row, &from_row, to_col, &from_col);
             }
 
             
-            if(first_letter==figures[3])//queen
-            {
-                int a[] = {-1,-2,-3,-4};
-                int b[] = {-1,-2,-3,-4};
-                int t=0;
-                for(int i=0; i<8; i++)
-                {
-                    switch(t)
-                    {
-                        case 2:
-                        min_el(&a,4);
-                        break;
-                        case 4:
-                        min_el(&b,4);
-                        break;
-                        case 6:
-                        min_el(&a,4);
-                        break;
-                    }
-                    if(t%2==0)
-                    for(int j=0; j<4;j++)
-                    {
-                        int c = to_row+a[j];
-                        int d = to_col+b[j];
-                        if(c>-1&&d>-1&&c<8&&d<8)
-                        if(state.field[c][d]==figures[3])
-                        {
-                            from_row = c;
-                            from_col = d;
-                        }
-                    }
-                    
-                    t++;
-                }
-                if(from_col<0|from_row<0)
-                for(int i=0; i<8; i++)
-                {
-                            if(state.field[i][to_col]==figures[3])
-                            {
-                                from_row=i;
-                                from_col = to_col;
-                                break;
-                            }
-                }
-                if(from_col<0||from_row<0)
-                for(int i=0; i<8; i++)
-                {
-                    if(state.field[to_row][i]==figures[3])
-                    {
-                        from_col=i;
-                        from_row = to_row;
-                        break;
-                    }
-                }
+            if(toupper(dragged_piece)==figures[3])//queen
+            {                                                               //no repeating code :)
+               rook_search(dragged_piece, to_row, &from_row, to_col, &from_col);
+               bishop_search(dragged_piece, to_row, &from_row, to_col, &from_col);
             }
 
-            if(first_letter==figures[4])//king
+            if(toupper(dragged_piece)==figures[4])//king
             {
-                int ab[] = {0,-1,1,-1,1,0,1,1,-1,1,-1,1,-1,0,-1,-1};
-                
-                for(int i=0; i<15; i+=2)
-                {
-                    
-                    int a = to_row+ab[i], b =to_col+ab[i+1];
-                    if(a>-1&&b>-1&&a<8&&b<8)
-                    if(state.field[a][b]==figures[4])
-                    {
-                        from_row=to_row+a;
-                        from_col = to_col+b;
-                        break;
+                int a[] = {-1, 0, 1};
+
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        int row = to_row + a[i], col = to_col + a[j];
+                        if (row < 0 || row >= 8 || col < 0 || row >= 8) continue;       //out of field
+                        if(state.field[row][col] == dragged_piece)
+                        {
+                            from_row=row;
+                            from_col = col;
+                        }
                     }
                 }
             }
@@ -906,13 +763,17 @@ void PGN_to_tree(char* pgn)
         
         else /*if castling or pawn*/ if(first_letter=='O')//castling
         {
-            dragged_piece=figures[4];
+            dragged_piece='K';
+            if (bw == 1) {             //if black
+                dragged_piece = tolower(dragged_piece);
+            }
+
             from_col=5;
             int l = strlen(current_word);
             if(l<5)//kingside
             { 
                 to_col=6;
-                if(bw == 1)
+                if(bw == 1)     //black
                 {
                     to_row = 7; 
                     from_row=7;
@@ -926,7 +787,7 @@ void PGN_to_tree(char* pgn)
             else//queenside
             {
                 to_col=2;
-                if(bw == 1)
+                if(bw == 1)     //black
                 {
                     to_row = 7; 
                     from_row=7; 
@@ -940,64 +801,49 @@ void PGN_to_tree(char* pgn)
         }
         else//pawn
         {
-            dragged_piece=figures[5];
-            if(strchr(current_word,'=')!=NULL) {
+            dragged_piece =' P';
+            if (bw == 1) {             //if black
+                dragged_piece = tolower(dragged_piece);
+            }
+
+            if(strchr(current_word,'=')!=NULL) {                //if promoted
                 promotion = strchr(current_word,'=')[1];
+                if (bw == 1) {             //if black
+                    promotion = tolower(promotion);
+                }
             }
             if(strchr(current_word,'x')!=NULL)//capture by pawn
             {
                 to_row = current_word[3]-97;
                 to_col = current_word[2]-49;
-                
-                if(state.field[to_row][to_col]=='-')//enpassant
-                {
-                    //enpassant code
-                    from_col = current_word[0]-49;
-                    for(int i=0; i<8; i++)
+                from_col = current_word[0]-97;
+                if (bw == 0) from_row = to_row - 1; else from_row = to_row + 1;
+            }
+            
+            else// if not capture
+            {
+                to_row = current_word[1]-97;
+                to_col = current_word[0]-49;
+                from_col = to_col;
+                if (bw == 0) {
+                    if(state.field[to_row - 1][to_col] == dragged_piece)
                     {
-                        if(state.field[i][from_col]==figures[5])
-                        {
-                            from_row=i;
-                            int e=1;
-                            if(bw == 1)
-                            e*=-1;
-                            break;
-
-                        }
+                        from_row = to_row - 1;
+                    }
+                    else {
+                        from_row = to_row - 2;
                     }
                 }
-                else//usual
-                {
-                    from_col = current_word[0]-49;
-                    for(int i=0; i<8; i++)
+                else {
+                    if(state.field[to_row + 1][to_col] == dragged_piece)
                     {
-                        if(state.field[i][from_col]==figures[5])
-                        {
-                            from_row=i;
-                            break;
-                        }
+                        from_row = to_row + 1;
+                    }
+                    else {
+                        from_row = to_row + 2;
                     }
                 }
             }
-            
-            // else// if what?
-            // {
-            //     to_row = current_word[1]-97;
-            //     to_col = current_word[0]-49;
-            //     from_col = to_col;
-            //     state.fifty_moves_counter++;
-            //     for(int i=0; i<8; i++)
-            //     {
-            //         if(state.field[i][to_col]==figures[5])
-            //         {
-            //             from_row=i;
-            //             state.field[from_row][from_col]='-';
-            //             state.field[to_row][to_col]=figures[5];
-            //             break;
-
-            //         }
-            //     }
-            // }
         }
                 
 
