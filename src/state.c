@@ -510,102 +510,124 @@ void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col,
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
         if(state.field[row][col]==dragged_piece) {
-            *(from_row_ptr) = row;
-            *(from_col_ptr) = col;
+            *from_row_ptr = row;
+            *from_col_ptr = col;
+            return;
+        }
+        if (state.field[row][col] != '-') {
             break;
         }
     } while (row >= 0 && col >= 0);
+    row = to_row, col = to_col;
     do {
         row++;
         col++;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
         if(state.field[row][col]==dragged_piece) {
-            *(from_row_ptr) = row;
-            *(from_col_ptr) = col;
+            *from_row_ptr = row;
+            *from_col_ptr = col;
+            return;
+        }
+        if (state.field[row][col] != '-') {
             break;
         }
     } while (row < 8 && col < 8);
+    row = to_row, col = to_col;
     do {
         row++;
         col--;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
         if(state.field[row][col]==dragged_piece) {
-            *(from_row_ptr) = row;
-            *(from_col_ptr) = col;
+            *from_row_ptr = row;
+            *from_col_ptr = col;
+            return;
+        }
+        if (state.field[row][col] != '-') {
             break;
         }
     } while (row < 8 && col > 0);
+    row = to_row, col = to_col;
     do {
         row--;
         col++;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
+        //printf("%d %d %c %c\n", row, col, dragged_piece, state.field[row][col]);
         if(state.field[row][col]==dragged_piece) {
-            *(from_row_ptr) = row;
-            *(from_col_ptr) = col;
+            *from_row_ptr = row;
+            *from_col_ptr = col;
+            return;
+        }
+        if (state.field[row][col] != '-') {
             break;
         }
     } while (row > 0 && col < 8);
 }
 
 void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, int* from_col_ptr) {
-    int from_col = *(from_col_ptr);
-    int from_row = *(from_row_ptr);
+    int from_col = *from_col_ptr;
+    int from_row = *from_row_ptr;
     if (from_row < 0) {
         int row = to_row, col = to_col;
+        if (from_col >= 0) col = from_col;
         do {
+            if(state.field[row][col]==dragged_piece)
+            {
+                *from_row_ptr = row;
+                *from_col_ptr = col;
+                return;
+            }
+            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+                break;
+            }
             row++;
-            if(state.field[row][col]==dragged_piece)
-            {
-                *(from_row_ptr) = row;
-                *(from_col_ptr) = col;
-                break;
-            }
-            else if (state.field[row][col] != '-') {
-                break;
-            }
         } while (row < 8);
+        row = to_row, col = to_col;
+        if (from_col >= 0) col = from_col;
         do {
-            row--;
             if(state.field[row][col]==dragged_piece)
             {
-                *(from_row_ptr) = row;
-                *(from_col_ptr) = col;
+                *from_row_ptr = row;
+                *from_col_ptr = col;
+                return;
+            }
+            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
                 break;
             }
-            else if (state.field[row][col] != '-') {
-                break;
-            }
+            row--;
         } while (row >= 0); 
     }
     
     if (from_col < 0) {
         int row = to_row, col = to_col;
+        if (from_row >= 0) row = from_row;
         do {
+            if(state.field[row][col]==dragged_piece)
+            {
+                *from_row_ptr = row;
+                *from_col_ptr = col;
+                return;
+            }
+            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+                break;
+            }
             col++;
-            if(state.field[row][col]==dragged_piece)
-            {
-                *(from_row_ptr) = row;
-                *(from_col_ptr) = col;
-                break;
-            }
-            else if (state.field[row][col] != '-') {
-                break;
-            }
         } while (col < 8);
+        row = to_row, col = to_col;
+        if (from_row >= 0) row = from_row;
         do {
-            col--;
             if(state.field[row][col]==dragged_piece)
             {
-                *(from_row_ptr) = row;
-                *(from_col_ptr) = col;
+                *from_row_ptr = row;
+                *from_col_ptr = col;
+                return;
+            }
+            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
                 break;
             }
-            else if (state.field[row][col] != '-') {
-                break;
-            }
+            col--;
         } while (col >= 0);
     }
 }
@@ -633,7 +655,6 @@ void PGN_to_tree(char* pgn)
         //printf("%s\n",word);
         
         list=g_list_append(list, word);
-        
     }
 
     int len = g_list_length(list);
@@ -644,14 +665,16 @@ void PGN_to_tree(char* pgn)
     init_state(&state);
 
     //analysing words
-    for(int j=0;j<len-2;j++)
+    for(int j=0;j<len-1;j++)
     {   
         char* current_word= list->data;
         char first_letter = current_word[0];
+        
         if (isdigit(first_letter)) {
+            list=list->next;
             continue;
         }
-        //printf("%d\n", j);
+        //puts(current_word);
 
         bw = (bw + 1) % 2;
 
@@ -665,12 +688,12 @@ void PGN_to_tree(char* pgn)
                     
             if(strrchr(current_word,'x')!=NULL)//capture
             {
-                if(len > 4 && !isdigit(current_word[4])) //disambiguation check
+                if(len > 4 && !isdigit(current_word[3])) //disambiguation check
                 {
                     if(isdigit(current_word[1]))    // is row or column disambiguated
-                    from_row = current_word[1];
+                    from_row = current_word[1] - 49;
                     else
-                    from_col = current_word[1];
+                    from_col = current_word[1] - 97;
                     
 
                     to_row = current_word[4]-49;
@@ -683,12 +706,12 @@ void PGN_to_tree(char* pgn)
             }
             else//non capture
             {
-                if(len > 3 && !isdigit(current_word[3]))     //disambiguation check
+                if(len > 3 && !isdigit(current_word[2]))     //disambiguation check
                 {
                     if(isdigit(current_word[1]))      // is row or column disambiguated
-                    from_row = current_word[1];
+                    from_row = current_word[1] - 49;
                     else
-                    from_col = current_word[1];
+                    from_col = current_word[1] - 97;
 
                     to_row = current_word[3]-49;
                     to_col = current_word[2]-97;
@@ -698,11 +721,11 @@ void PGN_to_tree(char* pgn)
                     to_col = current_word[1]-97;                   
                 }
             }
+            to_row = 7 - to_row;
             dragged_piece=first_letter;
             if (bw == 1) {             //if black
                 dragged_piece = tolower(dragged_piece);
             }
-
 
             if(toupper(dragged_piece)==figures[0])//rook
             {
@@ -716,12 +739,14 @@ void PGN_to_tree(char* pgn)
                 int b[] = {-1, 1, -2, 2, -2, 2, -1, 1};
 
                 for (int i = 0; i < 8; i++) {                       //checking all possible knight moves
-                    int row = to_row + a[i], col = to_col + b;
+                    int row = to_row + a[i], col = to_col + b[i];
                     if (row < 0 || row >= 8 || col < 0 || row >= 8) continue;       //out of field
+                    //if (current_word[0] == 'N' && current_word[2] == 'd') printf("%d %d %c %c %d %d\n", row, col, dragged_piece, state.field[row][col], from_row, from_col);
                     if (from_col >= 0 && from_col != col) continue;                 //column or row is known
+                    
                     if (from_row >= 0 && from_row != row) continue;
-
                     if(state.field[row][col]==dragged_piece) {
+                        
                         from_row = row;
                         from_col = col;
                         break;
@@ -756,7 +781,6 @@ void PGN_to_tree(char* pgn)
                     }
                 }
             }
-            
         }
         
         else /*if castling or pawn*/ 
@@ -768,40 +792,30 @@ void PGN_to_tree(char* pgn)
                     dragged_piece = tolower(dragged_piece);
                 }
 
-                from_col=5;
+                from_col=4;
                 int l = strlen(current_word);
                 if(l<5)//kingside
                 { 
                     to_col=6;
-                    if(bw == 1)     //black
-                    {
-                        to_row = 7; 
-                        from_row=7;
-                    }
-                    else
-                    {
-                        to_row = 0; 
-                        from_row=0;
-                    }
                 }
                 else//queenside
                 {
                     to_col=2;
-                    if(bw == 1)     //black
-                    {
-                        to_row = 7; 
-                        from_row=7; 
-                    }
-                    else
-                    {
-                        to_row = 0; 
-                        from_row=0;
-                    }
+                }
+                if(bw == 1)     //black
+                {
+                    to_row = 0; 
+                    from_row=0;
+                }
+                else
+                {
+                    to_row = 7; 
+                    from_row=7;
                 }
             }
             else//pawn
             {
-                dragged_piece =' P';
+                dragged_piece ='P';
                 if (bw == 1) {             //if black
                     dragged_piece = tolower(dragged_piece);
                 }
@@ -814,18 +828,20 @@ void PGN_to_tree(char* pgn)
                 }
                 if(strchr(current_word,'x')!=NULL)//capture by pawn
                 {
-                    to_row = current_word[3]-97;
-                    to_col = current_word[2]-49;
+                    to_row = current_word[3]-49;
+                    to_row = 7 - to_row;
+                    to_col = current_word[2]-97;
                     from_col = current_word[0]-97;
-                    if (bw == 0) from_row = to_row - 1; else from_row = to_row + 1;
+                    if (bw == 1) from_row = to_row - 1; else from_row = to_row + 1;
                 }
                 
                 else// if not capture
                 {
-                    to_row = current_word[1]-97;
-                    to_col = current_word[0]-49;
+                    to_row = current_word[1]-49;
+                    to_row = 7 - to_row;
+                    to_col = current_word[0]-97;
                     from_col = to_col;
-                    if (bw == 0) {
+                    if (bw == 1) {
                         if(state.field[to_row - 1][to_col] == dragged_piece)
                         {
                             from_row = to_row - 1;
@@ -844,18 +860,20 @@ void PGN_to_tree(char* pgn)
                         }
                     }
                 }
+                
             }
         }
-        printf("%d %d %d %d\n", from_col, from_row, to_col, to_row);
+        //printf("%d %d %d %d\n", from_col, from_row, to_col, to_row);
+        set_field(&state, from_row, from_col, '-');
         next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,promotion);
+        //if (current_word[0] == 'R' && current_word[2] == 'f') return;
+        //if (current_word[0] == 'd' && current_word[1] == '4') return;
+        // for (int i = 0; i < 8; i++) {
+        //     puts(state.field[i]);
+        // }
         list=list->next;
     }
     g_list_free(list);
 }
-
-
-
-
-
 
 
