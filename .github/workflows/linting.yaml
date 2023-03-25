@@ -19,6 +19,4 @@ jobs:
 
       - name: Lint and Syntax Check
         run: |
-          gio --version
-          pkg-config --modversion gio-2.0
           make check
