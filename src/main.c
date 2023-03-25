@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "gtkchessapp.h"
 
-#if GLIB_MAJOR_VERSION == 1 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 28)
+#if GLIB_MAJOR_VERSION == 1 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 74)
 #define G_APPLICATION_DEFAULT_FLAGS G_APPLICATION_FLAGS_NONE
 #endif
 
