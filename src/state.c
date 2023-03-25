@@ -29,7 +29,7 @@ char get_field_by_notation(game_state* state, const char* field)
     return get_field(state, i, j);
 }
 
-void get_move_notation(game_state* state, char* res, int from_row, int from_col, int to_row, int to_col, char promoted)
+void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, int from_row, int from_col, int to_row, int to_col, char promoted)
 {
     res[0] = from_col + 'a';
     res[1] = 8 - from_row + '0';
@@ -116,12 +116,12 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         set_enpassant(state, to_row-1, to_col);
     else
         clear_enpassant(state);
-    char move[6];
-    get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
+    char movestr[6];
+    get_move_notation(state, movestr, from_row, from_col, to_row, to_col, promotion);
     if (!state->side_to_move) {
-        printf("%d. %s\n", state->move_counter, move);
+        printf("%d. %s\n", state->move_counter, movestr);
     } else {
-        printf("%d... %s\n", state->move_counter - 1, move);
+        printf("%d... %s\n", state->move_counter - 1, movestr);
     }
 }
 
@@ -141,7 +141,11 @@ void just_move(game_state* state, char piece, int to_row, int to_col)
     state->field[to_row][to_col] = piece;
 }
 
-char is_castling(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
+char is_castling(
+    __attribute_maybe_unused__ game_state* state,
+    char piece,
+    __attribute_maybe_unused__ int from_row, int from_col,
+    __attribute_maybe_unused__ int to_row, int to_col)
 {
     int d_col = to_col - from_col;
     if (piece == 'K' || piece == 'k'){

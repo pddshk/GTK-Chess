@@ -8,7 +8,9 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-void gtkchess_app_startup(GApplication *app, gpointer data)
+void gtkchess_app_startup(
+	__attribute_maybe_unused__ GApplication *app,
+	__attribute_maybe_unused__ gpointer data)
 {
     engine_manager = NULL;
 	
@@ -22,7 +24,7 @@ void gtkchess_app_startup(GApplication *app, gpointer data)
 	load_textures("classic");
 }
 
-void gtkchess_app_activate(GApplication *app, gpointer data)
+void gtkchess_app_activate(GApplication *app, __attribute_maybe_unused__ gpointer data)
 {
     GList *windows=gtk_application_get_windows(GTK_APPLICATION(app));
     if (!windows){
@@ -35,16 +37,19 @@ void gtkchess_app_activate(GApplication *app, gpointer data)
     }
 }
 
-void gtkchess_app_shutdown(GApplication *self, gpointer data)
+void gtkchess_app_shutdown(
+	__attribute_maybe_unused__ GApplication *self,
+	__attribute_maybe_unused__ gpointer data)
 {
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) && !g_subprocess_get_if_exited(engine_manager))
         g_subprocess_force_exit(engine_manager);
 }
 
-void gtkchess_app_open(GApplication* app, gpointer data)
+void gtkchess_app_open(
+	__attribute_maybe_unused__ GApplication* app,
+	__attribute_maybe_unused__ gpointer data)
 {
-
 }
 
 int start_engine_manager(GSubprocess *engine_manager)
@@ -86,7 +91,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 
 GtkBuilder *builder_init()
 {
-    GtkBuilder* builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
+    builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
     GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
@@ -164,13 +169,13 @@ GtkBuilder *builder_init()
     return builder;
 }
 
-void flip_board(GtkButton* button, gpointer Board)
+void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
 	state.flipped = !state.flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
-void new_game(GtkButton* button, gpointer Board)
+void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
 	int flipped = state.flipped;
 	init_state(&state);
@@ -178,7 +183,7 @@ void new_game(GtkButton* button, gpointer Board)
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
-gboolean parse_engine_response(GObject* stream, gpointer data)
+gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpointer data)
 {
 	int code=0;
 	size_t nbytes=0;
@@ -237,7 +242,7 @@ gboolean parse_engine_response(GObject* stream, gpointer data)
 	return TRUE;
 }
 
-void toggle_engine(GtkButton* self, gpointer data)
+void toggle_engine(GtkButton* self, __attribute_maybe_unused__ gpointer data)
 {
 	switch (engine_state) {
 		case ENGINE_IDLE:
