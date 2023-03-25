@@ -1,6 +1,10 @@
 #include "globals.h"
 #include "gtkchessapp.h"
 
+#if G_APPLICATION_DEFAULT_FLAGS != 0
+#define G_APPLICATION_DEFAULT_FLAGS G_APPLICATION_FLAGS_NONE
+#endif
+
 int main(int argc, char** argv)
 {
 	GtkApplication* app = gtk_application_new("org.gtk.gtkchess", G_APPLICATION_DEFAULT_FLAGS);
