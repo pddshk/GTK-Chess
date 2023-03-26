@@ -29,7 +29,7 @@ void gtkchess_app_activate(GApplication *app, __attribute_maybe_unused__ gpointe
     GList *windows=gtk_application_get_windows(GTK_APPLICATION(app));
     if (!windows){
         builder = builder_init();
-        mainwindow=GTK_WINDOW(gtk_builder_get_object(builder, "MainWindow"));
+        mainwindow = GTK_WINDOW(gtk_builder_get_object(builder, "MainWindow"));
         gtk_application_add_window(GTK_APPLICATION(app), mainwindow);
         gtk_widget_show_all(GTK_WIDGET(mainwindow));
     } else {
@@ -91,7 +91,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 
 GtkBuilder *builder_init()
 {
-    builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
+    GtkBuilder *builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
     GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
@@ -166,6 +166,10 @@ GtkBuilder *builder_init()
 		builder,
 		NULL
 	);
+	variations[0] = GTK_LABEL(gtk_builder_get_object(builder, "Variation0"));
+	variations[1] = GTK_LABEL(gtk_builder_get_object(builder, "Variation1"));
+	variations[2] = GTK_LABEL(gtk_builder_get_object(builder, "Variation2"));
+	variations[3] = GTK_LABEL(gtk_builder_get_object(builder, "Variation3"));
     return builder;
 }
 
@@ -275,4 +279,24 @@ void tell_engine_manager(int type, const void* data, size_t size)
     if (size)
         g_output_stream_write(to_engine_manager, data, size, NULL, NULL);
     g_output_stream_flush(to_engine_manager, NULL, NULL);
+}
+
+void add_variation(GtkButton* self, gpointer data)
+{
+	printf("nvariations = %d\n",nvariations);
+	fflush(stdout);
+	if (nvariations > 3) return;
+	nvariations++;
+	char text[2]="1";
+	sprintf(text,"%d",nvariations);
+	gtk_label_set_text(variations[nvariations-1], text);
+}
+
+void rm_variation(GtkButton* self, gpointer data)
+{
+	printf("nvariations = %d\n",nvariations);
+	fflush(stdout);
+	if (nvariations < 2) return;
+	gtk_label_set_text(variations[nvariations-1], "");
+	nvariations--;
 }

@@ -11,6 +11,8 @@ extern GSource *from_engine_manager_source;
 extern GSubprocess *engine_manager;
 extern GtkBuilder *builder;
 extern GtkWindow *mainwindow;
+extern int nvariations;
+extern GtkLabel *variations[4];
 
 GtkBuilder *builder_init();
 
@@ -25,6 +27,9 @@ gboolean parse_engine_response(GObject*, gpointer);
 void tell_engine_manager(int, const void*, size_t);
 
 int start_engine_manager(GSubprocess*);
+
+void add_variation(GtkButton*, gpointer);
+void rm_variation(GtkButton*, gpointer);
 
 void gtkchess_app_startup(GApplication*, gpointer);
 void gtkchess_app_shutdown(GApplication*, gpointer);
