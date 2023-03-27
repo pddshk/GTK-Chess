@@ -7,17 +7,20 @@ PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 CHECKFLAGS += -Wextra -pedantic -fsyntax-only
-CPPCHECKFLAGS += --enable=all -x c --error-exitcode=1 --std=c11 --suppress=missingIncludeSystem --suppress=unusedFunction
+CPPCHECKFLAGS += -x c --inline-suppr --error-exitcode=1 --std=c11 --enable=style
 GCC = $(shell which gcc)
 CLANG = $(shell which clang)
 CPPCHECK = $(shell which cppcheck)
 
 OBJDIR	= obj
 SRCDIR	= src
-NAMES   = main board state rules #gtkchessapp
+NAMES   = main board state rules gtkchessapp
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
 HEADERS = $(addprefix $(SRCDIR)/, $(addsuffix .h, $(NAMES)))
+
+TEMPDIR = temp
+CPPCHECKFLAGS += --cppcheck-build-dir=$(TEMPDIR)
 
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONF) --variable=glib_compile_resources gio-2.0)
 BUILT_SRC = obj/resources.c
@@ -52,7 +55,10 @@ clean:
 run:
 	./GTKChess
 
-check: check_sources check_headers
+check: prepare_check check_sources check_headers
+
+prepare_check:
+	mkdir -p $(TEMPDIR)
 
 check_sources:
 	$(GCC) $(CFLAGS) $(CHECKFLAGS) $(SOURCES)

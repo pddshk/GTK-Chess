@@ -1,18 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
-
-typedef struct {
-    int castlings[4]; // Queenside | Kingside | queenside | kingside
-    int side_to_move;
-    int fifty_moves_counter;
-    int move_counter;
-    char field[8][9];
-    // set when pawn is moved 2 steps forward
-    // unset when not
-    int enpassant_row, enpassant_col;
-    int is_active;
-    int flipped;
-} game_state;
+#include "typedecl.h"
 
 extern game_state state;
 
@@ -24,7 +12,7 @@ void init_state(game_state*);
 char get_field_by_notation(game_state*, const char*);
 void get_move_notation(game_state*, char*, int, int, int, int, char);
 void resolve_coord(game_state*, int*, int*);
-int get_field(game_state*, int, int);
+char get_field(game_state*, int, int);
 void set_field(game_state*, int, int, char);
 
 int is_active(game_state*);
