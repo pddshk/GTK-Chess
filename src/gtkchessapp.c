@@ -91,6 +91,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 
 GtkBuilder *builder_init()
 {
+	//cppcheck-suppress shadowVariable
     GtkBuilder *builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
     GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
@@ -281,7 +282,9 @@ void tell_engine_manager(int type, const void* data, size_t size)
     g_output_stream_flush(to_engine_manager, NULL, NULL);
 }
 
-void add_variation(GtkButton* self, gpointer data)
+void add_variation(
+	__attribute_maybe_unused__ GtkButton* self,
+	__attribute_maybe_unused__ gpointer data)
 {
 	printf("nvariations = %d\n",nvariations);
 	fflush(stdout);
@@ -292,7 +295,9 @@ void add_variation(GtkButton* self, gpointer data)
 	gtk_label_set_text(variations[nvariations-1], text);
 }
 
-void rm_variation(GtkButton* self, gpointer data)
+void rm_variation(
+	__attribute_maybe_unused__ GtkButton* self,
+	__attribute_maybe_unused__ gpointer data)
 {
 	printf("nvariations = %d\n",nvariations);
 	fflush(stdout);

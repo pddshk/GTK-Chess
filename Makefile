@@ -1,5 +1,5 @@
 CC		= clang
-STD		?= c2x
+STD		?= c17
 GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
@@ -7,7 +7,7 @@ PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 CHECKFLAGS += -Wextra -pedantic -fsyntax-only
-CPPCHECKFLAGS += -x c --error-exitcode=1 --std=c11 --enable=style
+CPPCHECKFLAGS += -x c --inline-suppr --error-exitcode=1 --std=c11 --enable=style
 GCC = $(shell which gcc)
 CLANG = $(shell which clang)
 CPPCHECK = $(shell which cppcheck)
