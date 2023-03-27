@@ -116,7 +116,7 @@ int init_engine(engine_params* params)
 	buff[nread] = 0;
 	// printf("read %lu bytes:\n%s\n", nread, buff);
 
-    for (size_t i = 0; i < params->nparams; i++) {
+    for (int i = 0; i < params->nparams; i++) {
         char command[64] = "setoption name ";
         strcat(command, params->param_names[i]);
         strcat(command, " value ");
@@ -155,7 +155,8 @@ void stop_engine()
     engine_state = ENGINE_IDLE;
 }
 
-void *engine_to_manager(void *data)
+//remove maybe unused
+void *engine_to_manager(__attribute_maybe_unused__ void *data)
 {
     char buff[2048];
     while (1) {
@@ -190,9 +191,9 @@ void main_loop()
         read(STDIN_FILENO, &code, sizeof code);
         read(STDIN_FILENO, &size, sizeof size);
         char buff[2048];
-        size_t nread;
+        ssize_t nread;
         nread = read(STDIN_FILENO, buff, size);
-        if (nread == -1){
+        if (nread == (ssize_t)-1){
             perror("Cannot read from stdin:");
             pthread_cancel(thread_id);
             exit(EXIT_FAILURE);
@@ -221,7 +222,10 @@ void main_loop()
     pthread_join(thread_id, NULL);
 }
 
-gboolean parse_engine_response(gint from_engine, GIOCondition condition, gpointer object)
+gboolean parse_engine_response(
+    gint from_engine, 
+    GIOCondition condition,
+    __attribute_maybe_unused__ gpointer object)
 {
     if (condition == G_IO_IN){
         char buff[4096];

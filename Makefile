@@ -6,21 +6,22 @@ GIO		= gio-unix-2.0 gio-2.0
 PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
-CHECKFLAGS += -Wextra -pedantic -fsyntax-only
-CPPCHECKFLAGS += -x c --inline-suppr --error-exitcode=1 --std=c11 --enable=style
-GCC = $(shell which gcc)
-CLANG = $(shell which clang)
-CPPCHECK = $(shell which cppcheck)
 
 OBJDIR	= obj
 SRCDIR	= src
 NAMES   = main board state rules gtkchessapp
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
-HEADERS = $(addprefix $(SRCDIR)/, $(addsuffix .h, $(NAMES)))
 
+CHECKFLAGS += -Wextra -pedantic -fsyntax-only
+GCC = $(shell which gcc)
+CLANG = $(shell which clang)
+CPPCHECK = $(shell which cppcheck)
 TEMPDIR = temp
+CPPCHECKFLAGS += -x c --inline-suppr --error-exitcode=1
+CPPCHECKFLAGS += --std=c11 --enable=style
 CPPCHECKFLAGS += --cppcheck-build-dir=$(TEMPDIR)
+CSOURCES = $(SOURCES) src/engine_manager.c
 
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONF) --variable=glib_compile_resources gio-2.0)
 BUILT_SRC = obj/resources.c
@@ -55,15 +56,17 @@ clean:
 run:
 	./GTKChess
 
-check: prepare_check check_sources check_headers
+check: prepare_check check_sources
 
 prepare_check:
 	mkdir -p $(TEMPDIR)
 
 check_sources:
-	$(GCC) $(CFLAGS) $(CHECKFLAGS) $(SOURCES)
-	$(CLANG) $(CFLAGS) $(CHECKFLAGS) $(SOURCES)
-	$(CPPCHECK) $(CPPCHECKFLAGS) $(SOURCES)
+	$(GCC) $(CFLAGS) $(CHECKFLAGS) $(CSOURCES)
+	$(CLANG) $(CFLAGS) $(CHECKFLAGS) $(CSOURCES)
+	$(CPPCHECK) $(CPPCHECKFLAGS) $(CSOURCES)
 
-check_headers:
-	$(CPPCHECK) $(CPPCHECKFLAGS) $(HEADERS)
+clean_check:
+	rm -f $(TEMPDIR)/*
+
+restore: cleaner clean_check
