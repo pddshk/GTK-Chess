@@ -82,10 +82,12 @@ int bishops_moves(game_state* state, char piece, int from_row, int from_col, int
     else return 0;
 }
 
-int knights_moves(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col){
+int knights_moves(
+    __attribute_maybe_unused__ game_state* state,
+    __attribute_maybe_unused__ char piece,
+    int from_row, int from_col, int to_row, int to_col){
     int d_row = to_row - from_row, d_col = to_col - from_col;
-    return (((d_row == 2 || d_row == -2) && (d_col == 1 || d_col == -1)) ||
-           ((d_col == 2 || d_col == -2) && (d_row == 1 || d_row == -1)));
+    return d_row*d_row + d_col*d_col == 5;
 }
 
 int pawns_moves(game_state *state, char piece, int from_row, int from_col, int to_row, int to_col){

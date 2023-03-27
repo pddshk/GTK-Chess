@@ -3,3 +3,6 @@ obj
 GTKChess
 engine_manager
 .vscode
+*~
+src/resources.c
+temp

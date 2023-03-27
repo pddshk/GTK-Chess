@@ -92,7 +92,7 @@ These are all the command the engine gets from the interface.
 	for example do not use <name> = "draw value".
 	Here are some strings for the example below:
 	   "setoption name Nullmove value true\n"
-      "setoption name Selectivity value 3\n"
+       "setoption name Selectivity value 3\n"
 	   "setoption name Style value Risky\n"
 	   "setoption name Clear Hash\n"
 	   "setoption name NalimovPath value c:\chess\tb\4;c:\chess\tb\5\n"
@@ -156,13 +156,13 @@ These are all the command the engine gets from the interface.
 	* binc <x>
 		black increment per move in mseconds if x > 0
 	* movestogo <x>
-      there are x moves to the next time control,
+    	there are x moves to the next time control,
 		this will only be sent if x > 0,
 		if you don't get this and get the wtime and btime it's sudden death
 	* depth <x>
 		search x plies only.
 	* nodes <x>
-	   search x nodes only,
+	   	search x nodes only,
 	* mate <x>
 		search for a mate in x moves
 	* movetime <x>
