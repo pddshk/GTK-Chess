@@ -12,35 +12,7 @@ enum _EngineState{
     ENGINE_ERROR
 } engine_state;
 
-/*int min(int a, int b)
-{
-	return (a>b)?b:a;
-}
-void movescroll(GtkButton* button)
-{
-	puts("widget is outside\n");
-	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment( 
-    GTK_SCROLLED_WINDOW(scrl_window));
-	GtkAdjustment *wadj = gtk_scrolled_window_get_hadjustment( 
-    GTK_SCROLLED_WINDOW(scrl_window));
-	gint x, y;
-   	gtk_widget_translate_coordinates (button, scrl_window, 0, 0, &x, &y);
-	printf("x%d y %d\n",x,y);
-    gtk_adjustment_set_value(wadj, min(x,  gtk_adjustment_get_upper(wadj) - gtk_adjustment_get_page_size(wadj)));
-	gtk_adjustment_set_value(hadj, min(y,  gtk_adjustment_get_upper(hadj) - gtk_adjustment_get_page_size(hadj)));
-}
-gboolean is_invisible_in (GtkWidget *child, GtkWidget *scrolled,GtkWidget *vbox)
-{
-    gint x, y;
-    GtkAllocation child_alloc, scroll_alloc;
-    gtk_widget_translate_coordinates (child, scrolled, 0, 0, &x, &y);
-    gtk_widget_get_allocation(child, &child_alloc);
-    gtk_widget_get_allocation(scrolled, &scroll_alloc);
-	printf("x%d y%d\nscwidth%d scheight%d\nchwidth%d chheight%d\n",x,y,scroll_alloc.width, scroll_alloc.height,child_alloc.width,child_alloc.height);
-    return (x >= 0 && y >= 0) 
-        && x + child_alloc.width >= scroll_alloc.width
-        && y + child_alloc.height >= scroll_alloc.height;
-}*/
+
 
 gchar* get_sign(int number)
 {
@@ -173,7 +145,7 @@ void new_game(GtkButton* button, gpointer Board)
 {
 	int flipped = state.flipped;
 	init_state(&state);
-	//
+
 	destroy_tree(tree);
 	tree = init_tree(&state);
 	//
@@ -200,16 +172,16 @@ void get_FEN(GtkButton* button, gpointer data)
 }
 
 void paste_FEN(GtkButton* main_window_button, gpointer data) {
-    GtkWidget *window = gtk_builder_get_object(builder, "MainWindow");
+    GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
     GtkWidget *dialog;
     GtkWidget *content_area;
     GtkWidget *grid;
     GtkWidget *label;
-    GtkWidget *button;
+    //GtkWidget *button;
     static GtkEntry *textbox;
 
     dialog = gtk_dialog_new_with_buttons ("Get Text",
-                                          window,
+                                          GTK_WINDOW(window),
                                           GTK_DIALOG_MODAL,
 										 
                                           NULL);
@@ -219,8 +191,8 @@ void paste_FEN(GtkButton* main_window_button, gpointer data) {
 
     label = gtk_label_new("Paste FEN: ");
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
-    textbox = gtk_entry_new();
-    gtk_grid_attach(GTK_GRID(grid), textbox, 1, 0, 1, 1);
+    textbox = GTK_ENTRY(gtk_entry_new());
+    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
     gtk_widget_show_all(dialog);
@@ -240,7 +212,7 @@ void get_PGN(GtkButton* button, gpointer data)
 	//destroy_tree(tree);
 	
     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
-	PGN_to_tree(gtk_entry_get_text(entry));
+	PGN_to_tree((char*)gtk_entry_get_text(entry));
 	//show_state(tree->root, 0);
     gtk_widget_destroy(widget); 
 	//show_state(tree->root, 0);
@@ -250,18 +222,18 @@ void get_PGN(GtkButton* button, gpointer data)
 
 void paste_PGN(GtkButton* main_window_button, gpointer data) 
 {
-	 GtkWidget *window = gtk_builder_get_object(builder, "MainWindow");
+	 GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
     GtkWidget *dialog;
     GtkWidget *content_area;
     GtkWidget *grid;
     GtkWidget *label;
-    GtkWidget *button;
+    //GtkWidget *button;
     static GtkEntry *textbox;
 
     dialog = gtk_dialog_new_with_buttons ("Get Text",
-                                          window,
+                                          GTK_WINDOW(window),
                                           GTK_DIALOG_MODAL,
-										 
+									
                                           NULL);
     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
     grid = gtk_grid_new();
@@ -269,8 +241,8 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
 
     label = gtk_label_new("Paste PGN: ");
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
-    textbox = gtk_entry_new();
-    gtk_grid_attach(GTK_GRID(grid), textbox, 1, 0, 1, 1);
+    textbox = GTK_ENTRY(gtk_entry_new());
+    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
     gtk_widget_show_all(dialog);
@@ -365,7 +337,8 @@ void show_state(tnode* node, int level)
 
 			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
-			char* label = get_label(node);
+			char* label = malloc(sizeof(char)* 10);
+			get_label(node,label);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
 			if (node == tree->current) {
@@ -426,16 +399,17 @@ void show_state(tnode* node, int level)
 		}
 		default:
 		{
-			tnode* parent = (tnode*)node->parent;
+			//tnode* parent = (tnode*)node->parent;
 			GtkBox* subtreebox = node->vbox;
 			GtkBox *hbox=node->hbox;
-			char* label=get_label(node);
+			char* label=malloc(sizeof(char)* 10);
+			get_label(node,label);
 			if((*node).hbox_status == 0)
 			{
 	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
 				gchar *text =  get_sign(node->indent); 
 				gtk_text_buffer_set_text (tb,text,strlen(text));
-				GtkEntry *textArea = (gtk_text_view_new_with_buffer(tb));
+				GtkEntry *textArea = GTK_ENTRY(gtk_text_view_new_with_buffer(tb));
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
 				free(text); 
 			}

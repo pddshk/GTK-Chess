@@ -18,8 +18,12 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
     for( ; elem!=NULL; elem = elem->next) 
 		{
       tnode* item = elem->data;
-      char* label_1 = get_label(item);
-      char* label_2 = get_label(aboba);
+      
+      char* label_1 = malloc(sizeof(char)* 10);
+      get_label(item,label_1);
+      char* label_2 = malloc(sizeof(char)* 10);
+      get_label(aboba,label_2);
+
       if(strcmp(label_1,label_2)==0)//compare game state
       {
         free(label_1);
@@ -88,9 +92,9 @@ void destroy_tnodes(tnode* node)
 
 }
 
-char* get_label( tnode* node)
+void get_label( tnode* node, char* buffer)
 {
-	char* label = malloc(sizeof(char)* 10);
+	char* label = buffer;
 	int actual_move = node->field->move_counter;
 	if (node->field->side_to_move != 0) actual_move--;
 	if (node->field->side_to_move) 
@@ -101,6 +105,6 @@ char* get_label( tnode* node)
 	{
 		sprintf(label, "%d. %s  \n", actual_move, node->last_move_notation);
 	}
-	return label;
+
 
 }

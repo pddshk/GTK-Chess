@@ -394,10 +394,10 @@ void print_state(game_state* state)
     }
 }
 
-void FEN_to_state(char* fen) {
+void FEN_to_state(const char* fen) {
     char delim[] = " ";
     game_state newstate;
-    char* placement = strtok(fen, delim);
+    char* placement = strtok((char*)fen, delim);
     char field_ptr = 0;
     for(int i = 0; i < strlen(placement); field_ptr++) 
     {
@@ -497,6 +497,8 @@ char* remove_PGN_comments(char* pgn) {
         newpgnResize[i] = newpgn[i];
     }
     free(newpgn);
+    if(newpgnResize[ptr-1]=='\n')
+    newpgnResize[ptr-1]='\0';
     return newpgnResize;
 }
 

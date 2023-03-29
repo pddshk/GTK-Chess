@@ -64,7 +64,7 @@ int fifty_moves_exceeded(game_state*);
 int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
-void FEN_to_state(char*);
+void FEN_to_state(const char*);
 void PGN_to_tree(char*);
 
 #endif

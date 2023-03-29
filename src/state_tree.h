@@ -32,6 +32,6 @@ state_tree* init_tree(game_state*);
 void destroy_tree(state_tree*);
 tnode * addnode(game_state*, tnode*, char* last_move);
 void destroy_tnodes(tnode*);
-char* get_label( tnode* );
+void get_label( tnode* ,char*);
 
 #endif
