@@ -24,7 +24,9 @@ void gtkchess_app_startup(
 	load_textures("classic");
 }
 
-void gtkchess_app_activate(GApplication *app, __attribute_maybe_unused__ gpointer data)
+void gtkchess_app_activate(
+	GApplication *app,
+	__attribute_maybe_unused__ gpointer data)
 {
     GList *windows=gtk_application_get_windows(GTK_APPLICATION(app));
     if (!windows){
@@ -42,7 +44,8 @@ void gtkchess_app_shutdown(
 	__attribute_maybe_unused__ gpointer data)
 {
     tell_engine_manager(QUIT, NULL, 0);
-    if (G_IS_SUBPROCESS(engine_manager) && !g_subprocess_get_if_exited(engine_manager))
+    if (G_IS_SUBPROCESS(engine_manager) &&
+			!g_subprocess_get_if_exited(engine_manager))
         g_subprocess_force_exit(engine_manager);
 }
 
@@ -76,7 +79,10 @@ int start_engine_manager(GSubprocess *engine_manager)
 			G_POLLABLE_INPUT_STREAM(from_engine_manager),
 			NULL
 		);
-		g_source_attach(from_engine_manager_source, NULL); // to default context
+		g_source_attach(
+			from_engine_manager_source,
+			NULL // to default context
+		);
 	} else {
 		fprintf(stderr, "Cannot create pollable stream from engine manager!\n");
 		return FALSE;
@@ -118,8 +124,6 @@ GtkBuilder *builder_init()
 		GDK_ACTION_MOVE
 	);
 	g_signal_connect(Board, "drag-begin", G_CALLBACK(drag_begin), empty_icon);
-
-	GtkWidget **dialogs = g_new(GtkWidget*, 4);
 	// mate_dialog
 	dialogs[0] = gtk_message_dialog_new(
 		GTK_WINDOW(window),
@@ -242,6 +246,7 @@ gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpoin
 		printf("bestmove %s\n", buff);
 		break;
 	default:
+		printf("got code %d", code);
 		break;
 	}
 	return TRUE;

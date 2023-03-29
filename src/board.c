@@ -346,7 +346,14 @@ drag_drop (
 	        pawn_promotion_row = to_row;
 	        pawn_promotion_col = to_col;
 		} else {
-			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0);
+			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col, 0);
+			GtkWidget **dialogs = data; // mate stalemate and im dialogs
+			if (is_mate(&state))
+				gtk_dialog_run(GTK_DIALOG (dialogs[0]));
+			else if (is_stalemate(&state))
+				gtk_dialog_run(GTK_DIALOG (dialogs[1]));
+			else if (insufficient_material(&state))
+				gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 		}
 	else
 		cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
@@ -357,13 +364,6 @@ drag_drop (
 	drag_col_start = drag_row_start = 0;
 	// print_state(&state);
 	// parse incoming data
-	GtkWidget **dialogs = data; // mate stalemate and im dialogs
-	if (is_mate(&state))
-        gtk_dialog_run(GTK_DIALOG (dialogs[0]));
-	else if (is_stalemate(&state))
-        gtk_dialog_run(GTK_DIALOG (dialogs[1]));
-	else if (insufficient_material(&state))
-		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 	return TRUE;
 
 }

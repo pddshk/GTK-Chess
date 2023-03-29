@@ -1,3 +1,6 @@
+#ifndef INTERACT_H
+#define INTERACT_H
+
 enum {
     // both
     NOP,
@@ -20,3 +23,5 @@ enum {
     BESTMOVE,
     BESTMOVE_PONDER
 };
+
+#endif

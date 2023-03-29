@@ -14,4 +14,5 @@ int nvariations = 1;
 GtkLabel *variations[4];
 int pawn_promotion_row = -1, pawn_promotion_col = -1;
 char pawn_promotion = '-';
+GtkWidget *dialogs[4];
 #endif

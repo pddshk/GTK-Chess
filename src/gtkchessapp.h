@@ -13,6 +13,7 @@ extern GtkBuilder *builder;
 extern GtkWindow *mainwindow;
 extern int nvariations;
 extern GtkLabel *variations[4];
+extern GtkWidget *dialogs[4];
 
 GtkBuilder *builder_init();
 
