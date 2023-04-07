@@ -17,7 +17,7 @@ typedef struct
   int indent;
   GtkBox* hbox;
   GtkBox* vbox;
-  char* last_move_notation;
+  char last_move_notation[10];
 } tnode;
 
 typedef struct
@@ -30,8 +30,8 @@ typedef struct
 
 state_tree* init_tree(game_state*);
 void destroy_tree(state_tree*);
-tnode * addnode(game_state*, tnode*, char* last_move);
+tnode * addnode(game_state*, tnode*, const char* last_move);
 void destroy_tnodes(tnode*);
-void get_label( tnode* ,char*);
+void get_label( tnode*, char*);
 
 #endif
