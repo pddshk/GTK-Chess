@@ -49,7 +49,7 @@ char get_field_by_notation(game_state* state, const char* field)
     return get_field(state, i, j);
 }
 
-void get_move_notation(game_state* state, char* res, int from_row, int from_col, int to_row, int to_col, char promoted)
+void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, int from_row, int from_col, int to_row, int to_col, char promoted)
 {
     res[0] = from_col + 'a';
     res[1] = 8 - from_row + '0';
@@ -66,7 +66,7 @@ void resolve_coord(game_state* state, int*row, int*col)
     }
 }
 
-int get_field(game_state* state, int row, int col)
+char get_field(game_state* state, int row, int col)
 {
     if (state->flipped)
         return state->field[7-row][7-col];
@@ -163,7 +163,11 @@ void just_move(game_state* state, char piece, int to_row, int to_col)
     state->field[to_row][to_col] = piece;
 }
 
-char is_castling(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col)
+char is_castling(
+    __attribute_maybe_unused__ game_state* state,
+    char piece,
+    __attribute_maybe_unused__ int from_row, int from_col,
+    __attribute_maybe_unused__ int to_row, int to_col)
 {
     int d_col = to_col - from_col;
     if (piece == 'K' || piece == 'k'){
