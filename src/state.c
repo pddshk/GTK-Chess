@@ -140,8 +140,7 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
     get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
     
     //
-    game_state* state_storage = (game_state*) malloc(sizeof(game_state));
-    *state_storage = *state;
+    game_state state_storage = *state;
     (*tree).current =  addnode(state_storage, tree->current,  move); 
     show_state(tree->root,0);
     //

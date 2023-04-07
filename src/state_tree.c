@@ -1,6 +1,6 @@
 #include "state_tree.h"
 
-tnode* addnode(game_state* _field, tnode *_parent, const char *last_move) 
+tnode* addnode(game_state _field, tnode *_parent, const char *last_move) 
 {
   tnode* aboba =  (tnode*)malloc(sizeof(tnode)); 
   aboba->field = _field;
@@ -17,11 +17,7 @@ tnode* addnode(game_state* _field, tnode *_parent, const char *last_move)
     for( ; elem!=NULL; elem = elem->next) 
 		{
       tnode* item = elem->data;
-      char label_1[10];
-      get_label(item, label_1);
-      char label_2[10];
-      get_label(aboba, label_2);
-      if(strcmp(label_1,label_2)==0)//compare game state
+      if(tnode_equals(item,aboba)==0)//compare game state
       {
         return item;
       }
@@ -33,7 +29,7 @@ tnode* addnode(game_state* _field, tnode *_parent, const char *last_move)
 }
 
 
-state_tree* init_tree(game_state* state)
+state_tree* init_tree(game_state state)
 {
     state_tree* tree =  (state_tree*)malloc(sizeof(state_tree)); 
     tnode* abobik = (tnode*)malloc(sizeof(tnode));
@@ -79,11 +75,20 @@ void destroy_tnodes(tnode* node)
 
 }
 
+int tnode_equals(tnode* tnode_a, tnode* tnode_b)//compares tnodes: returns 0 if equal -1 - if not
+{
+  if(tnode_a->field.side_to_move==tnode_b->field.side_to_move &&
+  tnode_a->field.move_counter==tnode_b->field.move_counter &&
+  strcmp(tnode_a->last_move_notation,tnode_b->last_move_notation)==0)
+  return 0;
+  return -1;
+}
+
 void get_label(tnode* node, char* label)
 {
-	int actual_move = node->field->move_counter;
-	if (node->field->side_to_move != 0) actual_move--;
-	if (node->field->side_to_move) 
+	int actual_move = node->field.move_counter;
+	if (node->field.side_to_move != 0) actual_move--;
+	if (node->field.side_to_move) 
 	{
 		sprintf(label, "%d... %s\n", actual_move, node->last_move_notation);
 	}

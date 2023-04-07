@@ -21,7 +21,7 @@ void gtkchess_app_startup(
 	}
     engine_state = ENGINE_IDLE;
 	init_state(&state);
-	tree = init_tree(&state);
+	tree = init_tree(state);
 	// init_textures();
 	// load_textures("classic");
 }
@@ -202,7 +202,7 @@ void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 	int flipped = state.flipped;
 	init_state(&state);
 	destroy_tree(tree);
-	tree = init_tree(&state);
+	tree = init_tree(state);
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
@@ -350,7 +350,7 @@ void get_FEN(GtkButton* button, gpointer data)
     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
     FEN_to_state(gtk_entry_get_text(entry));
 	destroy_tree(tree);
-	tree = init_tree(&state);
+	tree = init_tree(state);
 	show_state(tree->root, 0);
     gtk_widget_destroy (widget); // This will close the dialog
 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
@@ -407,7 +407,7 @@ void get_PGN(GtkButton* button, gpointer data)
 
 void paste_PGN(GtkButton* main_window_button, gpointer data) 
 {
-	 GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
+	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
     GtkWidget *dialog;
     GtkWidget *content_area;
     GtkWidget *grid;
@@ -436,7 +436,7 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
 }
 
 void select_state(GtkButton* button, gpointer node) {
-	state = *(((tnode*)node)->field);
+	state = (((tnode*)node)->field);
 	(*tree).current = (tnode*)node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
 	show_state(tree->root, 0);
