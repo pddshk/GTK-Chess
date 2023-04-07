@@ -1,16 +1,15 @@
 #include "state_tree.h"
 
-tnode* addnode(game_state* _field, tnode *_parent, char *last_move) 
+tnode* addnode(game_state* _field, tnode *_parent, const char *last_move) 
 {
-  tnode* aboba =  (tnode*)malloc(48); 
+  tnode* aboba =  (tnode*)malloc(sizeof(tnode)); 
   aboba->field = _field;
-
   aboba->children =  NULL;
-  aboba->last_move_notation = last_move;
+  strcpy(aboba->last_move_notation, last_move);
   aboba->hbox = NULL;
- aboba->vbox = NULL;
- (*aboba).hbox_status=0;
- (*aboba).indent=0;
+  aboba->vbox = NULL;
+  (*aboba).hbox_status=0;
+  (*aboba).indent=0;
   if(_parent!= NULL)
   {
     aboba->parent = (struct tnode*)_parent;
@@ -18,38 +17,30 @@ tnode* addnode(game_state* _field, tnode *_parent, char *last_move)
     for( ; elem!=NULL; elem = elem->next) 
 		{
       tnode* item = elem->data;
-      
-      char* label_1 = malloc(sizeof(char)* 10);
-      get_label(item,label_1);
-      char* label_2 = malloc(sizeof(char)* 10);
-      get_label(aboba,label_2);
-
+      char label_1[10];
+      get_label(item, label_1);
+      char label_2[10];
+      get_label(aboba, label_2);
       if(strcmp(label_1,label_2)==0)//compare game state
       {
-        free(label_1);
-        free(label_2);
-       
-
         return item;
       }
-      free(label_1);
-      free(label_2);
     }
-    
     _parent->children =g_list_append(_parent->children, aboba);
   }
+  
   return aboba;
 }
 
 
 state_tree* init_tree(game_state* state)
 {
-    state_tree* tree =  (state_tree*)malloc(48); 
-    tnode* abobik = (tnode*)malloc(48);
+    state_tree* tree =  (state_tree*)malloc(sizeof(state_tree)); 
+    tnode* abobik = (tnode*)malloc(sizeof(tnode));
     abobik->field = state;
-    abobik->parent=NULL;
+    abobik->parent = NULL;
     abobik->children = NULL;
-    abobik->last_move_notation = "beg";
+    strcpy(abobik->last_move_notation, "begin");
     (*abobik).hbox_status=0;
     (*abobik).indent=0;
     abobik->hbox = NULL;
@@ -59,15 +50,15 @@ state_tree* init_tree(game_state* state)
     return tree;
    
 }
+
 void destroy_tree(state_tree* aboba)
 {
   if(aboba==NULL)
   return;
   destroy_tnodes(aboba->root);
-  //free(aboba->root->last_move_notation);
   free(aboba);
-  //puts("tree destroyed\n");
 }
+
 void destroy_tnodes(tnode* node)
 {
   if(g_list_length(node->children)!=0)
@@ -83,18 +74,13 @@ void destroy_tnodes(tnode* node)
   }
   
   //free(node->field);
-  //free(node->hbox);
-  //free(node->vbox);
-  //free(node->last_move_notation);
   
   free(node);
-  //free(node->last_move_notation);
 
 }
 
-void get_label( tnode* node, char* buffer)
+void get_label(tnode* node, char* label)
 {
-	char* label = buffer;
 	int actual_move = node->field->move_counter;
 	if (node->field->side_to_move != 0) actual_move--;
 	if (node->field->side_to_move) 
@@ -105,6 +91,5 @@ void get_label( tnode* node, char* buffer)
 	{
 		sprintf(label, "%d. %s  \n", actual_move, node->last_move_notation);
 	}
-
 
 }

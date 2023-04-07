@@ -145,7 +145,6 @@ void new_game(GtkButton* button, gpointer Board)
 {
 	int flipped = state.flipped;
 	init_state(&state);
-
 	destroy_tree(tree);
 	tree = init_tree(&state);
 	//
@@ -312,7 +311,6 @@ void show_state(tnode* node, int level)
 	{
 		case 0:
 		{
-			//printf("0\n");
 			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
 			for(; l!=NULL;l=l->next)
 			{
@@ -333,8 +331,6 @@ void show_state(tnode* node, int level)
 		}
 		case 1:
 		{
-			//printf("1\n");
-
 			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			char* label = malloc(sizeof(char)* 10);
@@ -356,10 +352,6 @@ void show_state(tnode* node, int level)
 				subtreebox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
 				gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(subtreebox));
 			}
-			/*if(is_invisible_in(subtreehbox,viewport,vbox))
-			{
-				movescroll(button);
-			}*/
 			//first child gets level 1 and is shown last, second - level 2, third - level 3...
 			if(g_list_length(node->children)!=0)
 			{
@@ -394,6 +386,7 @@ void show_state(tnode* node, int level)
 				g_list_free(elem);
 				show_state(first_item,1);
 			}
+			
 			gtk_widget_show_all(GTK_WIDGET(vbox));
 			break;
 		}
@@ -402,8 +395,6 @@ void show_state(tnode* node, int level)
 			//tnode* parent = (tnode*)node->parent;
 			GtkBox* subtreebox = node->vbox;
 			GtkBox *hbox=node->hbox;
-			char* label=malloc(sizeof(char)* 10);
-			get_label(node,label);
 			if((*node).hbox_status == 0)
 			{
 	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
@@ -415,30 +406,12 @@ void show_state(tnode* node, int level)
 			}
 
 			//button creation
+			char* label=malloc(sizeof(char)* 10);
+			get_label(node,label);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			free(label);
 			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
-
-			/*if(is_invisible_in(hbox,viewport,vbox))
-			{
-				movescroll(button);
-			}*/
-			/*
-			gint wx, wy;
-			gtk_widget_translate_coordinates(GTK_WIDGET(hbox), gtk_widget_get_toplevel(hbox), 0, 0, &wx, &wy);
-			gint vbox_height = gtk_widget_get_allocated_height(GTK_WIDGET(vbox));
-			gint vbox_width = gtk_widget_get_allocated_width(GTK_WIDGET(vbox));
-
-			GtkScrolledWindow* scr_window = (GtkScrolledWindow*)window;
-
-			GtkAdjustment* w_a = gtk_scrolled_window_get_hadjustment(scr_window);
-			GtkAdjustment* h_a = gtk_scrolled_window_get_vadjustment(scr_window);
-			
-			gdouble x = (gdouble)wx/(gdouble)vbox_width;
-			gdouble y = (gdouble)wy/(gdouble)vbox_height;
-			printf("wx%d,wy%d\nheigth%d,width%d\nx%f,y%f\n",wx,wy,vbox_height,vbox_width,x,y);*/
-			//gtk_adjustment_set_value(w_a, x);
-			//gtk_adjustment_set_value(h_a, y);
 			
 			if (node == tree->current) 
 			{
@@ -447,7 +420,6 @@ void show_state(tnode* node, int level)
 			}
 			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
 			
-			free(label);
 			//going through children
 			if(g_list_length(node->children)!=0)
 			{
@@ -475,7 +447,6 @@ void show_state(tnode* node, int level)
 					GValue targetIndex = G_VALUE_INIT;
 					g_value_init (&targetIndex, G_TYPE_INT);
 					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(node->hbox),"position",&targetIndex);
-					//puts("afsd");
 					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
 					//
 					show_state(item,level);
@@ -484,7 +455,6 @@ void show_state(tnode* node, int level)
 				g_list_free(elem);
 				show_state(first_item,t_level);
 			}
-			//printf("first level default\n");
 			gtk_widget_show_all(GTK_WIDGET(vbox));
 			gtk_widget_show_all(GTK_WIDGET(subtreebox));
 			break;
