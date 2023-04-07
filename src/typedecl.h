@@ -24,7 +24,7 @@ typedef struct
   int indent;
   GtkBox* hbox;
   GtkBox* vbox;
-  char* last_move_notation;
+  char last_move_notation[10];
 } tnode;
 
 typedef struct

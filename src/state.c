@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "rules.h"
-#include "gui.h"
+#include "gtkchessapp.h"
 
 extern state_tree* tree;
 
