@@ -15,6 +15,8 @@ typedef struct {
     int flipped;
 } game_state;
 
+struct tnode; 
+
 typedef struct
 {
   game_state field;      // поле данных

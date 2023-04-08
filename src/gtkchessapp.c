@@ -205,6 +205,7 @@ void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 	tree = init_tree(state);
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
+	show_state(tree->root,0);
 }
 
 gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpointer data)

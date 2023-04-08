@@ -29,7 +29,7 @@ BUILT_SRC = obj/resources.c
 OBJECTS += $(BUILT_SRC:.c=.o)
 
 GRESOURCE = src/gtkchessapp.gresource.xml
-UI = src/window.glade
+UI = src/window.glade src/selected.css
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
