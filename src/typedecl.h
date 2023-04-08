@@ -19,20 +19,20 @@ struct tnode;
 
 typedef struct
 {
-  game_state field;      // поле данных
-  struct tnode* parent;  // родитель
-  GList* children;
-  int hbox_status;
-  int indent;
-  GtkBox* hbox;
-  GtkBox* vbox;
-  char last_move_notation[10];
+    game_state field;      // поле данных
+    struct tnode* parent;  // родитель
+    GList* children;
+    int hbox_status;
+    int indent;
+    GtkBox* hbox;
+    GtkBox* vbox;
+    char last_move_notation[10];
 } tnode;
 
 typedef struct
 {
-  tnode* root;
-  tnode* current;
+    tnode* root;
+    tnode* current;
 } state_tree;
 
 #endif
