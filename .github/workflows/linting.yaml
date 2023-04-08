@@ -3,7 +3,7 @@ name: Lint and Syntax Check
 on:
   push:
     branches:
-        - master
+      - master
   pull_request:
     branches:
       - master
