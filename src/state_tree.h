@@ -8,6 +8,6 @@ void destroy_tree(state_tree*);
 tnode * addnode(game_state, tnode*, const char* last_move);
 void destroy_tnodes(tnode*);
 int tnode_equals(tnode* , tnode* );
-void get_label(tnode* ,char*);
+void get_label(tnode* ,char*);            //returns move text for the view
 
 #endif
