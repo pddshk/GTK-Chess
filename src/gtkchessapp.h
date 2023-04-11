@@ -6,6 +6,7 @@
 #include "interact.h"
 
 extern game_state state;
+extern int flipped;
 extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
 extern GSubprocess *engine_manager;

@@ -10,7 +10,7 @@ enum {
     BPQueen, BPRook, BPBishop, BPKnight
 };
 
-enum { Npieces = BPKnight + 1 };
+enum { Npieces = BPKnight };
 
 // pieces and board textures
 RsvgHandle *Pieces[Npieces];
@@ -134,7 +134,7 @@ int resolve_promoted_piece(char piece)
 	}
 }
 
-gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gpointer data)
+gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
 {
 	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
@@ -168,7 +168,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 	// when pawn is to be promoted
 	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
 	char q,r,b,n;
-	int dir = state.flipped ? -1 : 1;
+	int dir = flipped ? -1 : 1;
 	int _pawn_promotion_col = pawn_promotion_col,
 		_pawn_promotion_row = pawn_promotion_row;
 	resolve_coord(&state, &_pawn_promotion_row, &_pawn_promotion_col);
@@ -284,11 +284,11 @@ drag_begin (
 gboolean
 drag_motion (
   GtkWidget* widget,
-  __attribute_maybe_unused__ GdkDragContext* context,
+  GdkDragContext* context,
   gint x,
   gint y,
-  __attribute_maybe_unused__ guint time,
-  __attribute_maybe_unused__ gpointer user_data
+  guint time,
+  gpointer user_data
 )
 {
 	// update current drag position and redraw board
@@ -303,9 +303,9 @@ drag_motion (
 gboolean
 drag_failed (
   GtkWidget* self,
-  __attribute_maybe_unused__ GdkDragContext* context,
-  __attribute_maybe_unused__ GtkDragResult result,
-  __attribute_maybe_unused__ gpointer user_data
+  GdkDragContext* context,
+  GtkDragResult result,
+  gpointer user_data
 )
 {
 	cancel_drag(&state, dragged_piece, drag_row_start, drag_col_start);
@@ -318,10 +318,10 @@ drag_failed (
 gboolean
 drag_drop (
   GtkWidget* widget,
-  __attribute_maybe_unused__ GdkDragContext* context,
+  GdkDragContext* context,
   gint x,
   gint y,
-  __attribute_maybe_unused__ guint time,
+  guint time,
   gpointer data
 )
 {
@@ -346,15 +346,13 @@ drag_drop (
 			pawn_promotion = dragged_piece;
 	        pawn_promotion_row = to_row;
 	        pawn_promotion_col = to_col;
-		} else {
-			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col, 0);
-			GtkWidget **dialogs = data; // mate stalemate and im dialogs
-			if (is_mate(&state))
-				gtk_dialog_run(GTK_DIALOG (dialogs[0]));
-			else if (is_stalemate(&state))
-				gtk_dialog_run(GTK_DIALOG (dialogs[1]));
-			else if (insufficient_material(&state))
-				gtk_dialog_run(GTK_DIALOG(dialogs[2]));
+		} 
+		else 
+		{
+			
+			next_move(&state, dragged_piece, from_row, from_col, to_row, to_col,0);
+			//
+			//след ход
 		}
 		
 	}
@@ -364,9 +362,16 @@ drag_drop (
 	gtk_widget_queue_draw(widget);
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
-	drag_col_start = drag_row_start = -1;
+	drag_col_start = drag_row_start = 0;
 	// print_state(&state);
 	// parse incoming data
+	GtkWidget **dialogs = data; // mate stalemate and im dialogs
+	if (is_mate(&state))
+        gtk_dialog_run(GTK_DIALOG (dialogs[0]));
+	else if (is_stalemate(&state))
+        gtk_dialog_run(GTK_DIALOG (dialogs[1]));
+	else if (insufficient_material(&state))
+		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 	return TRUE;
 
 }
@@ -377,7 +382,7 @@ gboolean
 board_clicked (
   GtkWidget* widget,
   GdkEventButton *event,
-  __attribute_maybe_unused__ gpointer user_data
+  gpointer user_data
 )
 {
 	if (event->type == GDK_BUTTON_RELEASE && pawn_promotion != '-'){

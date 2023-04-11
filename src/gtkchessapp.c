@@ -193,17 +193,17 @@ GtkBuilder *builder_init()
 
 void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	state.flipped = !state.flipped;
+	flipped = !flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	int flipped = state.flipped;
+	
 	init_state(&state);
 	destroy_tree(tree);
 	tree = init_tree(state);
-	state.flipped = flipped;
+	
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 	show_state(tree->root,0);
 }

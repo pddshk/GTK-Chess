@@ -23,7 +23,7 @@ void init_state(game_state* state)
     state->move_counter = 1;
     state->enpassant_row = state->enpassant_col = -1;
     state->is_active = 1;
-    state->flipped = 0;
+    
 }
 
 int is_active(game_state* state){
@@ -60,7 +60,7 @@ void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, 
 
 void resolve_coord(game_state* state, int*row, int*col)
 {
-    if (state->flipped){
+    if (flipped){
         *row = 7 - *row;
         *col = 7 - *col;
     }
@@ -68,7 +68,7 @@ void resolve_coord(game_state* state, int*row, int*col)
 
 char get_field(game_state* state, int row, int col)
 {
-    if (state->flipped)
+    if (flipped)
         return state->field[7-row][7-col];
     else
         return state->field[row][col];
@@ -76,7 +76,7 @@ char get_field(game_state* state, int row, int col)
 
 void set_field(game_state* state, int row, int col, char piece)
 {
-    if (state->flipped)
+    if (flipped)
         state->field[7-row][7-col] = piece;
     else
         state->field[row][col] = piece;
