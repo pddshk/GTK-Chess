@@ -454,7 +454,7 @@ void show_state(tnode* node, int level)
 		{
 			//printf("0\n");
 			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
-			for(; l!=NULL;l=l->next)
+			for(; l;l=l->next)
 			{
 				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 			}
@@ -462,7 +462,7 @@ void show_state(tnode* node, int level)
 			if(g_list_length(node->children)!=0)
 			{
 				GList* elem = node->children;
-				for(; elem!=NULL; elem = elem->next) 
+				for(; elem; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					show_state(item,1);
@@ -553,27 +553,6 @@ void show_state(tnode* node, int level)
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
-
-			/*if(is_invisible_in(hbox,viewport,vbox))
-			{
-				movescroll(button);
-			}*/
-			/*
-			gint wx, wy;
-			gtk_widget_translate_coordinates(GTK_WIDGET(hbox), gtk_widget_get_toplevel(hbox), 0, 0, &wx, &wy);
-			gint vbox_height = gtk_widget_get_allocated_height(GTK_WIDGET(vbox));
-			gint vbox_width = gtk_widget_get_allocated_width(GTK_WIDGET(vbox));
-
-			GtkScrolledWindow* scr_window = (GtkScrolledWindow*)window;
-
-			GtkAdjustment* w_a = gtk_scrolled_window_get_hadjustment(scr_window);
-			GtkAdjustment* h_a = gtk_scrolled_window_get_vadjustment(scr_window);
-			
-			gdouble x = (gdouble)wx/(gdouble)vbox_width;
-			gdouble y = (gdouble)wy/(gdouble)vbox_height;
-			printf("wx%d,wy%d\nheigth%d,width%d\nx%f,y%f\n",wx,wy,vbox_height,vbox_width,x,y);*/
-			//gtk_adjustment_set_value(w_a, x);
-			//gtk_adjustment_set_value(h_a, y);
 			
 			if (node == tree->current) 
 			{
@@ -586,24 +565,20 @@ void show_state(tnode* node, int level)
 			//going through children
 			if(g_list_length(node->children)!=0)
 			{
-				tnode* first_item;
-				int t_level = level ;
+				GList* elem = node->children;
+				tnode* first_item = elem->data;
+				int t_level = level;
 				level++;
-				int j=0;
-				GList* elem = node->children ;
-				for(; elem!=NULL; elem = elem->next) 
+				(*first_item).vbox = subtreebox;
+				(*first_item).indent = (node->indent) + 1; 
+				(*first_item).hbox_status=1;
+				(*first_item).hbox=hbox;
+				elem = elem->next;
+				for(; elem; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					(*item).vbox = subtreebox;
 					(*item).indent = (node->indent) + 1; 
-					if(j==0)
-					{
-						j=1;
-						(*item).hbox_status=1;
-						(*item).hbox=hbox;
-						first_item=item;
-						continue;
-					}
 					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
 					//reordering
