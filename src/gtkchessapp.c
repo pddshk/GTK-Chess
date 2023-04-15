@@ -503,31 +503,26 @@ void show_state(tnode* node, int level)
 			//first child gets level 1 and is shown last, second - level 2, third - level 3...
 			if(g_list_length(node->children)!=0)
 			{
-				tnode* first_item;
-				int j=0;
 				GList* elem = node->children;
-				for(; elem!=NULL; elem = elem->next) 
+				tnode* first_item = elem->data;
+				(*first_item).indent = node->indent; 
+				elem = elem->next;
+				for(; elem; elem = elem->next) 
 				{
 					tnode* item = elem->data;
 					(*item).indent = node->indent; 
-					if(j==0)
-					{
-						j=1;
-						first_item = item;
-						continue;
-					}
 					(*item).indent++;
 					(*item).vbox = subtreebox;
-					GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					GtkBox* child_subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 					//gtk_widget_set_size_request(GTK_WIDGET(subtreehbox), 300, 100);
-					(*item).hbox = subtreehbox;
+					(*item).hbox = child_subtreehbox;
 					
-					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(subtreehbox));
+					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(child_subtreehbox));
 					//reordering
 					GValue targetIndex = G_VALUE_INIT;
 					g_value_init (&targetIndex, G_TYPE_INT);
-					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(subtreehbox),"position",&targetIndex);
-					gtk_box_reorder_child (GTK_BOX(subtreebox),GTK_WIDGET(subtreehbox),g_value_get_int(&targetIndex) + 1);
+					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(child_subtreehbox),"position",&targetIndex);
+					gtk_box_reorder_child (GTK_BOX(subtreebox),GTK_WIDGET(child_subtreehbox),g_value_get_int(&targetIndex) + 1);
 					//
 					show_state(item,2);
 				}
