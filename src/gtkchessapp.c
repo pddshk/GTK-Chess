@@ -21,7 +21,7 @@ void gtkchess_app_startup(
 	}
     engine_state = ENGINE_IDLE;
 	init_state(&state);
-	tree = init_tree(state);
+	init_tree(state);
 	// init_textures();
 	// load_textures("classic");
 }
@@ -202,7 +202,7 @@ void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 	int flipped = state.flipped;
 	init_state(&state);
 	destroy_tree(tree);
-	tree = init_tree(state);
+	init_tree(state);
 	state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 	show_state(tree->root,0);
@@ -351,7 +351,7 @@ void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
     FEN_to_state(gtk_entry_get_text(entry));
 	destroy_tree(tree);
-	tree = init_tree(state);
+	init_tree(state);
 	show_state(tree->root, 0);
     gtk_widget_destroy (widget); // This will close the dialog
 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));

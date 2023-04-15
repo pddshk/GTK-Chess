@@ -442,7 +442,8 @@ void FEN_to_state(const char* fen) {
         }
     }
     char* enpassant_square = strtok(NULL, delim);
-    if (enpassant_square[0] != '-') {
+    newstate.enpassant_col = newstate.enpassant_row = -1;
+    if (isalpha(enpassant_square[0])) {
         newstate.enpassant_col = enpassant_square[0] - 'a';
         newstate.enpassant_row = enpassant_square[1] - '0';
     }
@@ -450,6 +451,8 @@ void FEN_to_state(const char* fen) {
     sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
     char* fullmove = strtok(NULL, delim);
     sscanf(fullmove, "%d", &newstate.move_counter);
+    newstate.is_active = state.is_active;
+    newstate.flipped = state.flipped;
     state = newstate;
 }
 
@@ -685,14 +688,14 @@ void PGN_to_tree(char* pgn)
         char dragged_piece;
         int from_row=-1, from_col=-1, to_row=-1, to_col=-1;
 
-        int len = strlen(current_word);
+        int wordlen = strlen(current_word);
         
         if(strchr(figures,first_letter))//if not pawn and not castling
         {
                     
             if(strrchr(current_word,'x')!=NULL)//capture
             {
-                if(len > 4 && !isdigit(current_word[3])) //disambiguation check
+                if(wordlen > 4 && !isdigit(current_word[3])) //disambiguation check
                 {
                     if(isdigit(current_word[1]))    // is row or column disambiguated
                     from_row = current_word[1] - 49;
@@ -710,7 +713,7 @@ void PGN_to_tree(char* pgn)
             }
             else//non capture
             {
-                if(len > 3 && !isdigit(current_word[2]))     //disambiguation check
+                if(wordlen > 3 && !isdigit(current_word[2]))     //disambiguation check
                 {
                     if(isdigit(current_word[1]))      // is row or column disambiguated
                     from_row = current_word[1] - 49;
@@ -739,8 +742,8 @@ void PGN_to_tree(char* pgn)
 
             if(toupper(dragged_piece)==figures[1])//knight
             {
-                int a[] = {-2, -2, -1, -1, 1, 1, 2, 2};
-                int b[] = {-1, 1, -2, 2, -2, 2, -1, 1};
+                const int a[] = {-2, -2, -1, -1, 1, 1, 2, 2};
+                const int b[] = {-1, 1, -2, 2, -2, 2, -1, 1};
 
                 for (int i = 0; i < 8; i++) {                       //checking all possible knight moves
                     int row = to_row + a[i], col = to_col + b[i];
@@ -772,10 +775,10 @@ void PGN_to_tree(char* pgn)
             
             if(toupper(dragged_piece)==figures[4])//king
             {
-                int a[] = {-1, 0, 1};
+                const int a[] = {-1, 0, 1};
                 for (int i = 0; i < 3; i++) {
-                    for (int j = 0; j < 3; j++) {
-                        int row = to_row + a[i], col = to_col + a[j];
+                    for (int k = 0; k < 3; k++) {
+                        int row = to_row + a[i], col = to_col + a[k];
                         if (row < 0 || row >= 8 || col < 0 || col >= 8) continue;       //out of field
                         if(state.field[row][col] == dragged_piece)
                         {

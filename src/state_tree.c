@@ -29,9 +29,9 @@ tnode* addnode(game_state _field, tnode *_parent, const char *last_move)
 }
 
 
-state_tree* init_tree(game_state state)
+void init_tree(game_state state)
 {
-    state_tree* tree =  (state_tree*)malloc(sizeof(state_tree)); 
+    tree =  (state_tree*)malloc(sizeof(state_tree)); 
     tnode* start_state_node = (tnode*)malloc(sizeof(tnode));
     start_state_node->field = state;
     start_state_node->parent = NULL;
@@ -43,7 +43,6 @@ state_tree* init_tree(game_state state)
     start_state_node->vbox = NULL;
     tree->root = start_state_node;
     tree->current = start_state_node;
-    return tree;
 }
 
 void destroy_tree(state_tree* tree)
