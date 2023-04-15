@@ -47,9 +47,9 @@ void gtkchess_app_shutdown(
 {
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) &&
-			!g_subprocess_get_if_exited(engine_manager))
+			!g_subprocess_get_if_exited(engine_manager)) {
         g_subprocess_force_exit(engine_manager);
-	
+	}
 	destroy_tree(tree);
 }
 
