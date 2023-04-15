@@ -402,7 +402,7 @@ void FEN_to_state(const char* fen) {
     game_state newstate;
     char* placement = strtok((char*)fen, delim);
     char field_ptr = 0;
-    for(int i = 0; i < strlen(placement); field_ptr++) 
+    for(size_t i = 0; i < strlen(placement); field_ptr++) 
     {
         if (placement[i] < '0' || placement[i] > '9') {
             if (placement[i] == '/') {
@@ -427,7 +427,7 @@ void FEN_to_state(const char* fen) {
         newstate.side_to_move = 0;
     }
     char* castling = strtok(NULL, delim);
-    for(int i = 0; i < strlen(castling); i++) {
+    for(size_t i = 0; i < strlen(castling); i++) {
         if (castling[i] == 'K') {
             newstate.castlings[1] = 1;
         }
@@ -466,7 +466,7 @@ void removeChar(char *str, char garbage) {
 
 char* remove_PGN_comments(char* pgn) {
     char* newpgn = malloc(sizeof(char) * strlen(pgn));
-    int i = strrchr(pgn, ']') + 1 - pgn;
+    size_t i = strrchr(pgn, ']') + 1 - pgn;
     int write = 0, ptr = 0;
     while (i < strlen(pgn)) {
         

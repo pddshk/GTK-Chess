@@ -340,7 +340,7 @@ gchar* get_sign(int number)
 
 }
 
-void get_FEN(GtkButton* button, gpointer data)
+void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
 {
 	GtkWidget* widget = GTK_WIDGET(data);
 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
@@ -357,7 +357,7 @@ void get_FEN(GtkButton* button, gpointer data)
 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
 }
 
-void paste_FEN(GtkButton* main_window_button, gpointer data) {
+void paste_FEN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) {
     GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
     GtkWidget *dialog;
     GtkWidget *content_area;
@@ -369,7 +369,7 @@ void paste_FEN(GtkButton* main_window_button, gpointer data) {
     dialog = gtk_dialog_new_with_buttons ("Get Text",
                                           GTK_WINDOW(window),
                                           GTK_DIALOG_MODAL,
-										 
+										  0,
                                           NULL);
     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
     grid = gtk_grid_new();
@@ -386,7 +386,7 @@ void paste_FEN(GtkButton* main_window_button, gpointer data) {
     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_FEN), dialog);
 }
 
-void get_PGN(GtkButton* button, gpointer data)
+void get_PGN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
 {
 	//PGN_to_tree(gtk_entry_get_text(entry));
 	//destroy_tree(tree);GtkWidget* widget = GTK_WIDGET(data);
@@ -406,7 +406,7 @@ void get_PGN(GtkButton* button, gpointer data)
 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
 }
 
-void paste_PGN(GtkButton* main_window_button, gpointer data) 
+void paste_PGN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) 
 {
 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
     GtkWidget *dialog;
@@ -419,7 +419,7 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
     dialog = gtk_dialog_new_with_buttons ("Get Text",
                                           GTK_WINDOW(window),
                                           GTK_DIALOG_MODAL,
-									
+										  0,
                                           NULL);
     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
     grid = gtk_grid_new();
@@ -436,7 +436,7 @@ void paste_PGN(GtkButton* main_window_button, gpointer data)
     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_PGN), dialog);
 }
 
-void select_state(GtkButton* button, gpointer node) {
+void select_state(__attribute_maybe_unused__ GtkButton* button, gpointer node) {
 	state = (((tnode*)node)->field);
 	(*tree).current = (tnode*)node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
