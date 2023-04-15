@@ -136,12 +136,12 @@ void next_move(game_state* state, char piece, int from_row, int from_col, int to
         set_enpassant(state, to_row-1, to_col);
     else
         clear_enpassant(state);
-    char *move = malloc(sizeof(char) * 6);
-    get_move_notation(state, move, from_row, from_col, to_row, to_col, promotion);
+    char *move_buffer = malloc(sizeof(char) * 6);
+    get_move_notation(state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
     game_state state_storage = *state;
-    (*tree).current =  addnode(state_storage, tree->current,  move); 
+    (*tree).current =  addnode(state_storage, tree->current,  move_buffer); 
     show_state(tree->root,0);
     //
 }
@@ -441,10 +441,10 @@ void FEN_to_state(const char* fen) {
             newstate.castlings[2] = 1;
         }
     }
-    char* enpassant = strtok(NULL, delim);
-    if (enpassant[0] != '-') {
-        newstate.enpassant_col = enpassant[0] - 'a';
-        newstate.enpassant_row = enpassant[1] - '0';
+    char* enpassant_square = strtok(NULL, delim);
+    if (enpassant_square[0] != '-') {
+        newstate.enpassant_col = enpassant_square[0] - 'a';
+        newstate.enpassant_row = enpassant_square[1] - '0';
     }
     char* fiftymoves = strtok(NULL, delim);
     sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
@@ -466,9 +466,9 @@ void removeChar(char *str, char garbage) {
 
 char* remove_PGN_comments(char* pgn) {
     char* newpgn = malloc(sizeof(char) * strlen(pgn));
-    size_t i = strrchr(pgn, ']') + 1 - pgn;
+    ;
     int write = 0, ptr = 0;
-    while (i < strlen(pgn)) {
+    for (size_t i = strrchr(pgn, ']') + 1 - pgn; i < strlen(pgn);  ++i) {
         
         if (pgn[i] == '{') {
             while (pgn[i] != '}') {
@@ -493,7 +493,6 @@ char* remove_PGN_comments(char* pgn) {
             newpgn[ptr] = pgn[i];
             ++ptr;
         }
-        ++i;
     } 
     char* newpgnResize = malloc(sizeof(char) * ptr);
     for (int i = 0; i < ptr; i++) {
@@ -575,65 +574,65 @@ void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, i
     int from_col = *from_col_ptr;
     int from_row = *from_row_ptr;
     if (from_row < 0) {
-        int row = to_row, col = to_col;
+        int row = to_row + 1, col = to_col;
         if (from_col >= 0) col = from_col;
-        do {
+        while (row < 8) {
             if(state.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+            else if (state.field[row][col] != '-') {
                 break;
             }
             row++;
-        } while (row < 8);
-        row = to_row, col = to_col;
+        }
+        row = to_row - 1, col = to_col;
         if (from_col >= 0) col = from_col;
-        do {
+        while (row >= 0) {
             if(state.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+            else if (state.field[row][col] != '-') {
                 break;
             }
             row--;
-        } while (row >= 0); 
+        } 
     }
     
     if (from_col < 0) {
-        int row = to_row, col = to_col;
+        int row = to_row, col = to_col + 1;
         if (from_row >= 0) row = from_row;
-        do {
+        while (col < 8) {
             if(state.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+            else if (state.field[row][col] != '-' ) {
                 break;
             }
             col++;
-        } while (col < 8);
-        row = to_row, col = to_col;
+        } 
+        row = to_row, col = to_col - 1;
         if (from_row >= 0) row = from_row;
-        do {
+        while (col >= 0) {
             if(state.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-' && row != to_row && col != to_col) {
+            else if (state.field[row][col] != '-') {
                 break;
             }
             col--;
-        } while (col >= 0);
+        } 
     }
 }
 
@@ -745,7 +744,7 @@ void PGN_to_tree(char* pgn)
 
                 for (int i = 0; i < 8; i++) {                       //checking all possible knight moves
                     int row = to_row + a[i], col = to_col + b[i];
-                    if (row < 0 || row >= 8 || col < 0 || row >= 8) continue;       //out of field
+                    if (row < 0 || row >= 8 || col < 0 || col >= 8) continue;       //out of field
                     //if (current_word[0] == 'N' && current_word[2] == 'd') printf("%d %d %c %c %d %d\n", row, col, dragged_piece, state.field[row][col], from_row, from_col);
                     if (from_col >= 0 && from_col != col) continue;                 //column or row is known
                     
@@ -777,7 +776,7 @@ void PGN_to_tree(char* pgn)
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
                         int row = to_row + a[i], col = to_col + a[j];
-                        if (row < 0 || row >= 8 || col < 0 || row >= 8) continue;       //out of field
+                        if (row < 0 || row >= 8 || col < 0 || col >= 8) continue;       //out of field
                         if(state.field[row][col] == dragged_piece)
                         {
                             from_row=row;
