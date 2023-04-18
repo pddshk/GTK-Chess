@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 
 game_state state;
+int flipped;
 GOutputStream *to_engine_manager;
 //my var
 GtkBuilder* builder;
