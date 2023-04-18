@@ -665,7 +665,7 @@ void PGN_to_tree(char* pgn)
     }
 
     int len = g_list_length(list);
-    char figures[] = {'R','N','B','Q','K','P'};
+    char figures[] = "RNBQKP";
     char promotion = 0; 
     int bw = 1; // black/white
 
