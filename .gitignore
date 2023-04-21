@@ -8,3 +8,4 @@ temp
 docs/build
 include/UI.h
 src/resources.c
+result

@@ -3,8 +3,13 @@ STD		?= c17
 GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
+<<<<<<< HEAD
 PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
+=======
+PKGCONF	?= $(shell which pkg-config)
+CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
+>>>>>>> 41e1d34 (build: add basic flake.nix)
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
@@ -38,7 +43,10 @@ UI = $(DATADIR)/window.glade $(DATADIR)/selected.css
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
-	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/data/textures/classic/WKnight.svg
+#	FIXME: `nix build` fails with error: 
+#	gio: Setting attribute metadata::custom-icon not supported
+#
+#	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/src/textures/classic/WKnight.svg
 
 engine_manager: $(OBJDIR)/engine_manager.o
 	$(CC) $(CFLAGS) -o engine_manager $< $(LDFLAGS) -pthread
