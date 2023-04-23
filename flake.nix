@@ -12,27 +12,47 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=22.11"; 
   };
 
-  outputs = { self, nixpkgs }: {
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
+  outputs = { self, nixpkgs }: 
+    let
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      perSystem = nixpkgs.lib.genAttrs supportedSystems;
+      allNixpkgs = perSystem (system: import nixpkgs { inherit system; });
+      nixpkgsFor = system: allNixpkgs.${system};
 
-    nativeBuildInputs = with self.pkgs; [ clang gnumake pkg-config which libxml2 ];
-    buildInputs = with self.pkgs; [ gtk3 librsvg glib ];
+      nativeBuildInputs = perSystem (system: 
+        with nixpkgsFor system; [ clang gnumake pkg-config which libxml2 ]
+      );
 
-    defaultPackage.x86_64-linux = self.packages.gtkChess;
+      buildInputs = perSystem (system:
+        with nixpkgsFor system; [ gtk3 librsvg glib ]
+      );
 
-    packages.gtkChess = with self.pkgs; stdenv.mkDerivation {
-      name = "GTK-Chess";
-      version = "dev";
-      src = ./.;
-      nativeBuildInputs = self.nativeBuildInputs;
-      buildInputs = self.buildInputs;
-      buildPhase = "make all";
-      installPhase = "mkdir -p $out/bin; cp GTKChess $out/bin";
+      inputsCombined = perSystem (system:
+        nativeBuildInputs.${system} ++ buildInputs.${system}
+      );
+    in {
+      defaultPackage = perSystem (system: self.packages.${system}.gtkChess); 
+      
+      packages = perSystem (system:
+        with nixpkgsFor system; { 
+          gtkChess = stdenv.mkDerivation {
+            name = "GTK-Chess";
+            version = "dev";
+            src = ./.;
+            nativeBuildInputs = nativeBuildInputs.${system};
+            buildInputs = buildInputs.${system};
+            buildPhase = "make all";
+            installPhase = "mkdir -p $out/bin; cp GTKChess $out/bin";
+          };
+        }
+      );
+
+      devShells = perSystem (system: {
+        default = 
+          with nixpkgsFor system; mkShell {
+            buildInputs = [ cppcheck ] ++ inputsCombined.${system}; 
+          };
+        }
+      );
     };
-
-    devShells.x86_64-linux.default = with self.pkgs; mkShell { 
-      buildInputs = [ cppcheck ] ++ self.nativeBuildInputs ++ self.buildInputs; 
-    };
-  };
-
 }
