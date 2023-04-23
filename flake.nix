@@ -13,18 +13,26 @@
   };
 
   outputs = { self, nixpkgs }: {
+    pkgs = import nixpkgs { system = "x86_64-linux"; };
+
+    nativeBuildInputs = with self.pkgs; [ clang gnumake pkg-config which libxml2 ];
+    buildInputs = with self.pkgs; [ gtk3 librsvg glib ];
+
     defaultPackage.x86_64-linux = self.packages.gtkChess;
 
-    packages.gtkChess = 
-      with import nixpkgs { system = "x86_64-linux"; }; 
-      stdenv.mkDerivation {
-        name = "GTK-Chess";
-        version = "dev";
-        src = ./.;
-        nativeBuildInputs = [ clang gnumake pkg-config which libxml2 ];
-        buildInputs = [ gtk3 librsvg glib ];
-        buildPhase = "make all";
-        installPhase = "mkdir -p $out/bin; cp GTKChess $out/bin";
-      };
+    packages.gtkChess = with self.pkgs; stdenv.mkDerivation {
+      name = "GTK-Chess";
+      version = "dev";
+      src = ./.;
+      nativeBuildInputs = self.nativeBuildInputs;
+      buildInputs = self.buildInputs;
+      buildPhase = "make all";
+      installPhase = "mkdir -p $out/bin; cp GTKChess $out/bin";
+    };
+
+    devShells.x86_64-linux.default = with self.pkgs; mkShell { 
+      buildInputs = [ cppcheck ] ++ self.nativeBuildInputs ++ self.buildInputs; 
+    };
   };
+
 }
