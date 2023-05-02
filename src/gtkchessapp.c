@@ -20,6 +20,8 @@ void gtkchess_app_startup(
 		exit(EXIT_FAILURE);
 	}
     engine_state = ENGINE_IDLE;
+
+	game_state state;
 	init_state(&state);
 	init_tree(state);
 	// init_textures();
@@ -199,7 +201,7 @@ void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	
+	game_state state;
 	init_state(&state);
 	destroy_tree(tree);
 	init_tree(state);
@@ -350,6 +352,7 @@ void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
 	
     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
     FEN_to_state(gtk_entry_get_text(entry));
+	game_state state = tree->current->field;
 	destroy_tree(tree);
 	init_tree(state);
 	show_state(tree->root, 0);
@@ -437,17 +440,16 @@ void paste_PGN(__attribute_maybe_unused__ GtkButton* main_window_button, __attri
 }
 
 void select_state(__attribute_maybe_unused__ GtkButton* button, gpointer node) {
-	state = (((tnode*)node)->field);
-	(*tree).current = (tnode*)node;
+	tree->current = (tnode*)node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
 	show_state(tree->root, 0);
+	
 }
 
 void show_state(tnode* node, int level) 
 {
 	if (node==NULL)
 	return;
-	
 	switch(level)
 	{
 		case 0:

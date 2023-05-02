@@ -2,8 +2,8 @@
 #define STATE_H
 #include "typedecl.h"
 
-extern game_state state;
-//extern state_tree* tree;
+//extern game_state state;
+extern state_tree* tree;
 
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;

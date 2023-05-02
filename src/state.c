@@ -7,7 +7,7 @@
 #include "rules.h"
 #include "gtkchessapp.h"
 
-extern state_tree* tree;
+//extern state_tree* tree;
 
 
 void init_state(game_state* state)
@@ -120,28 +120,30 @@ void recalc_castlings(game_state* state)
 
 void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
-    state->side_to_move = !state->side_to_move;
-    if (state->side_to_move) {
-        state->move_counter++;
+    game_state new_state = *state;
+    set_field(&new_state, from_row, from_col, '-');
+    
+    new_state.side_to_move = !new_state.side_to_move;
+    if (new_state.side_to_move) {
+        new_state.move_counter++;
     }
-    if (is_pawn(piece) || is_square_foe(state, piece, to_row, to_col))
-        state->fifty_moves_counter = 0;
+    if (is_pawn(piece) || is_square_foe(&new_state, piece, to_row, to_col))
+        new_state.fifty_moves_counter = 0;
     else
-        state->fifty_moves_counter++;
-    move(state, promotion ? promotion : piece, from_row, from_col, to_row, to_col);
-    recalc_castlings(state);
+        new_state.fifty_moves_counter++;
+    move(&new_state, promotion ? promotion : piece, from_row, from_col, to_row, to_col);
+    recalc_castlings(&new_state);
     if (piece == 'P' && to_row - from_row == -2)
-        set_enpassant(state, to_row+1, to_col);
+        set_enpassant(&new_state, to_row+1, to_col);
     else if (piece == 'p' && to_row - from_row == 2)
-        set_enpassant(state, to_row-1, to_col);
+        set_enpassant(&new_state, to_row-1, to_col);
     else
-        clear_enpassant(state);
+        clear_enpassant(&new_state);
     char *move_buffer = malloc(sizeof(char) * 6);
-    get_move_notation(state, move_buffer, from_row, from_col, to_row, to_col, promotion);
+    get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
-    game_state state_storage = *state;
-    (*tree).current =  addnode(state_storage, tree->current,  move_buffer); 
+    tree->current =  addnode(new_state, tree->current,  move_buffer); 
     show_state(tree->root,0);
     //
 }
@@ -253,7 +255,7 @@ int is_knight(char piece) { return piece == 'N' || piece == 'n'; }
 int is_pawn(char piece) { return piece == 'P' || piece == 'p'; }
 
 void copy_state(game_state *other){
-    memcpy((void*) other, &state, sizeof(game_state));
+    memcpy((void*) other, &tree->current->field, sizeof(game_state));
 }
 
 char resolve_promotion(int row)
@@ -451,9 +453,9 @@ void FEN_to_state(const char* fen) {
     sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
     char* fullmove = strtok(NULL, delim);
     sscanf(fullmove, "%d", &newstate.move_counter);
-    newstate.is_active = state.is_active;
-    newstate.flipped = state.flipped;
-    state = newstate;
+    newstate.is_active = tree->current->field.is_active;
+    newstate.flipped = tree->current->field.flipped;
+    tree->current->field = newstate;
 }
 
 
@@ -516,12 +518,12 @@ void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col,
         col--;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
-        if(state.field[row][col]==dragged_piece) {
+        if(tree->current->field.field[row][col]==dragged_piece) {
             *from_row_ptr = row;
             *from_col_ptr = col;
             return;
         }
-        if (state.field[row][col] != '-') {
+        if (tree->current->field.field[row][col] != '-') {
             break;
         }
     } while (row >= 0 && col >= 0);
@@ -531,12 +533,12 @@ void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col,
         col++;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
-        if(state.field[row][col]==dragged_piece) {
+        if(tree->current->field.field[row][col]==dragged_piece) {
             *from_row_ptr = row;
             *from_col_ptr = col;
             return;
         }
-        if (state.field[row][col] != '-') {
+        if (tree->current->field.field[row][col] != '-') {
             break;
         }
     } while (row < 8 && col < 8);
@@ -546,12 +548,12 @@ void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col,
         col--;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
-        if(state.field[row][col]==dragged_piece) {
+        if(tree->current->field.field[row][col]==dragged_piece) {
             *from_row_ptr = row;
             *from_col_ptr = col;
             return;
         }
-        if (state.field[row][col] != '-') {
+        if (tree->current->field.field[row][col] != '-') {
             break;
         }
     } while (row < 8 && col > 0);
@@ -561,13 +563,12 @@ void bishop_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col,
         col++;
         if (from_col >= 0 && from_col != col) continue;                 //column or row is known
         if (from_row >= 0 && from_row != row) continue;
-        //printf("%d %d %c %c\n", row, col, dragged_piece, state.field[row][col]);
-        if(state.field[row][col]==dragged_piece) {
+        if(tree->current->field.field[row][col]==dragged_piece) {
             *from_row_ptr = row;
             *from_col_ptr = col;
             return;
         }
-        if (state.field[row][col] != '-') {
+        if (tree->current->field.field[row][col] != '-') {
             break;
         }
     } while (row > 0 && col < 8);
@@ -580,13 +581,13 @@ void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, i
         int row = to_row + 1, col = to_col;
         if (from_col >= 0) col = from_col;
         while (row < 8) {
-            if(state.field[row][col]==dragged_piece)
+            if(tree->current->field.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-') {
+            else if (tree->current->field.field[row][col] != '-') {
                 break;
             }
             row++;
@@ -594,13 +595,13 @@ void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, i
         row = to_row - 1, col = to_col;
         if (from_col >= 0) col = from_col;
         while (row >= 0) {
-            if(state.field[row][col]==dragged_piece)
+            if(tree->current->field.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-') {
+            else if (tree->current->field.field[row][col] != '-') {
                 break;
             }
             row--;
@@ -611,13 +612,13 @@ void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, i
         int row = to_row, col = to_col + 1;
         if (from_row >= 0) row = from_row;
         while (col < 8) {
-            if(state.field[row][col]==dragged_piece)
+            if(tree->current->field.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-' ) {
+            else if (tree->current->field.field[row][col] != '-' ) {
                 break;
             }
             col++;
@@ -625,13 +626,13 @@ void rook_search(int dragged_piece, int to_row, int* from_row_ptr, int to_col, i
         row = to_row, col = to_col - 1;
         if (from_row >= 0) row = from_row;
         while (col >= 0) {
-            if(state.field[row][col]==dragged_piece)
+            if(tree->current->field.field[row][col]==dragged_piece)
             {
                 *from_row_ptr = row;
                 *from_col_ptr = col;
                 return;
             }
-            else if (state.field[row][col] != '-') {
+            else if (tree->current->field.field[row][col] != '-') {
                 break;
             }
             col--;
@@ -668,6 +669,8 @@ void PGN_to_tree(char* pgn)
     char figures[] = "RNBQKP";
     char promotion = 0; 
     int bw = 1; // black/white
+
+    game_state state;
 
     init_state(&state);
 
