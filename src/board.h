@@ -6,7 +6,7 @@
 #include "state.h"
 #include "rules.h"
 
-extern state_tree* tree;
+extern state_tree tree;
 extern int flipped;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;

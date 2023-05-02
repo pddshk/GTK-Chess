@@ -5,7 +5,6 @@
 #include "typedecl.h"
 #include "interact.h"
 
-extern game_state state;
 extern int flipped;
 extern GOutputStream *to_engine_manager;
 extern GSource *from_engine_manager_source;
@@ -15,7 +14,7 @@ extern GtkWindow *mainwindow;
 extern int nvariations;
 extern GtkLabel *variations[4];
 extern GtkWidget *dialogs[4];
-extern state_tree *tree;
+extern state_tree tree;
 extern GtkBox* vbox;
 
 GtkBuilder *builder_init();
