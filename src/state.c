@@ -56,7 +56,7 @@ void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, 
     res[4] = promoted;
 }
 
-void resolve_coord(game_state* state, int*row, int*col)
+void resolve_coord(__attribute_maybe_unused__ game_state* state, int*row, int*col)
 {
     if (flipped){
         *row = 7 - *row;
@@ -116,7 +116,7 @@ void recalc_castlings(game_state* state)
     }
 }
 
-void next_move(game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
+void next_move(__attribute_maybe_unused__ game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
     game_state new_state = *state;
     set_field(&new_state, from_row, from_col, '-');

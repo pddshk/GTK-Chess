@@ -134,7 +134,7 @@ int resolve_promoted_piece(char piece)
 	}
 }
 
-gboolean draw_board(GtkWidget *Board, cairo_t *cr, gpointer data)
+gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gpointer data)
 {
 	gdouble hmargin, wmargin, board_size, cell_size, w_offset, h_offset;
 
@@ -284,11 +284,11 @@ drag_begin (
 gboolean
 drag_motion (
   GtkWidget* widget,
-  GdkDragContext* context,
+  __attribute_maybe_unused__ GdkDragContext* context,
   gint x,
   gint y,
-  guint time,
-  gpointer user_data
+  __attribute_maybe_unused__ guint time,
+  __attribute_maybe_unused__ gpointer user_data
 )
 {
 	// update current drag position and redraw board
@@ -303,9 +303,9 @@ drag_motion (
 gboolean
 drag_failed (
   GtkWidget* self,
-  GdkDragContext* context,
-  GtkDragResult result,
-  gpointer user_data
+  __attribute_maybe_unused__ GdkDragContext* context,
+  __attribute_maybe_unused__ GtkDragResult result,
+  __attribute_maybe_unused__ gpointer user_data
 )
 {
 	cancel_drag(&tree.current->field, dragged_piece, drag_row_start, drag_col_start);
@@ -318,10 +318,10 @@ drag_failed (
 gboolean
 drag_drop (
   GtkWidget* widget,
-  GdkDragContext* context,
+  __attribute_maybe_unused__ GdkDragContext* context,
   gint x,
   gint y,
-  guint time,
+  __attribute_maybe_unused__ guint time,
   gpointer data
 )
 {
@@ -386,7 +386,7 @@ gboolean
 board_clicked (
   GtkWidget* widget,
   GdkEventButton *event,
-  gpointer user_data
+  __attribute_maybe_unused__ gpointer user_data
 )
 {
 	if (event->type == GDK_BUTTON_RELEASE && pawn_promotion != '-'){
