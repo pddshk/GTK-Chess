@@ -24,6 +24,19 @@ void init_state(game_state* state)
     
 }
 
+game_state init_state_non_pointer()
+{
+    game_state state;
+    strcpy((char*)state.field, "rnbqkbnr\0pppppppp\0--------\0--------\0--------\0--------\0PPPPPPPP\0RNBQKBNR\0");
+    state.castlings[0] = state.castlings[1] = state.castlings[2] = state.castlings[3] = 1;
+    state.side_to_move = 1;
+    state.fifty_moves_counter = 0;
+    state.move_counter = 1;
+    state.enpassant_row = state.enpassant_col = -1;
+    state.is_active = 1;
+    return state;
+}
+
 int is_active(game_state* state){
     return state->is_active;
 }
@@ -116,7 +129,7 @@ void recalc_castlings(game_state* state)
     }
 }
 
-void next_move(__attribute_maybe_unused__ game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
+void next_move(__attribute_maybe_unused__ const game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
     game_state new_state = *state;
     set_field(&new_state, from_row, from_col, '-');
@@ -668,9 +681,9 @@ void PGN_to_tree(char* pgn)
     char promotion = 0; 
     int bw = 1; // black/white
 
-    game_state state;
+    game_state state = init_state_non_pointer();
 
-    init_state(&state);
+    //init_state(&state);
 
     //analysing words
     for(int j=0;j<len-1;j++)
