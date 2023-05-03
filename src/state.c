@@ -34,6 +34,7 @@ game_state init_state_non_pointer()
     state.move_counter = 1;
     state.enpassant_row = state.enpassant_col = -1;
     state.is_active = 1;
+    state.flipped = 0;
     return state;
 }
 
