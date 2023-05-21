@@ -40,8 +40,8 @@ void gtkchess_app_activate(GApplication*, gpointer);
 void gtkchess_app_open(GApplication*, gpointer);
 
 gchar* get_sign(int number);
-void paste_FEN(GtkButton*, gpointer);
-void paste_PGN(GtkButton*, gpointer);
+// void paste_FEN(GtkButton*, gpointer);
+// void paste_PGN(GtkButton*, gpointer);
 void select_state(GtkButton*, gpointer);
 void show_state(tnode*,int);
 

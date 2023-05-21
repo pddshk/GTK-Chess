@@ -171,7 +171,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 	int dir = flipped ? -1 : 1;
 	int _pawn_promotion_col = pawn_promotion_col,
 		_pawn_promotion_row = pawn_promotion_row;
-	resolve_coord(&tree.current->field, &_pawn_promotion_row, &_pawn_promotion_col);
+	resolve_coord(& tree.current->state, &_pawn_promotion_row, &_pawn_promotion_col);
 	switch (pawn_promotion) {
 		case 'P':
 			q_row=_pawn_promotion_row;
@@ -202,9 +202,9 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 			else if (row == n_row)
 				current_piece = resolve_promoted_piece(n);
 			else
-				current_piece=resolve_piece(get_field(&tree.current->field, row, col));
+				current_piece=resolve_piece(get_field(&tree.current->state, row, col));
 		} else
-			current_piece=resolve_piece(get_field(&tree.current->field, row, col));
+			current_piece=resolve_piece(get_field(&tree.current->state, row, col));
 		if (current_piece){ // render it
 			gdouble x = col * cell_size, y = row * cell_size;
 			RsvgRectangle piece_holder;
@@ -268,12 +268,12 @@ drag_begin (
 	);
 	drag_col_start = (int)((start_x - w_offset) / cell_size);
 	drag_row_start = (int)((start_y - h_offset) / cell_size);
-	dragged_piece = get_field(&tree.current->field, drag_row_start, drag_col_start);
+	dragged_piece = get_field(&tree.current->state, drag_row_start, drag_col_start);
 	// check if piece to be moved is of valid side
-	const char* piece_set = tree.current->field.side_to_move ? "KQRBNP" : "kqrbnp";
+	const char* piece_set = tree.current->state.side_to_move ? "KQRBNP" : "kqrbnp";
 	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
 		// remove dragged piece from state to prevent drawing it
-		set_field(&tree.current->field, drag_row_start, drag_col_start, '-');
+		set_field(&tree.current->state, drag_row_start, drag_col_start, '-');
 		gtk_drag_set_icon_pixbuf(context, empty_icon, 0, 0);
 		drag_status = 1;
 	} else {
@@ -308,7 +308,7 @@ drag_failed (
   __attribute_maybe_unused__ gpointer user_data
 )
 {
-	cancel_drag(&tree.current->field, dragged_piece, drag_row_start, drag_col_start);
+	cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
 	gtk_widget_queue_draw(self);
@@ -337,10 +337,10 @@ drag_drop (
 	int col = (int)((x - w_offset) / cell_size), row = (int)((y - h_offset) / cell_size);
 	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
 	// resolves coordinates in case board is flipped
-	resolve_coord(&tree.current->field, &from_row, &from_col);
-	resolve_coord(&tree.current->field, &to_row, &to_col);
+	resolve_coord(&tree.current->state, &from_row, &from_col);
+	resolve_coord(&tree.current->state, &to_row, &to_col);
 	// chek if there was move and move is valid
-	if (drag_status && is_valid_move(&tree.current->field, dragged_piece, from_row, from_col, to_row, to_col))
+	if (drag_status && is_valid_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col))
 	{
 		if (is_pawn_promotion(dragged_piece, to_row)){
 			pawn_promotion = dragged_piece;
@@ -349,10 +349,10 @@ drag_drop (
 		} 
 		else 
 		{
-			cancel_drag(&tree.current->field, dragged_piece, drag_row_start, drag_col_start);
+			cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 			//return piece and then move to save current state
 
-			next_move(&tree.current->field, dragged_piece, from_row, from_col, to_row, to_col,0);
+			next_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col,0);
 			//
 			//след ход
 			
@@ -361,7 +361,7 @@ drag_drop (
 		
 	}
 	else
-		cancel_drag(&tree.current->field, dragged_piece, drag_row_start, drag_col_start);
+		cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 
 	gtk_widget_queue_draw(widget);
 	drag_pos_x = drag_pos_y = -1;
@@ -370,11 +370,11 @@ drag_drop (
 	// print_state(&state);
 	// parse incoming data
 	GtkWidget **dialogs = data; // mate stalemate and im dialogs
-	if (is_mate(&tree.current->field))
+	if (is_mate(&tree.current->state))
         gtk_dialog_run(GTK_DIALOG (dialogs[0]));
-	else if (is_stalemate(&tree.current->field))
+	else if (is_stalemate(&tree.current->state))
         gtk_dialog_run(GTK_DIALOG (dialogs[1]));
-	else if (insufficient_material(&tree.current->field))
+	else if (insufficient_material(&tree.current->state))
 		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 	return TRUE;
 
@@ -401,16 +401,16 @@ board_clicked (
 
 		int col = (int)((event->x - w_offset) / cell_size),
 			row = (int)((event->y - h_offset) / cell_size);
-		resolve_coord(&tree.current->field, &row, &col);
+		resolve_coord(&tree.current->state, &row, &col);
 		if (col != pawn_promotion_col) return TRUE;
-		if ((pawn_promotion == 'P' && tree.current->field.side_to_move && row < 4) ||
-			(pawn_promotion == 'p' && !(tree.current->field.side_to_move) && row > 3)) {
+		if ((pawn_promotion == 'P' && tree.current->state.side_to_move && row < 4) ||
+			(pawn_promotion == 'p' && !(tree.current->state.side_to_move) && row > 3)) {
 			
-			cancel_drag(&tree.current->field, dragged_piece, drag_row_start, drag_col_start);
+			cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 			//return piece and then move to save current state
 
 			next_move(
-				&tree.current->field,
+				&tree.current->state,
 				'P',
 				drag_row_start, drag_col_start,
 				pawn_promotion_row, pawn_promotion_col,
