@@ -30,7 +30,7 @@ tnode* addnode(game_state _field, tnode *_parent, const char *last_move)
 }
 
 // init tree from given state if state is NULL, then init fro starting postion
-void init_tree(state_tree* tree, game_state* state)
+void init_tree(state_tree* tree, const game_state* state)
 {
     tree->root = tree->current = (tnode*)malloc(sizeof(tnode));
     tree->root->parent = NULL;
