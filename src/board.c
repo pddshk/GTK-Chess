@@ -276,7 +276,7 @@ drag_begin (
 	);
 	drag_col_start = flip_resolve((int)((start_x - w_offset) / cell_size));
 	drag_row_start = flip_resolve((int)((start_y - h_offset) / cell_size));
-	dragged_piece = get_field(&tree.current->field, drag_row_start, drag_col_start);
+	dragged_piece = get_field(&tree.current->state, drag_row_start, drag_col_start);
 	// check if piece to be moved is of valid side
 	const char* piece_set = tree.current->state.side_to_move ? "KQRBNP" : "kqrbnp";
 	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
@@ -360,7 +360,7 @@ drag_drop (
 			cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 			//return piece and then move to save current state
 
-			next_move(&tree.current->field, dragged_piece, from_row, from_col, to_row, to_col,0);
+			next_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col,0);
 		}
 		
 	}
