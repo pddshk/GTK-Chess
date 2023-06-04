@@ -70,28 +70,35 @@ void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, 
     res[4] = promoted;
 }
 
-void resolve_coord(__attribute_maybe_unused__ game_state* state, int*row, int*col)
-{
-    if (flipped){
-        *row = 7 - *row;
-        *col = 7 - *col;
-    }
+// void resolve_coord(__attribute_maybe_unused__ game_state* state, int*row, int*col)
+// {
+//     if (flipped){
+//         *row = 7 - *row;
+//         *col = 7 - *col;
+//     }
+// }
+
+// char get_field(game_state* state, int row, int col)
+// {
+//     if (flipped)
+//         return state->field[7-row][7-col];
+//     else
+//         return state->field[row][col];
+// }
+
+// void set_field(game_state* state, int row, int col, char piece)
+// {
+//     if (flipped)
+//         state->field[7-row][7-col] = piece;
+//     else
+//         state->field[row][col] = piece;
+// }
+char get_field(game_state* state, int row, int col) {
+    return state->field[row][col];
 }
 
-char get_field(game_state* state, int row, int col)
-{
-    if (flipped)
-        return state->field[7-row][7-col];
-    else
-        return state->field[row][col];
-}
-
-void set_field(game_state* state, int row, int col, char piece)
-{
-    if (flipped)
-        state->field[7-row][7-col] = piece;
-    else
-        state->field[row][col] = piece;
+void set_field(game_state* state, int row, int col, char piece) {
+    state->field[row][col] = piece;
 }
 
 int is_enpassant_square(game_state *state, int row, int col)
