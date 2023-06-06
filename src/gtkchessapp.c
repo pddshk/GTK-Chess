@@ -469,7 +469,7 @@ void show_state(tnode* node, int level)
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			const char label[11] = "Game Start";
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
-			if (node == tree->current) {
+			if (node == tree.current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
