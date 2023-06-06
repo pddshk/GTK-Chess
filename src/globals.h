@@ -3,13 +3,12 @@
 #include "typedecl.h"
 #include <gtk/gtk.h>
 
-game_state state;
 int flipped;
 GOutputStream *to_engine_manager;
 //my var
 GtkBuilder* builder;
 GtkBox* vbox;
-state_tree*tree;
+state_tree tree;
 //GObject* scrl_window;
 //GObject* viewport;
 // GInputStream *from_engine_manager;

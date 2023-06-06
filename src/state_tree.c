@@ -1,9 +1,10 @@
 #include "state_tree.h"
+#include "state.h"
 
 tnode* addnode(game_state _field, tnode *_parent, const char *last_move) 
 {
     tnode* new_node =  (tnode*)malloc(sizeof(tnode)); 
-    new_node->field = _field;
+    new_node->state = _field;
     new_node->children =  NULL;
     strcpy(new_node->last_move_notation, last_move);
     new_node->hbox = NULL;
@@ -28,33 +29,32 @@ tnode* addnode(game_state _field, tnode *_parent, const char *last_move)
     return new_node;
 }
 
-
-void init_tree(game_state state)
+// init tree from given state if state is NULL, then init fro starting postion
+void init_tree(state_tree* tree, const game_state* state)
 {
-    tree =  (state_tree*)malloc(sizeof(state_tree)); 
-    tnode* start_state_node = (tnode*)malloc(sizeof(tnode));
-    start_state_node->field = state;
-    start_state_node->parent = NULL;
-    start_state_node->children = NULL;
-    strcpy(start_state_node->last_move_notation, "begin");
-    (*start_state_node).hbox_status=0;
-    (*start_state_node).indent=0;
-    start_state_node->hbox = NULL;
-    start_state_node->vbox = NULL;
-    tree->root = start_state_node;
-    tree->current = start_state_node;
+    tree->root = tree->current = (tnode*)malloc(sizeof(tnode));
+    tree->root->parent = NULL;
+    tree->root->children = NULL;
+    strcpy(tree->root->last_move_notation, "begin");
+    tree->root->hbox_status=0;
+    tree->root->indent=0;
+    tree->root->hbox = NULL;
+    tree->root->vbox = NULL;
+    if (state)
+        tree->root->state = *state;
+    else
+        init_state(&tree->root->state);
 }
 
 void destroy_tree(state_tree* tree)
 {
-    if(tree==NULL) return;
     destroy_tnodes(tree->root);
-    free(tree);
+    tree->current = NULL;
 }
 
 void destroy_tnodes(tnode* node)
 {
-    if(g_list_length(node->children)!=0)
+    if(g_list_length(node->children) != 0)
     {
         GList* element = node->children;
         for(; element!=NULL; element = element->next) 
@@ -72,8 +72,8 @@ void destroy_tnodes(tnode* node)
 
 int tnode_equals(tnode* tnode_a, tnode* tnode_b)//compares tnodes: returns 0 if equal -1 - if not
 {
-    if(tnode_a->field.side_to_move==tnode_b->field.side_to_move &&
-    tnode_a->field.move_counter==tnode_b->field.move_counter &&
+    if(tnode_a->state.side_to_move==tnode_b->state.side_to_move &&
+    tnode_a->state.move_counter==tnode_b->state.move_counter &&
     strcmp(tnode_a->last_move_notation,tnode_b->last_move_notation)==0)
         return 0;
     else
@@ -82,8 +82,8 @@ int tnode_equals(tnode* tnode_a, tnode* tnode_b)//compares tnodes: returns 0 if 
 
 void get_label(tnode* node, char* label)
 {
-    int actual_move = node->field.move_counter;
-    if (node->field.side_to_move)
+    int actual_move = node->state.move_counter;
+    if (node->state.side_to_move)
         sprintf(label, "%d... %s\n", --actual_move, node->last_move_notation);
     else 
         sprintf(label, "%d. %s  \n", actual_move, node->last_move_notation);

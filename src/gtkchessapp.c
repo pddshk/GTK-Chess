@@ -20,8 +20,8 @@ void gtkchess_app_startup(
 		exit(EXIT_FAILURE);
 	}
     engine_state = ENGINE_IDLE;
-	init_state(&state);
-	init_tree(state);
+
+	init_tree(&tree, NULL);
 	// init_textures();
 	// load_textures("classic");
 }
@@ -50,7 +50,7 @@ void gtkchess_app_shutdown(
 			!g_subprocess_get_if_exited(engine_manager)) {
         g_subprocess_force_exit(engine_manager);
 	}
-	destroy_tree(tree);
+	destroy_tree(&tree);
 }
 
 void gtkchess_app_open(
@@ -199,13 +199,11 @@ void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	
-	init_state(&state);
-	destroy_tree(tree);
-	init_tree(state);
-	state.flipped = flipped;
+	destroy_tree(&tree);
+	init_tree(&tree, NULL);
+	tree.root->state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
-	show_state(tree->root,0);
+	show_state(tree.root,0);
 }
 
 gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpointer data)
@@ -340,114 +338,120 @@ gchar* get_sign(int number)
 
 }
 
-void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
-{
-	GtkWidget* widget = GTK_WIDGET(data);
-	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
-	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
-	GtkWidget *grid = children->data;
-	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
+// Bullshit
+// void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
+// {
+// 	GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
+// 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
+// 	GtkWidget *grid = children->data;
+// 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
 	
-    GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
-    FEN_to_state(gtk_entry_get_text(entry));
-	destroy_tree(tree);
-	init_tree(state);
-	show_state(tree->root, 0);
-    gtk_widget_destroy (widget); // This will close the dialog
-	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-}
+//     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
+//     FEN_to_state(gtk_entry_get_text(entry));
+// 	game_state state = tree.current->field;
+// 	destroy_tree(&tree);
+// 	init_tree(state);
+// 	show_state(tree.root, 0);
+//     gtk_widget_destroy (widget); // This will close the dialog
+// 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+// }
 
-void paste_FEN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) {
-    GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
-    GtkWidget *dialog;
-    GtkWidget *content_area;
-    GtkWidget *grid;
-    GtkWidget *label;
-    //GtkWidget *button;
-    static GtkEntry *textbox;
+// void paste_FEN(
+// 	__attribute_maybe_unused__ GtkButton* main_window_button,
+// 	__attribute_maybe_unused__ gpointer data
+// ) {
+//     GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
+//     GtkWidget *dialog;
+//     GtkWidget *content_area;
+//     GtkWidget *grid;
+//     GtkWidget *label;
+//     //GtkWidget *button;
+//     static GtkEntry *textbox;
 
-    dialog = gtk_dialog_new_with_buttons ("Get Text",
-                                          GTK_WINDOW(window),
-                                          GTK_DIALOG_MODAL,
-										  0,
-                                          NULL);
-    content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
-    grid = gtk_grid_new();
-    gtk_container_add (GTK_CONTAINER (content_area), grid);
+//     dialog = gtk_dialog_new_with_buttons ("Get Text",
+//                                           GTK_WINDOW(window),
+//                                           GTK_DIALOG_MODAL,
+// 										  0,
+//                                           NULL);
+//     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
+//     grid = gtk_grid_new();
+//     gtk_container_add (GTK_CONTAINER (content_area), grid);
 
-    label = gtk_label_new("Paste FEN: ");
-    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
-    textbox = GTK_ENTRY(gtk_entry_new());
-    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
-	GtkWidget *okbutton = gtk_button_new_with_label("OK");
-	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
-    gtk_widget_show_all(dialog);
+//     label = gtk_label_new("Paste FEN: ");
+//     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+//     textbox = GTK_ENTRY(gtk_entry_new());
+//     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
+// 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
+// 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
+//     gtk_widget_show_all(dialog);
 
-    g_signal_connect (okbutton, "clicked", G_CALLBACK (get_FEN), dialog);
-}
+//     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_FEN), dialog);
+// }
 
-void get_PGN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
-{
-	//PGN_to_tree(gtk_entry_get_text(entry));
-	//destroy_tree(tree);GtkWidget* widget = GTK_WIDGET(data);
-	GtkWidget* widget = GTK_WIDGET(data);
-	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
-	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
-	GtkWidget *grid = children->data;
-	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
-	//destroy_tree(tree);
+
+//Bullshit as well
+// void get_PGN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
+// {
+// 	//PGN_to_tree(gtk_entry_get_text(entry));
+// 	//destroy_tree(tree);GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
+// 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
+// 	GtkWidget *grid = children->data;
+// 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
+// 	//destroy_tree(tree);
 	
-    GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
-	PGN_to_tree((char*)gtk_entry_get_text(entry));
-	//show_state(tree->root, 0);
-    gtk_widget_destroy(widget); 
-	//show_state(tree->root, 0);
-    //gtk_widget_destroy (widget); // This will close the dialog
-	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-}
+//     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
+// 	PGN_to_tree((char*)gtk_entry_get_text(entry));
+// 	//show_state(tree->root, 0);
+//     gtk_widget_destroy(widget); 
+// 	//show_state(tree->root, 0);
+//     //gtk_widget_destroy (widget); // This will close the dialog
+// 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+// }
 
-void paste_PGN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) 
-{
-	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
-    GtkWidget *dialog;
-    GtkWidget *content_area;
-    GtkWidget *grid;
-    GtkWidget *label;
-    //GtkWidget *button;
-    static GtkEntry *textbox;
+// void paste_PGN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) 
+// {
+// 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
+//     GtkWidget *dialog;
+//     GtkWidget *content_area;
+//     GtkWidget *grid;
+//     GtkWidget *label;
+//     //GtkWidget *button;
+//     static GtkEntry *textbox;
 
-    dialog = gtk_dialog_new_with_buttons ("Get Text",
-                                          GTK_WINDOW(window),
-                                          GTK_DIALOG_MODAL,
-										  0,
-                                          NULL);
-    content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
-    grid = gtk_grid_new();
-    gtk_container_add (GTK_CONTAINER (content_area), grid);
+//     dialog = gtk_dialog_new_with_buttons ("Get Text",
+//                                           GTK_WINDOW(window),
+//                                           GTK_DIALOG_MODAL,
+// 										  0,
+//                                           NULL);
+//     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
+//     grid = gtk_grid_new();
+//     gtk_container_add (GTK_CONTAINER (content_area), grid);
 
-    label = gtk_label_new("Paste PGN: ");
-    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
-    textbox = GTK_ENTRY(gtk_entry_new());
-    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
-	GtkWidget *okbutton = gtk_button_new_with_label("OK");
-	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
-    gtk_widget_show_all(dialog);
+//     label = gtk_label_new("Paste PGN: ");
+//     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+//     textbox = GTK_ENTRY(gtk_entry_new());
+//     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
+// 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
+// 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
+//     gtk_widget_show_all(dialog);
 
-    g_signal_connect (okbutton, "clicked", G_CALLBACK (get_PGN), dialog);
-}
+//     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_PGN), dialog);
+// }
 
 void select_state(__attribute_maybe_unused__ GtkButton* button, gpointer node) {
-	state = (((tnode*)node)->field);
-	(*tree).current = (tnode*)node;
+	tree.current = (tnode*)node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-	show_state(tree->root, 0);
+	show_state(tree.root, 0);
+	
 }
 
 void show_state(tnode* node, int level) 
 {
 	if (node==NULL)
 	return;
-	
 	switch(level)
 	{
 		case 0:
@@ -496,7 +500,7 @@ void show_state(tnode* node, int level)
 			get_label(node,label);
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
-			if (node == tree->current) {
+			if (node == tree.current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
@@ -566,7 +570,7 @@ void show_state(tnode* node, int level)
 			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
 			
-			if (node == tree->current) 
+			if (node == tree.current) 
 			{
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");

@@ -19,7 +19,7 @@ struct tnode;
 
 typedef struct
 {
-    game_state field;      // поле данных
+    game_state state;      // поле данных
     struct tnode* parent;  // родитель
     GList* children;
     int hbox_status;
