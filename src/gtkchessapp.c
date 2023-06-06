@@ -325,13 +325,13 @@ void rm_variation(
 	nvariations--;
 }
 
-gchar* get_sign(int number)
+gchar* get_sign(int number,char symbol)
 {
-	number--;
+	number++;
 	//printf("%d/n", number);
 	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*40 + 1));
 	for(int i = 0; i< number * 40;i++) {
-		st[i] = ' ';
+		st[i] = symbol;
 	}
 	st[number * 40] = '\0';
 	return st;
@@ -498,6 +498,29 @@ void show_state(tnode* node, int level)
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			char* label = malloc(sizeof(char)* 10);
 			get_label(node,label);
+
+			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+			gchar *text;
+			if(label[0]=='1'&&label[2]!='.')
+			{
+				text=(gchar*)malloc(sizeof(gchar)*(62));
+				text[0] = '|';
+				text[1]='\n';
+				text[2] = '|';
+				for(int i = 3; i< 62;i++) {
+					text[i] = '-';
+				}
+				text[62] = '\0';
+			}
+			else
+			text =  get_sign(1,' ');
+
+
+			gtk_text_buffer_set_text (tb,text,strlen(text));
+			GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(textArea));
+			free(text); 
+
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
 			if (node == tree.current) {
@@ -558,7 +581,7 @@ void show_state(tnode* node, int level)
 			if((*node).hbox_status == 0)
 			{
 	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-				gchar *text =  get_sign(node->indent); 
+				gchar *text =  get_sign(node->indent,' '); 
 				gtk_text_buffer_set_text (tb,text,strlen(text));
 				GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
