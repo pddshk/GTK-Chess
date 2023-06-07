@@ -48,4 +48,6 @@ static void main_loop(void);
 void tell_gui(int, const void*, size_t);
 void tell_engine(const char*);
 
+static void unmount_engine(GSubprocess*);
+
 #endif
