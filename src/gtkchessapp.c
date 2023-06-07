@@ -48,9 +48,11 @@ void gtkchess_app_shutdown(
 	__attribute_maybe_unused__ GApplication *self,
 	__attribute_maybe_unused__ gpointer data)
 {
+	puts("Shutting down engine");
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) &&
 			!g_subprocess_get_if_exited(engine_manager)) {
+		puts("Force exiting engine manager");
         g_subprocess_force_exit(engine_manager);
 	}
 	destroy_tree(&tree);

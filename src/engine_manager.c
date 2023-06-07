@@ -12,10 +12,11 @@ int main(void)
     engine_params params;
     params.param_names = NULL;
     params.param_values = NULL;
-    // wait for engine name
     while (1)
     {
-        while (1)
+        // wait for engine name
+        int no_engine = TRUE;
+        while (no_engine)
         {
             int code;
             size_t nbytes;
@@ -26,16 +27,21 @@ int main(void)
             read(STDIN_FILENO, &nbytes, sizeof nbytes);
             
             // fprintf(stderr, "Got data length %zu.\n", nbytes);
-           
-            if (code == LOAD_ENGINE){
+            switch (code)
+            {
+            case LOAD_ENGINE:
                 read(STDIN_FILENO, engine_name, nbytes);
-                
-                // fprintf(stderr, "%s\n", engine_name);
-                
+                no_engine = FALSE;
                 break;
-            } else {
-                char buff[1024];
-                read(STDIN_FILENO, buff, nbytes);
+            case QUIT:
+                clear_params(&params);
+                unmount_engine(engine);
+                return EXIT_SUCCESS;
+            default: {
+                    char buff[1024];
+                    read(STDIN_FILENO, buff, nbytes); // clear up pipe
+                    break;
+                }
             }
         }
 
@@ -82,16 +88,8 @@ int main(void)
             tell_gui(ENGINE_NONE, NULL, 0);
         }
         fflush(stdout);
-        if (G_IS_SUBPROCESS(engine)) {
-            g_output_stream_close(to_engine, NULL, NULL);
-            g_input_stream_close(from_engine, NULL, NULL);
-            if (!g_subprocess_get_if_exited(engine)) {
-                g_subprocess_send_signal(engine, SIGTERM);
-                g_subprocess_wait(engine, NULL, NULL);
-            }
-            if (!g_subprocess_get_if_exited(engine))
-                g_subprocess_force_exit(engine);
-        }
+        unmount_engine(engine);
+        clear_params(&params);
     }
 }
 
@@ -251,10 +249,13 @@ gboolean parse_engine_response(
 
 void clear_params(struct _engine_params* params)
 {
-    if (params->param_names) free(params->param_names);
-    if (params->param_values) free(params->param_values);
-    params->nparams=0;
-    params->exec_path[0] = 0;
+    if (params) {
+        if (params->param_names) free(params->param_names);
+        if (params->param_values) free(params->param_values);
+        params->param_names = params->param_values = NULL;
+        params->nparams=0;
+        params->exec_path[0] = 0;
+    }
 }
 
 void tell_gui(int code, const void* data, size_t size)
@@ -275,4 +276,18 @@ void tell_engine(const char* command)
         NULL
     );
     g_output_stream_flush(to_engine, NULL, NULL);
+}
+
+void unmount_engine(GSubprocess* engine)
+{
+    if (G_IS_SUBPROCESS(engine)) {
+        g_output_stream_close(to_engine, NULL, NULL);
+        g_input_stream_close(from_engine, NULL, NULL);
+        if (!g_subprocess_get_if_exited(engine)) {
+            g_subprocess_send_signal(engine, SIGTERM);
+            g_subprocess_wait(engine, NULL, NULL);
+        }
+        if (!g_subprocess_get_if_exited(engine))
+            g_subprocess_force_exit(engine);
+    }
 }
