@@ -1,5 +1,6 @@
 #ifndef TYPEDECL_H
 #define TYPEDECL_H
+#include <gtk/gtk.h>
 
 typedef struct {
     int castlings[4]; // Queenside | Kingside | queenside | kingside
@@ -13,5 +14,25 @@ typedef struct {
     int is_active;
     int flipped;
 } game_state;
+
+struct tnode; 
+
+typedef struct
+{
+    game_state state;      // поле данных
+    struct tnode* parent;  // родитель
+    GList* children;
+    int hbox_status;
+    int indent;
+    GtkBox* hbox;
+    GtkBox* vbox;
+    char last_move_notation[10];
+} tnode;
+
+typedef struct
+{
+    tnode* root;
+    tnode* current;
+} state_tree;
 
 #endif
