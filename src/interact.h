@@ -17,7 +17,8 @@ enum {
     MOVE_NOW,
     QUIT,
     // from engine manager
-    DONE,
+    SUCCESS,
+    FAILURE,
     LINE,
     INFO,
     BESTMOVE,

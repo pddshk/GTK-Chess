@@ -3,6 +3,7 @@
 #include "state_tree.h"
 
 enum _EngineState{
+	ENGINE_NONE,
     ENGINE_OFF,
     ENGINE_IDLE,
     ENGINE_WORKING,
@@ -17,9 +18,11 @@ void gtkchess_app_startup(
 	
 	if (!start_engine_manager(engine_manager)){
 		fputs("Error while starting engine!\n", stderr);
-		exit(EXIT_FAILURE);
+		// exit(EXIT_FAILURE);
+		engine_state = ENGINE_NONE;
+	} else {
+		engine_state = ENGINE_IDLE;
 	}
-    engine_state = ENGINE_IDLE;
 
 	init_tree(&tree, NULL);
 	// init_textures();
@@ -96,7 +99,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 	size_t size=0;
 	g_input_stream_read(from_engine_manager, &code, sizeof code, NULL, NULL);
 	g_input_stream_read(from_engine_manager, &size, sizeof size, NULL, NULL);
-	return code == DONE;
+	return code == SUCCESS;
 }
 
 GtkBuilder *builder_init(void)
@@ -259,6 +262,9 @@ gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpoin
 	case BESTMOVE:
 		printf("bestmove %s\n", buff);
 		break;
+	case FAILURE:
+		printf("Something went wrong\n");
+		break;
 	default:
 		printf("got code %d", code);
 		break;
@@ -283,12 +289,16 @@ void toggle_engine(GtkButton* self, __attribute_maybe_unused__ gpointer data)
 			engine_state = ENGINE_IDLE;
 			gtk_button_set_label(self, "Go");
 			break;
+		case ENGINE_NONE:
+			puts("No engine to start!");
+			break;
 		case ENGINE_OFF:
 			//puts("Engine is off!");
 			break;
 		case ENGINE_ERROR:
 			puts("Engine is broken!");
 			break;
+		default: break;
 	}
 }
 
