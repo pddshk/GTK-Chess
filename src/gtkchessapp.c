@@ -1,5 +1,6 @@
 #include "gtkchessapp.h"
 #include "board.h"
+#include "state_tree.h"
 
 enum _EngineState{
     ENGINE_OFF,
@@ -19,9 +20,10 @@ void gtkchess_app_startup(
 		exit(EXIT_FAILURE);
 	}
     engine_state = ENGINE_IDLE;
-	init_state(&state);
-	init_textures();
-	load_textures("classic");
+
+	init_tree(&tree, NULL);
+	// init_textures();
+	// load_textures("classic");
 }
 
 void gtkchess_app_activate(
@@ -45,8 +47,10 @@ void gtkchess_app_shutdown(
 {
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) &&
-			!g_subprocess_get_if_exited(engine_manager))
+			!g_subprocess_get_if_exited(engine_manager)) {
         g_subprocess_force_exit(engine_manager);
+	}
+	destroy_tree(&tree);
 }
 
 void gtkchess_app_open(
@@ -95,15 +99,22 @@ int start_engine_manager(GSubprocess *engine_manager)
 	return code == DONE;
 }
 
-GtkBuilder *builder_init()
+GtkBuilder *builder_init(void)
 {
+	GtkCssProvider* provider = gtk_css_provider_new();
+	GdkDisplay* display = gdk_display_get_default();
+	GdkScreen* screen = gdk_display_get_default_screen (display);
+	gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+	gtk_css_provider_load_from_resource(provider, "/org/gtk/gtkchess/selected.css");
+
 	//cppcheck-suppress shadowVariable
     GtkBuilder *builder=gtk_builder_new_from_resource("/org/gtk/gtkchess/window.glade");
     GObject* window=gtk_builder_get_object(builder, "MainWindow");
 	gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
+	vbox = GTK_BOX(gtk_builder_get_object(builder, "Notation"));
     GtkWidget *Board = GTK_WIDGET(gtk_builder_get_object(builder, "Board"));
 
-    GdkPixbuf *empty_icon = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 0, 8, 1, 1);
+    GdkPixbuf *empty_icon = gdk_pixbuf_new(GDK_COLORSPACE_RGB, 0, 8, 1, 1);
 	GtkTargetEntry *board_entry = gtk_target_entry_new(
 		"GtkDrawingArea",
 		GTK_TARGET_SAME_WIDGET,
@@ -175,21 +186,24 @@ GtkBuilder *builder_init()
 	variations[1] = GTK_LABEL(gtk_builder_get_object(builder, "Variation1"));
 	variations[2] = GTK_LABEL(gtk_builder_get_object(builder, "Variation2"));
 	variations[3] = GTK_LABEL(gtk_builder_get_object(builder, "Variation3"));
+	init_textures();
+	load_textures("classic");
     return builder;
 }
 
 void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	state.flipped = !state.flipped;
+	flipped = !flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	int flipped = state.flipped;
-	init_state(&state);
-	state.flipped = flipped;
+	destroy_tree(&tree);
+	init_tree(&tree, NULL);
+	tree.root->state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
+	show_state(tree.root,0);
 }
 
 gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpointer data)
@@ -291,8 +305,8 @@ void add_variation(
 	__attribute_maybe_unused__ GtkButton* self,
 	__attribute_maybe_unused__ gpointer data)
 {
-	printf("nvariations = %d\n",nvariations);
-	fflush(stdout);
+	// printf("nvariations = %d\n",nvariations);
+	// fflush(stdout);
 	if (nvariations > 3) return;
 	nvariations++;
 	char text[2]="1";
@@ -309,4 +323,320 @@ void rm_variation(
 	if (nvariations < 2) return;
 	gtk_label_set_text(variations[nvariations-1], "");
 	nvariations--;
+}
+
+gchar* get_sign(int number,char symbol)
+{
+	number++;
+	//printf("%d/n", number);
+	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*40 + 1));
+	for(int i = 0; i< number * 40;i++) {
+		st[i] = symbol;
+	}
+	st[number * 40] = '\0';
+	return st;
+
+}
+
+// Bullshit
+// void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
+// {
+// 	GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
+// 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
+// 	GtkWidget *grid = children->data;
+// 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
+	
+//     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
+//     FEN_to_state(gtk_entry_get_text(entry));
+// 	game_state state = tree.current->field;
+// 	destroy_tree(&tree);
+// 	init_tree(state);
+// 	show_state(tree.root, 0);
+//     gtk_widget_destroy (widget); // This will close the dialog
+// 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+// }
+
+// void paste_FEN(
+// 	__attribute_maybe_unused__ GtkButton* main_window_button,
+// 	__attribute_maybe_unused__ gpointer data
+// ) {
+//     GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
+//     GtkWidget *dialog;
+//     GtkWidget *content_area;
+//     GtkWidget *grid;
+//     GtkWidget *label;
+//     //GtkWidget *button;
+//     static GtkEntry *textbox;
+
+//     dialog = gtk_dialog_new_with_buttons ("Get Text",
+//                                           GTK_WINDOW(window),
+//                                           GTK_DIALOG_MODAL,
+// 										  0,
+//                                           NULL);
+//     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
+//     grid = gtk_grid_new();
+//     gtk_container_add (GTK_CONTAINER (content_area), grid);
+
+//     label = gtk_label_new("Paste FEN: ");
+//     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+//     textbox = GTK_ENTRY(gtk_entry_new());
+//     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
+// 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
+// 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
+//     gtk_widget_show_all(dialog);
+
+//     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_FEN), dialog);
+// }
+
+
+//Bullshit as well
+// void get_PGN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
+// {
+// 	//PGN_to_tree(gtk_entry_get_text(entry));
+// 	//destroy_tree(tree);GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget* widget = GTK_WIDGET(data);
+// 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
+// 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
+// 	GtkWidget *grid = children->data;
+// 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
+// 	//destroy_tree(tree);
+	
+//     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
+// 	PGN_to_tree((char*)gtk_entry_get_text(entry));
+// 	//show_state(tree->root, 0);
+//     gtk_widget_destroy(widget); 
+// 	//show_state(tree->root, 0);
+//     //gtk_widget_destroy (widget); // This will close the dialog
+// 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+// }
+
+// void paste_PGN(__attribute_maybe_unused__ GtkButton* main_window_button, __attribute_maybe_unused__ gpointer data) 
+// {
+// 	GtkWidget *window = GTK_WIDGET(gtk_builder_get_object(builder, "MainWindow"));
+//     GtkWidget *dialog;
+//     GtkWidget *content_area;
+//     GtkWidget *grid;
+//     GtkWidget *label;
+//     //GtkWidget *button;
+//     static GtkEntry *textbox;
+
+//     dialog = gtk_dialog_new_with_buttons ("Get Text",
+//                                           GTK_WINDOW(window),
+//                                           GTK_DIALOG_MODAL,
+// 										  0,
+//                                           NULL);
+//     content_area = gtk_dialog_get_content_area(GTK_DIALOG (dialog));
+//     grid = gtk_grid_new();
+//     gtk_container_add (GTK_CONTAINER (content_area), grid);
+
+//     label = gtk_label_new("Paste PGN: ");
+//     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+//     textbox = GTK_ENTRY(gtk_entry_new());
+//     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(textbox), 1, 0, 1, 1);
+// 	GtkWidget *okbutton = gtk_button_new_with_label("OK");
+// 	gtk_grid_attach(GTK_GRID(grid), okbutton, 0, 2, 30, 20);
+//     gtk_widget_show_all(dialog);
+
+//     g_signal_connect (okbutton, "clicked", G_CALLBACK (get_PGN), dialog);
+// }
+
+void select_state(__attribute_maybe_unused__ GtkButton* button, gpointer node) {
+	tree.current = (tnode*)node;
+	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
+	show_state(tree.root, 0);
+	
+}
+
+void show_state(tnode* node, int level) 
+{
+	if (node==NULL)
+	return;
+	switch(level)
+	{
+		case 0:
+		{
+			//erasing tree graphics
+			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
+			for(; l;l=l->next)
+			{
+				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
+			}
+			g_list_free(l);
+
+			//visualising zero move
+			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
+			const char label[11] = "Game Start";
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			if (node == tree.current) {
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
+				gtk_style_context_add_class(context,"selected");
+			}
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(button));
+
+			//visualising tree
+			if(g_list_length(node->children)!=0)
+			{
+				GList* elem = node->children;
+				for(; elem; elem = elem->next) 
+				{
+					tnode* item = elem->data;
+					show_state(item,1);
+				}
+				g_list_free(elem);
+			}
+			break;
+		}
+		case 1:
+		{
+			
+
+			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
+			char* label = malloc(sizeof(char)* 10);
+			get_label(node,label);
+
+			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+			gchar *text;
+			if(label[0]=='1'&&label[2]!='.')
+			{
+				text=(gchar*)malloc(sizeof(gchar)*(62));
+				text[0] = '|';
+				text[1]='\n';
+				text[2] = '|';
+				for(int i = 3; i< 62;i++) {
+					text[i] = '-';
+				}
+				text[62] = '\0';
+			}
+			else
+			text =  get_sign(1,' ');
+
+
+			gtk_text_buffer_set_text (tb,text,strlen(text));
+			GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(textArea));
+			free(text); 
+
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			free(label);
+			if (node == tree.current) {
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
+				gtk_style_context_add_class(context,"selected");
+			}
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+
+			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
+			
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(button));
+			//if there is more than 1 child we create a vbox for them
+			GtkBox* subtreebox = NULL;
+			if (g_list_length(node->children) > 1) {
+				subtreebox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
+				gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(subtreebox));
+			}
+			
+			//first child gets level 1 and is shown last, second - level 2, third - level 3...
+			if(g_list_length(node->children)!=0)
+			{
+				GList* elem = node->children;
+				tnode* first_item = elem->data;
+				(*first_item).indent = node->indent; 
+				elem = elem->next;
+				for(; elem; elem = elem->next) 
+				{
+					tnode* item = elem->data;
+					(*item).indent = node->indent; 
+					(*item).indent++;
+					(*item).vbox = subtreebox;
+					GtkBox* child_subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					//gtk_widget_set_size_request(GTK_WIDGET(subtreehbox), 300, 100);
+					(*item).hbox = child_subtreehbox;
+					
+					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(child_subtreehbox));
+					//reordering
+					GValue targetIndex = G_VALUE_INIT;
+					g_value_init (&targetIndex, G_TYPE_INT);
+					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(child_subtreehbox),"position",&targetIndex);
+					gtk_box_reorder_child (GTK_BOX(subtreebox),GTK_WIDGET(child_subtreehbox),g_value_get_int(&targetIndex) + 1);
+					//
+					show_state(item,2);
+				}
+				g_list_free(elem);
+				show_state(first_item,1);
+			}
+			gtk_widget_show_all(GTK_WIDGET(vbox));
+			break;
+		}
+		default:
+		{
+			//tnode* parent = (tnode*)node->parent;
+			GtkBox* subtreebox = node->vbox;
+			GtkBox *hbox=node->hbox;
+			char* label=malloc(sizeof(char)* 10);
+			get_label(node,label);
+			if((*node).hbox_status == 0)
+			{
+	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+				gchar *text =  get_sign(node->indent,' '); 
+				gtk_text_buffer_set_text (tb,text,strlen(text));
+				GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
+				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
+				free(text); 
+			}
+
+			//button creation
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
+			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
+			
+			if (node == tree.current) 
+			{
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
+				gtk_style_context_add_class(context,"selected");
+			}
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			
+			free(label);
+			//going through children
+			if(g_list_length(node->children)!=0)
+			{
+				GList* elem = node->children;
+				tnode* first_item = elem->data;
+				int t_level = level;
+				level++;
+				(*first_item).vbox = subtreebox;
+				(*first_item).indent = (node->indent) + 1; 
+				(*first_item).hbox_status=1;
+				(*first_item).hbox=hbox;
+				elem = elem->next;
+				for(; elem; elem = elem->next) 
+				{
+					tnode* item = elem->data;
+					(*item).vbox = subtreebox;
+					(*item).indent = (node->indent) + 1; 
+					(*item).hbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+					gtk_container_add(GTK_CONTAINER(subtreebox), GTK_WIDGET(item->hbox));
+					//reordering
+					GValue targetIndex = G_VALUE_INIT;
+					g_value_init (&targetIndex, G_TYPE_INT);
+					gtk_container_child_get_property(GTK_CONTAINER(subtreebox),GTK_WIDGET(node->hbox),"position",&targetIndex);
+					//puts("afsd");
+					gtk_box_reorder_child (subtreebox,GTK_WIDGET(item->hbox),g_value_get_int(&targetIndex) + 1);
+					//
+					show_state(item,level);
+					
+				}
+				g_list_free(elem);
+				show_state(first_item,t_level);
+			}
+			//printf("first level default\n");
+			gtk_widget_show_all(GTK_WIDGET(vbox));
+			gtk_widget_show_all(GTK_WIDGET(subtreebox));
+			break;
+		}
+	}
 }

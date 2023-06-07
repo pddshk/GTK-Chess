@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include "interact.h"
 
-int main()
+int main(void)
 {
     GSubprocess *engine = NULL;
     engine_params params;
@@ -133,7 +133,7 @@ int init_engine(engine_params* params)
     return !!strstr(buff, "readyok");
 }
 
-void start_stop()
+void start_stop(void)
 {
     switch (engine_state) {
         case ENGINE_IDLE: {
@@ -149,7 +149,7 @@ void start_stop()
     }
 }
 
-void stop_engine()
+void stop_engine(void)
 {
     tell_engine("stop\n");
     engine_state = ENGINE_IDLE;
@@ -181,7 +181,7 @@ void *engine_to_manager(__attribute_maybe_unused__ void *data)
     }
 }
 
-void main_loop()
+void main_loop(void)
 {
     pthread_t thread_id;
     pthread_create(&thread_id, NULL, engine_to_manager, NULL);

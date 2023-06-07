@@ -2,7 +2,7 @@
 #define STATE_H
 #include "typedecl.h"
 
-extern game_state state;
+extern state_tree tree;
 
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
@@ -21,7 +21,7 @@ int is_enpassant_square(game_state*, int,int);
 void set_enpassant(game_state*, int,int);
 void clear_enpassant(game_state*);
 void recalc_castlings(game_state*);
-void next_move(game_state*, char, int, int, int, int, char);
+void next_move(const game_state*, char, int, int, int, int, char);
 
 void copy_state(game_state*);
 
@@ -50,5 +50,7 @@ int fifty_moves_exceeded(game_state*);
 int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
+void FEN_to_state(const char*);
+void PGN_to_tree(char*);
 
 #endif

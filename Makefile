@@ -9,7 +9,7 @@ LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
 SRCDIR	= src
-NAMES   = main board state rules gtkchessapp
+NAMES   = main board state rules gtkchessapp state_tree
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
 
@@ -29,7 +29,7 @@ BUILT_SRC = obj/resources.c
 OBJECTS += $(BUILT_SRC:.c=.o)
 
 GRESOURCE = src/gtkchessapp.gresource.xml
-UI = src/window.glade
+UI = src/window.glade src/selected.css
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)

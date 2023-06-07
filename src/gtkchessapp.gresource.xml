@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/org/gtk/gtkchess">
     <file preprocess="xml-stripblanks">window.glade</file>
+    <file>selected.css</file>
   </gresource>
 </gresources>
