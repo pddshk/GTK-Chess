@@ -325,13 +325,13 @@ void rm_variation(
 	nvariations--;
 }
 
-gchar* get_sign(int number)
+gchar* get_sign(int number,char symbol)
 {
-	number--;
+	number++;
 	//printf("%d/n", number);
 	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*40 + 1));
 	for(int i = 0; i< number * 40;i++) {
-		st[i] = ' ';
+		st[i] = symbol;
 	}
 	st[number * 40] = '\0';
 	return st;
@@ -456,13 +456,28 @@ void show_state(tnode* node, int level)
 	{
 		case 0:
 		{
-			//printf("0\n");
+			//erasing tree graphics
 			GList* l = gtk_container_get_children(GTK_CONTAINER(vbox));
 			for(; l;l=l->next)
 			{
 				gtk_container_remove(GTK_CONTAINER(vbox),l->data);
 			}
 			g_list_free(l);
+
+			//visualising zero move
+			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
+			const char label[11] = "Game Start";
+			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
+			if (node == tree.current) {
+				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
+				gtk_style_context_add_class(context,"selected");
+			}
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(button));
+
+			//visualising tree
 			if(g_list_length(node->children)!=0)
 			{
 				GList* elem = node->children;
@@ -477,12 +492,35 @@ void show_state(tnode* node, int level)
 		}
 		case 1:
 		{
-			//printf("1\n");
+			
 
 			GtkBox* subtreehbox =  GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			char* label = malloc(sizeof(char)* 10);
 			get_label(node,label);
+
+			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
+			gchar *text;
+			if(label[0]=='1'&&label[2]!='.')
+			{
+				text=(gchar*)malloc(sizeof(gchar)*(62));
+				text[0] = '|';
+				text[1]='\n';
+				text[2] = '|';
+				for(int i = 3; i< 62;i++) {
+					text[i] = '-';
+				}
+				text[62] = '\0';
+			}
+			else
+			text =  get_sign(1,' ');
+
+
+			gtk_text_buffer_set_text (tb,text,strlen(text));
+			GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
+			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(textArea));
+			free(text); 
+
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
 			if (node == tree.current) {
@@ -500,10 +538,7 @@ void show_state(tnode* node, int level)
 				subtreebox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
 				gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(subtreebox));
 			}
-			/*if(is_invisible_in(subtreehbox,viewport,vbox))
-			{
-				movescroll(button);
-			}*/
+			
 			//first child gets level 1 and is shown last, second - level 2, third - level 3...
 			if(g_list_length(node->children)!=0)
 			{
@@ -546,9 +581,9 @@ void show_state(tnode* node, int level)
 			if((*node).hbox_status == 0)
 			{
 	 			GtkTextBuffer* tb = gtk_text_buffer_new (NULL);
-				gchar *text =  get_sign(node->indent); 
+				gchar *text =  get_sign(node->indent,' '); 
 				gtk_text_buffer_set_text (tb,text,strlen(text));
-				GtkEntry *textArea = GTK_ENTRY(gtk_text_view_new_with_buffer(tb));
+				GtkTextView *textArea = GTK_TEXT_VIEW(gtk_text_view_new_with_buffer(tb));
 				gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(textArea));
 				free(text); 
 			}
