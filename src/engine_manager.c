@@ -75,30 +75,40 @@ int main(void)
             
             // fputs("Engine started\n", stderr);
             
-            tell_gui(DONE, NULL, 0);
+            tell_gui(SUCCESS, NULL, 0);
             main_loop();
+        } else {
+            // fprintf(stderr, "init failed");
+            tell_gui(ENGINE_NONE, NULL, 0);
         }
-        else
-            fprintf(stderr, "init failed");
         fflush(stdout);
-        g_subprocess_send_signal(engine, SIGTERM);
-        g_subprocess_wait(engine, NULL, NULL);
-        if (!g_subprocess_get_if_exited(engine))
-            g_subprocess_force_exit(engine);
-        g_output_stream_close(to_engine, NULL, NULL);
-        g_input_stream_close(from_engine, NULL, NULL);
+        if (G_IS_SUBPROCESS(engine)) {
+            g_output_stream_close(to_engine, NULL, NULL);
+            g_input_stream_close(from_engine, NULL, NULL);
+            if (!g_subprocess_get_if_exited(engine)) {
+                g_subprocess_send_signal(engine, SIGTERM);
+                g_subprocess_wait(engine, NULL, NULL);
+            }
+            if (!g_subprocess_get_if_exited(engine))
+                g_subprocess_force_exit(engine);
+        }
     }
 }
 
 int run_engine(GSubprocess* engine, engine_params* params)
 {
+    GError *err=NULL;
     engine = g_subprocess_new(
         G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
-        NULL,
+        &err,
         params->exec_path,
         NULL
     );
-
+    if (err) {
+        fprintf (stderr, "Unable to load engine: %s\n", err->message);
+        g_error_free (err);
+        return FALSE;
+    }
     to_engine = g_subprocess_get_stdin_pipe(engine);
     from_engine = g_subprocess_get_stdout_pipe(engine);
     return init_engine(params);
