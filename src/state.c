@@ -20,23 +20,22 @@ void init_state(game_state* state)
     state->fifty_moves_counter = 0;
     state->move_counter = 1;
     state->enpassant_row = state->enpassant_col = -1;
-    state->is_active = 1;
-    
+    state->is_active = 1;   
 }
 
-game_state init_state_non_pointer()
-{
-    game_state state;
-    strcpy((char*)state.field, "rnbqkbnr\0pppppppp\0--------\0--------\0--------\0--------\0PPPPPPPP\0RNBQKBNR\0");
-    state.castlings[0] = state.castlings[1] = state.castlings[2] = state.castlings[3] = 1;
-    state.side_to_move = 1;
-    state.fifty_moves_counter = 0;
-    state.move_counter = 1;
-    state.enpassant_row = state.enpassant_col = -1;
-    state.is_active = 1;
-    state.flipped = 0;
-    return state;
-}
+// game_state init_state_non_pointer()
+// {
+//     game_state state;
+//     strcpy((char*)state.field, "rnbqkbnr\0pppppppp\0--------\0--------\0--------\0--------\0PPPPPPPP\0RNBQKBNR\0");
+//     state.castlings[0] = state.castlings[1] = state.castlings[2] = state.castlings[3] = 1;
+//     state.side_to_move = 1;
+//     state.fifty_moves_counter = 0;
+//     state.move_counter = 1;
+//     state.enpassant_row = state.enpassant_col = -1;
+//     state.is_active = 1;
+//     state.flipped = 0;
+//     return state;
+// }
 
 int is_active(game_state* state){
     return state->is_active;
