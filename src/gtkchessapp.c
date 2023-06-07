@@ -305,8 +305,8 @@ void add_variation(
 	__attribute_maybe_unused__ GtkButton* self,
 	__attribute_maybe_unused__ gpointer data)
 {
-	printf("nvariations = %d\n",nvariations);
-	fflush(stdout);
+	// printf("nvariations = %d\n",nvariations);
+	// fflush(stdout);
 	if (nvariations > 3) return;
 	nvariations++;
 	char text[2]="1";
