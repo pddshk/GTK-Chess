@@ -16,7 +16,7 @@ enum { Npieces = BPKnight };
 RsvgHandle *Pieces[Npieces];
 RsvgHandle *BoardImage;
 
-void init_textures(){
+void init_textures(void){
 	for (size_t i = 0; i < Npieces; i++)
 		Pieces[i] = NULL;
 	BoardImage = NULL;

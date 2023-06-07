@@ -11,7 +11,7 @@ extern int flipped;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
 
-void init_textures();
+void init_textures(void);
 void load_textures(const char* pack);
 
 void

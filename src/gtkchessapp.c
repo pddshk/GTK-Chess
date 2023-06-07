@@ -99,7 +99,7 @@ int start_engine_manager(GSubprocess *engine_manager)
 	return code == DONE;
 }
 
-GtkBuilder *builder_init()
+GtkBuilder *builder_init(void)
 {
 	GtkCssProvider* provider = gtk_css_provider_new();
 	GdkDisplay* display = gdk_display_get_default();

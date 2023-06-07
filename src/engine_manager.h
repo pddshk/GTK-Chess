@@ -40,9 +40,9 @@ void clear_params(engine_params*);
 
 // static void skip_output();
 // void start_stop(GtkBox*);
-void start_stop();
-void stop_engine();
-static void main_loop();
+void start_stop(void);
+void stop_engine(void);
+static void main_loop(void);
 // gboolean parse_engine_response(gint, GIOCondition, gpointer);
 
 void tell_gui(int, const void*, size_t);

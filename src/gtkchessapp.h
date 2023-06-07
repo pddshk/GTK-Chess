@@ -17,7 +17,7 @@ extern GtkWidget *dialogs[4];
 extern state_tree tree;
 extern GtkBox* vbox;
 
-GtkBuilder *builder_init();
+GtkBuilder *builder_init(void);
 
 void flip_board(GtkButton*, gpointer);
 
