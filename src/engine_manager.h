@@ -5,7 +5,7 @@
 #define UCI "uci\n"
 #define ISREADY "isready\n"
 
-char engine_name[128] = ""; // = "stockfish";
+static char engine_name[128] = ""; // = "stockfish";
 
 /*
 Engine manager process is responsible for creating separate process for
@@ -29,24 +29,24 @@ typedef struct _engine_params{
     char (*param_values)[32];
 } engine_params;
 
-GOutputStream *to_engine;
-GInputStream *from_engine;
+static GOutputStream *to_engine;
+static GInputStream *from_engine;
 
 static int init_engine(engine_params*);
 
 static int run_engine(GSubprocess*, engine_params*);
 
-void clear_params(engine_params*);
+static void clear_params(engine_params*);
 
 // static void skip_output();
 // void start_stop(GtkBox*);
-void start_stop(void);
-void stop_engine(void);
+static void start_stop(void);
+static void stop_engine(void);
 static void main_loop(void);
 // gboolean parse_engine_response(gint, GIOCondition, gpointer);
 
-void tell_gui(int, const void*, size_t);
-void tell_engine(const char*);
+static void tell_gui(int, const void*, size_t);
+static void tell_engine(const char*);
 
 static void unmount_engine(GSubprocess*);
 
