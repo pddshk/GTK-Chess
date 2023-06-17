@@ -1,25 +1,46 @@
-name: Sphinx build
+name: Build and deploy Sphinx docs
 
-on: push
+on:
+  push:
+    branches: ["master", "30-add-documentation"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
     
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-pages-artifact@v3
       with:
         name: html-docs
         path: docs/build/html/
         
     - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/master'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html
+      id: deployment
+      uses: actions/deploy-pages@v2
+      # uses: peaceiris/actions-gh-pages@v3
+      # if: github.ref == 'refs/heads/master'
+      # with:
+      #   github_token: ${{ secrets.GITHUB_TOKEN }}
+      #   publish_dir: docs/build/html
