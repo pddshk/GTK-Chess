@@ -31,7 +31,7 @@ jobs:
       uses: ammaraskar/sphinx-action@master
       
     - name: Upload artifacts
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v1
       with:
         name: html-docs
         path: docs/build/html/
