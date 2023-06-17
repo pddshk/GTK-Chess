@@ -4,5 +4,5 @@ GTKChess
 engine_manager
 .vscode
 *~
-src/resources.c
 temp
+docs/build
