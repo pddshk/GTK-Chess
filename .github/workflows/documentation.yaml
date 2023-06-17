@@ -1,4 +1,4 @@
-name: Build and deploy Sphinx docs
+name: Deploy Sphinx docs to Pages
 
 on:
   push:
@@ -15,30 +15,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  pages:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - id: deploy
+      uses: sphinx-notes/pages@v3
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v3
+# jobs:
+#   deploy:
+#     environment:
+#       name: github-pages
+#       url: ${{ steps.deployment.outputs.page_url }}
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v3
+
+#     - name: Setup Pages
+#       uses: actions/configure-pages@v3
     
-    - name: Build HTML
-      uses: ammaraskar/sphinx-action@master
+#     - name: Build HTML
+#       uses: ammaraskar/sphinx-action@master
       
-    - name: Upload artifacts
-      uses: actions/upload-pages-artifact@v1
-      with:
-        name: github-pages
-        path: docs/build/html/
+#     - name: Upload artifacts
+#       uses: actions/upload-pages-artifact@v1
+#       with:
+#         name: github-pages
+#         path: docs/build/html/
         
-    - name: Deploy
-      id: deployment
-      uses: actions/deploy-pages@v2
+#     - name: Deploy
+#       id: deployment
+#       uses: actions/deploy-pages@v2
+
       # uses: peaceiris/actions-gh-pages@v3
       # if: github.ref == 'refs/heads/master'
       # with:
