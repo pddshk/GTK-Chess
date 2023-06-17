@@ -71,11 +71,13 @@ clean_check:
 	rm -f $(TEMPDIR)/*
 
 clean_docs:
-	rm -rf $(DOCDIR)/*
+	rm -rf $(DOCDIR)/build
 
 restore: cleaner clean_check clean_docs
 
-sphinx-quickstart: clean_docs
-	sphinx-quickstart --no-batchfile \
-		--ext-githubpages --ext-viewcode --ext-autodoc \
-		-p "GTK-Chess" -a "Paul Dydyshko" -r "0.0.1" -l "en" --sep $(DOCDIR)
+docs: $(DOCDIR)/source
+	cd $(DOCDIR) && $(MAKE) html && cd -
+
+read: docs
+	xdg-open $(DOCDIR)/build/html/index.html &> /dev/null
+	
