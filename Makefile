@@ -9,6 +9,7 @@ LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
 SRCDIR	= src
+DOCDIR	= docs
 NAMES   = main board state rules gtkchessapp state_tree
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
@@ -69,4 +70,14 @@ check_sources:
 clean_check:
 	rm -f $(TEMPDIR)/*
 
-restore: cleaner clean_check
+clean_docs:
+	rm -rf $(DOCDIR)/build
+
+restore: cleaner clean_check clean_docs
+
+docs: $(DOCDIR)/source
+	cd $(DOCDIR) && $(MAKE) html && cd -
+
+read: docs
+	xdg-open $(DOCDIR)/build/html/index.html &> /dev/null
+	
