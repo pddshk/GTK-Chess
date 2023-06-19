@@ -23,8 +23,6 @@ void gtkchess_app_startup(
 		engine_state = ENGINE_IDLE;
 	}
 	init_tree(&tree, NULL);
-	// init_textures();
-	// load_textures("classic");
 }
 
 void gtkchess_app_activate(
@@ -197,7 +195,7 @@ GtkBuilder *builder_init(void)
 	variations[2] = GTK_LABEL(gtk_builder_get_object(builder, "Variation2"));
 	variations[3] = GTK_LABEL(gtk_builder_get_object(builder, "Variation3"));
 	init_textures();
-	load_textures("classic");
+	// load_textures("classic");
     return builder;
 }
 

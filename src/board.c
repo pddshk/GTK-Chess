@@ -2,6 +2,8 @@
 #include <math.h>
 #include <string.h>
 
+#define TEXTURES_PATH "resource:///org/gtk/gtkchess/textures/classic/"
+
 enum {
 	None,
 	WKing, WQueen, WRook, WBishop, WKnight, WPawn,
@@ -16,11 +18,11 @@ enum { Npieces = BPKnight };
 RsvgHandle *Pieces[Npieces];
 RsvgHandle *BoardImage;
 
-void init_textures(void){
-	for (size_t i = 0; i < Npieces; i++)
-		Pieces[i] = NULL;
-	BoardImage = NULL;
-}
+// void init_textures(void){
+// 	for (size_t i = 0; i < Npieces; i++)
+// 		Pieces[i] = NULL;
+// 	BoardImage = NULL;
+// }
 
 // global state of drag action
 // used to render dragged_piece
@@ -71,32 +73,27 @@ void calc_size(GtkWidget* Board,
 	*h_offset = *hmargin + border_size;
 }
 
-void load_textures(const char* pack)
+void init_textures(void)
 {
-	puts("Loading textures");
 	const char* const names[] = {
 		"WKing", "WQueen", "WRook", "WBishop", "WKnight", "WPawn",
 		"BKing", "BQueen", "BRook", "BBishop", "BKnight", "BPawn",
 		"WPQueen", "WPRook", "WPBishop", "WPKnight",
     	"BPQueen", "BPRook", "BPBishop", "BPKnight"
 	};
+	char uri[64] = TEXTURES_PATH;
+	char *name = uri + strlen(TEXTURES_PATH);
 	for (size_t i = 1; i < Npieces; i++)
 	{
-		char path[64] = "../data/textures/";
-		strcat(path, pack);
-		strcat(path, "/");
-		strcat(path, names[i-1]);
-		strcat(path, ".svg");
-		if (Pieces[i])
-			g_object_unref(Pieces[i]);
-		Pieces[i] = rsvg_handle_new_from_file(path, NULL);
+		sprintf(name, "%s.svg", names[i-1]);
+		GFile *file = g_file_new_for_uri(uri);
+		Pieces[i] = rsvg_handle_new_from_gfile_sync(file, RSVG_HANDLE_FLAGS_NONE, NULL, NULL);
+		g_object_unref(file);
 	}
-	if (BoardImage)
-		g_object_unref(BoardImage);
-	char path[64] = "../data/textures/";
-	strcat(path, pack);
-	strcat(path, "/Board.svg");
-	BoardImage = rsvg_handle_new_from_file(path, NULL);
+	strcpy(name, "Board.svg");
+	GFile *file = g_file_new_for_uri(uri);
+	BoardImage = rsvg_handle_new_from_gfile_sync(file, RSVG_HANDLE_FLAGS_NONE, NULL, NULL);
+	g_object_unref(file);
 }
 
 // resolves piece texture

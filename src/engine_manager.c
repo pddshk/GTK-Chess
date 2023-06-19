@@ -218,7 +218,6 @@ void main_loop(void)
             stop_engine();
             pthread_cancel(thread_id);
             exit(EXIT_SUCCESS);
-            break;
         case GO:
             if (engine_state == ENGINE_IDLE)
                 start_stop();
@@ -241,7 +240,7 @@ gboolean parse_engine_response(
 {
     if (condition == G_IO_IN){
         char buff[4096];
-        int nread = 0;
+        ssize_t nread = 0;
         do {
             nread = read(from_engine, buff, sizeof(buff));
             buff[nread] = 0;

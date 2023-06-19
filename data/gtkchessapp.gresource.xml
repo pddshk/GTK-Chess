@@ -3,5 +3,26 @@
   <gresource prefix="/org/gtk/gtkchess">
     <file preprocess="xml-stripblanks">window.glade</file>
     <file>selected.css</file>
+    <file preprocess="xml-stripblanks">textures/classic/BBishop.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BKing.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BKnight.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BPBishop.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BPKnight.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BPQueen.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BPRook.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BPawn.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BQueen.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/BRook.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/Board.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WBishop.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WKing.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WKnight.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WPBishop.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WPKnight.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WPQueen.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WPRook.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WPawn.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WQueen.svg</file>
+    <file preprocess="xml-stripblanks">textures/classic/WRook.svg</file>
   </gresource>
 </gresources>
