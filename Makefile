@@ -4,11 +4,12 @@ GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
 PKGCONF	= $(shell which pkg-config)
-CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
+CFLAGS	+= -Wall -Wextra -Wpedantic -std=$(STD) -O3 $(shell $(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO))
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
 SRCDIR	= src
+DATADIR = data
 DOCDIR	= docs
 NAMES   = main board state rules gtkchessapp state_tree
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
@@ -29,18 +30,18 @@ BUILT_SRC = obj/resources.c
 
 OBJECTS += $(BUILT_SRC:.c=.o)
 
-GRESOURCE = src/gtkchessapp.gresource.xml
-UI = src/window.glade src/selected.css
+GRESOURCE = $(DATADIR)/gtkchessapp.gresource.xml
+UI = $(DATADIR)/window.glade $(DATADIR)/selected.css
 
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
-	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/src/textures/classic/WKnight.svg
+	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/data/textures/classic/WKnight.svg
 
 engine_manager: $(OBJDIR)/engine_manager.o
 	$(CC) $(CFLAGS) -o engine_manager $< $(LDFLAGS) -pthread
 
 $(BUILT_SRC): $(GRESOURCE) $(UI)
-	$(GLIB_COMPILE_RESOURCES) $(GRESOURCE) --target=$@ --sourcedir=$(SRCDIR) --generate-source
+	$(GLIB_COMPILE_RESOURCES) $(GRESOURCE) --target=$@ --sourcedir=$(DATADIR) --generate-source
 
 prepare:
 	mkdir -p $(OBJDIR)

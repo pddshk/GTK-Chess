@@ -73,6 +73,7 @@ void calc_size(GtkWidget* Board,
 
 void load_textures(const char* pack)
 {
+	puts("Loading textures");
 	const char* const names[] = {
 		"WKing", "WQueen", "WRook", "WBishop", "WKnight", "WPawn",
 		"BKing", "BQueen", "BRook", "BBishop", "BKnight", "BPawn",
@@ -81,7 +82,7 @@ void load_textures(const char* pack)
 	};
 	for (size_t i = 1; i < Npieces; i++)
 	{
-		char path[32] = "src/textures/";
+		char path[64] = "../data/textures/";
 		strcat(path, pack);
 		strcat(path, "/");
 		strcat(path, names[i-1]);
@@ -92,7 +93,7 @@ void load_textures(const char* pack)
 	}
 	if (BoardImage)
 		g_object_unref(BoardImage);
-	char path[32] = "src/textures/";
+	char path[64] = "../data/textures/";
 	strcat(path, pack);
 	strcat(path, "/Board.svg");
 	BoardImage = rsvg_handle_new_from_file(path, NULL);
