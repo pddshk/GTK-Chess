@@ -173,7 +173,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 
 	// when pawn is to be promoted
 	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
-	char q,r,b,n;
+	char q=0,r=0,b=0,n=0;
 	int dir = 1;
 	int _pawn_promotion_col = pawn_promotion_col,
 		_pawn_promotion_row = pawn_promotion_row;

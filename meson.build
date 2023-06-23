@@ -10,7 +10,8 @@ project(
     ]
 )
 
-add_project_arguments('-Wno-overlength-strings', '-I../include', language: 'c')
+incdir = include_directories('include')
+add_project_arguments('-Wno-overlength-strings', language: 'c')
 
 dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.24.0')
 dep_glib = dependency('glib-2.0', version: '>= 2.64.0')
@@ -33,7 +34,8 @@ executable(
     dependencies: [dep_giounix],
     link_args: ['-pthread'],
     install: true,
-    install_dir: '.'
+    install_dir: '.',
+    include_directories : incdir
 )
 
 executable(
@@ -43,5 +45,6 @@ executable(
     dependencies: [dep_rsvg, dep_giounix, dep_glib, dep_gtk3],
     link_args: ['-rdynamic'],
     install: true,
-    install_dir: '.'
+    install_dir: '.',
+    include_directories : incdir
 )

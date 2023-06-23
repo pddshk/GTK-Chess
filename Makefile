@@ -4,7 +4,7 @@ GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
 PKGCONF	= $(shell which pkg-config)
-CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 -Iinclude `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
+CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
@@ -15,6 +15,8 @@ DOCDIR	= docs
 NAMES   = main board state rules gtkchessapp state_tree
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
+
+CFLAGS += -I$(INCDIR)
 
 CHECKFLAGS += -Wextra -pedantic -fsyntax-only
 GCC = $(shell which gcc)

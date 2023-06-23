@@ -325,7 +325,7 @@ void add_variation(
 	if (nvariations > 3) return;
 	nvariations++;
 	char text[2]="1";
-	sprintf(text,"%d",nvariations);
+	// sprintf(text,"%d",nvariations);
 	gtk_label_set_text(variations[nvariations-1], text);
 }
 
