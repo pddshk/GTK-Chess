@@ -18,15 +18,11 @@ void gtkchess_app_startup(
 	
 	if (!start_engine_manager(engine_manager)){
 		fputs("Error while starting engine!\n", stderr);
-		// exit(EXIT_FAILURE);
 		engine_state = ENGINE_NONE;
 	} else {
 		engine_state = ENGINE_IDLE;
 	}
-
 	init_tree(&tree, NULL);
-	// init_textures();
-	// load_textures("classic");
 }
 
 void gtkchess_app_activate(
@@ -48,11 +44,11 @@ void gtkchess_app_shutdown(
 	__attribute_maybe_unused__ GApplication *self,
 	__attribute_maybe_unused__ gpointer data)
 {
-	puts("Shutting down engine");
+	g_source_remove(g_source_get_id(from_engine_manager_source));
     tell_engine_manager(QUIT, NULL, 0);
     if (G_IS_SUBPROCESS(engine_manager) &&
 			!g_subprocess_get_if_exited(engine_manager)) {
-		puts("Force exiting engine manager");
+		fprintf(stderr, "Warning: Force exiting engine manager");
         g_subprocess_force_exit(engine_manager);
 	}
 	destroy_tree(&tree);
@@ -66,14 +62,16 @@ void gtkchess_app_open(
 
 int start_engine_manager(GSubprocess *engine_manager)
 {
+	GError *err = NULL;
 	engine_manager = g_subprocess_new(
 		G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE,
-		NULL,
+		&err,
 		"./engine_manager",
 		NULL
 	);
-	if (!engine_manager) {
-		fprintf(stderr, "Cannot create subprocess for engine manager! Engine would be unavailable.\n");
+	if (err) {
+		fprintf(stderr, "Cannot create subprocess for engine manager! Engine would be unavailable.\n %s", err->message);
+		g_error_free(err);
 		return FALSE;
 	}
 	to_engine_manager = g_subprocess_get_stdin_pipe(engine_manager);
@@ -97,10 +95,15 @@ int start_engine_manager(GSubprocess *engine_manager)
 		return FALSE;
 	}
 	tell_engine_manager(LOAD_ENGINE, "stockfish", strlen("stockfish"));
-	int code=0;
+	int code=-1;
 	size_t size=0;
-	g_input_stream_read(from_engine_manager, &code, sizeof code, NULL, NULL);
+	g_input_stream_read(from_engine_manager, &code, sizeof code, NULL, &err);
+	if (err){
+		fprintf(stderr, "Cannot read from engine manager: %s", err->message);
+		g_error_free(err);
+	}
 	g_input_stream_read(from_engine_manager, &size, sizeof size, NULL, NULL);
+	// printf("returned code: %d\n", code);
 	return code == SUCCESS;
 }
 
@@ -192,7 +195,7 @@ GtkBuilder *builder_init(void)
 	variations[2] = GTK_LABEL(gtk_builder_get_object(builder, "Variation2"));
 	variations[3] = GTK_LABEL(gtk_builder_get_object(builder, "Variation3"));
 	init_textures();
-	load_textures("classic");
+	// load_textures("classic");
     return builder;
 }
 
@@ -268,7 +271,7 @@ gboolean parse_engine_response(GObject* stream, __attribute_maybe_unused__ gpoin
 		printf("Something went wrong\n");
 		break;
 	default:
-		printf("got code %d", code);
+		printf("got code %d\n", code);
 		break;
 	}
 	return TRUE;
@@ -322,7 +325,7 @@ void add_variation(
 	if (nvariations > 3) return;
 	nvariations++;
 	char text[2]="1";
-	sprintf(text,"%d",nvariations);
+	// sprintf(text,"%d",nvariations);
 	gtk_label_set_text(variations[nvariations-1], text);
 }
 
@@ -522,7 +525,7 @@ void show_state(tnode* node, int level)
 				for(int i = 3; i< 62;i++) {
 					text[i] = '-';
 				}
-				text[62] = '\0';
+				text[61] = '\0';
 			}
 			else
 			text =  get_sign(1,' ');

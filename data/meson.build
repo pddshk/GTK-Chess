@@ -1,0 +1,1 @@
+gresources_file = files('gtkchessapp.gresource.xml')
