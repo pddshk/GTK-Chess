@@ -14,6 +14,7 @@ int main(void)
     params.param_values = NULL;
     while (1)
     {
+        // fprintf(stderr, "Waiting for engine name\n");
         // wait for engine name
         int no_engine = TRUE;
         while (no_engine)
@@ -22,7 +23,7 @@ int main(void)
             size_t nbytes;
             read(STDIN_FILENO, &code, sizeof code);
             
-            // fprintf(stderr, "Got message code %d. ", code);
+            // fprintf(stderr, "Got message code %d.\n", code);
 
             read(STDIN_FILENO, &nbytes, sizeof nbytes);
             
@@ -31,12 +32,14 @@ int main(void)
             {
             case LOAD_ENGINE:
                 read(STDIN_FILENO, engine_name, nbytes);
+                // fprintf(stderr, "Loading engine %s\n", engine_name);
                 no_engine = FALSE;
                 break;
             case QUIT:
                 clear_params(&params);
                 unmount_engine(engine);
-                return EXIT_SUCCESS;
+                fprintf(stderr, "Shutting down engine manager\n");
+                exit(EXIT_SUCCESS);
             default: {
                     char buff[1024];
                     read(STDIN_FILENO, buff, nbytes); // clear up pipe
@@ -53,8 +56,9 @@ int main(void)
         
         FILE *config = fopen(config_path, "r");
         if (!config) {
-            perror("Cannot open file");
-            exit(EXIT_FAILURE);
+            perror("Cannot open config file");
+            tell_gui(FAILURE, NULL, 0);
+            continue;
         }
         clear_params(&params);
         fgets(params.exec_path, sizeof(params.exec_path), config);
@@ -214,7 +218,6 @@ void main_loop(void)
             stop_engine();
             pthread_cancel(thread_id);
             exit(EXIT_SUCCESS);
-            break;
         case GO:
             if (engine_state == ENGINE_IDLE)
                 start_stop();
@@ -237,7 +240,7 @@ gboolean parse_engine_response(
 {
     if (condition == G_IO_IN){
         char buff[4096];
-        int nread = 0;
+        ssize_t nread = 0;
         do {
             nread = read(from_engine, buff, sizeof(buff));
             buff[nread] = 0;

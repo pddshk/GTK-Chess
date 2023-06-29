@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<gresources>
-  <gresource prefix="/org/gtk/gtkchess">
-    <file preprocess="xml-stripblanks">window.glade</file>
-    <file>selected.css</file>
-  </gresource>
-</gresources>

@@ -2,6 +2,8 @@
 #include <math.h>
 #include <string.h>
 
+#define TEXTURES_PATH "resource:///org/gtk/gtkchess/textures/classic/"
+
 enum {
 	None,
 	WKing, WQueen, WRook, WBishop, WKnight, WPawn,
@@ -16,11 +18,11 @@ enum { Npieces = BPKnight };
 RsvgHandle *Pieces[Npieces];
 RsvgHandle *BoardImage;
 
-void init_textures(void){
-	for (size_t i = 0; i < Npieces; i++)
-		Pieces[i] = NULL;
-	BoardImage = NULL;
-}
+// void init_textures(void){
+// 	for (size_t i = 0; i < Npieces; i++)
+// 		Pieces[i] = NULL;
+// 	BoardImage = NULL;
+// }
 
 // global state of drag action
 // used to render dragged_piece
@@ -71,7 +73,7 @@ void calc_size(GtkWidget* Board,
 	*h_offset = *hmargin + border_size;
 }
 
-void load_textures(const char* pack)
+void init_textures(void)
 {
 	const char* const names[] = {
 		"WKing", "WQueen", "WRook", "WBishop", "WKnight", "WPawn",
@@ -79,23 +81,19 @@ void load_textures(const char* pack)
 		"WPQueen", "WPRook", "WPBishop", "WPKnight",
     	"BPQueen", "BPRook", "BPBishop", "BPKnight"
 	};
+	char uri[64] = TEXTURES_PATH;
+	char *name = uri + strlen(TEXTURES_PATH);
 	for (size_t i = 1; i < Npieces; i++)
 	{
-		char path[32] = "src/textures/";
-		strcat(path, pack);
-		strcat(path, "/");
-		strcat(path, names[i-1]);
-		strcat(path, ".svg");
-		if (Pieces[i])
-			g_object_unref(Pieces[i]);
-		Pieces[i] = rsvg_handle_new_from_file(path, NULL);
+		sprintf(name, "%s.svg", names[i-1]);
+		GFile *file = g_file_new_for_uri(uri);
+		Pieces[i] = rsvg_handle_new_from_gfile_sync(file, RSVG_HANDLE_FLAGS_NONE, NULL, NULL);
+		g_object_unref(file);
 	}
-	if (BoardImage)
-		g_object_unref(BoardImage);
-	char path[32] = "src/textures/";
-	strcat(path, pack);
-	strcat(path, "/Board.svg");
-	BoardImage = rsvg_handle_new_from_file(path, NULL);
+	strcpy(name, "Board.svg");
+	GFile *file = g_file_new_for_uri(uri);
+	BoardImage = rsvg_handle_new_from_gfile_sync(file, RSVG_HANDLE_FLAGS_NONE, NULL, NULL);
+	g_object_unref(file);
 }
 
 // resolves piece texture
@@ -175,7 +173,7 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 
 	// when pawn is to be promoted
 	int q_row=-1, r_row=-1, b_row=-1, n_row=-1;
-	char q,r,b,n;
+	char q=0,r=0,b=0,n=0;
 	int dir = 1;
 	int _pawn_promotion_col = pawn_promotion_col,
 		_pawn_promotion_row = pawn_promotion_row;

@@ -216,6 +216,7 @@ void castle(game_state* state, char king, char side)
                     state->field[7][5] = 'R';
                     return;
             }
+            break;
         case 'k':
             switch (side) {
                 case 'Q':
@@ -232,6 +233,7 @@ void castle(game_state* state, char king, char side)
                     return;
 
             }
+            break;
     }
 }
 
@@ -311,6 +313,7 @@ int any_moves_possible(game_state* state)
                         )
                             return 1;
                     }
+                    break;
                 case 'R': case 'r':
                     for (int k = 0; k < 8; k++){
                         if (is_valid_move(state, piece, i, j, i+k, j) ||
@@ -320,6 +323,7 @@ int any_moves_possible(game_state* state)
                         )
                             return 1;
                     }
+                    break;
                 case 'B': case 'b':
                     for (int k = 0; k < 8; k++){
                         if (is_valid_move(state, piece, i, j, i+k, j+k) ||
@@ -329,6 +333,7 @@ int any_moves_possible(game_state* state)
                         )
                             return 1;
                     }
+                    break;
                 case 'N': case 'n':
                     if (is_valid_move(state, piece, i, j, i-2, j-1) ||
                         is_valid_move(state, piece, i, j, i-2, j+1) ||
@@ -340,6 +345,7 @@ int any_moves_possible(game_state* state)
                         is_valid_move(state, piece, i, j, i+2, j+1)
                     )
                         return 1;
+                    break;
                 case 'P':
                     if (is_valid_move(state, piece, i, j, i-1, j-1) ||
                         is_valid_move(state, piece, i, j, i-1, j) ||
@@ -347,6 +353,7 @@ int any_moves_possible(game_state* state)
                         is_valid_move(state, piece, i, j, i-2, j)
                     )
                         return 1;
+                    break;
                 case 'p':
                     if (is_valid_move(state, piece, i, j, i+1, j-1) ||
                         is_valid_move(state, piece, i, j, i+1, j) ||
