@@ -180,8 +180,6 @@ GtkBuilder *builder_init(void)
 	);
 	g_signal_connect(dialogs[3], "response", G_CALLBACK(gtk_widget_hide), NULL);
 
-	// g_signal_connect(Board, "drag-drop", G_CALLBACK(drag_drop), dialogs);
-	// g_signal_connect(Board, "button-release-event", G_CALLBACK(board_clicked), dialogs);
 	gtk_builder_connect_signals(builder, NULL);
 	//GObject *EngineToggler=gtk_builder_get_object(builder, "EngineToggler");
 

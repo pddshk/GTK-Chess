@@ -275,7 +275,6 @@ int is_bishop(char piece) { return piece == 'B' || piece == 'b'; }
 int is_knight(char piece) { return piece == 'N' || piece == 'n'; }
 int is_pawn(char piece) { return piece == 'P' || piece == 'p'; }
 
-// Why here?!
 void copy_state(game_state *other){
     memcpy((void*) other, &tree.current->state, sizeof(game_state));
 }
@@ -486,15 +485,15 @@ void print_state(game_state* state)
 //     tree.current->field = newstate;
 // }
 
-void removeChar(char *str, char garbage) {
+// void removeChar(char *str, char garbage) {
 
-    char *src, *dst;
-    for (src = dst = str; *src != '\0'; src++) {
-        *dst = *src;
-        if (*dst != garbage) dst++;
-    }
-    *dst = '\0';
-}
+//     char *src, *dst;
+//     for (src = dst = str; *src != '\0'; src++) {
+//         *dst = *src;
+//         if (*dst != garbage) dst++;
+//     }
+//     *dst = '\0';
+// }
 
 // char* remove_PGN_comments(char* pgn) {
 //     char* newpgn = malloc(sizeof(char) * strlen(pgn));

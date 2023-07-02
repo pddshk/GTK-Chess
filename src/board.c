@@ -177,7 +177,6 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 	int dir = 1;
 	int _pawn_promotion_col = pawn_promotion_col,
 		_pawn_promotion_row = pawn_promotion_row;
-	//resolve_coord(&tree.current->field, &_pawn_promotion_row, &_pawn_promotion_col);
 	switch (pawn_promotion) {
 		case 'P':
 			q_row=_pawn_promotion_row;
@@ -343,9 +342,6 @@ drag_drop (
 	int col = flip_resolve((int)((x - w_offset) / cell_size)),
 		row = flip_resolve((int)((y - h_offset) / cell_size));
 	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
-	// resolves coordinates in case board is flipped
-	//resolve_coord(&tree.current->field, &from_row, &from_col);
-	//resolve_coord(&tree.current->field, &to_row, &to_col);
 	// chek if there was move and move is valid
 	if (drag_status && is_valid_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col))
 	{
@@ -397,11 +393,9 @@ board_clicked (
 
 		int col = flip_resolve((int)((event->x - w_offset) / cell_size)),
 			row = flip_resolve((int)((event->y - h_offset) / cell_size));
-		//resolve_coord(&tree.current->field, &row, &col);
 		if (col != pawn_promotion_col) return TRUE;
 		if ((pawn_promotion == 'P' && tree.current->state.side_to_move && row < 4) ||
 			(pawn_promotion == 'p' && !(tree.current->state.side_to_move) && row > 3)) {
-			// cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
 			//return piece and then move to save current state
 			next_move(
 				&tree.current->state,
