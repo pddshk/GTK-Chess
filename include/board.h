@@ -10,6 +10,7 @@ extern state_tree tree;
 extern int flipped;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
+extern GtkWidget *dialogs[4];
 
 void init_textures(void);
 void load_textures(const char* pack);
@@ -56,5 +57,7 @@ board_clicked (
 );
 
 gboolean draw_board(GtkWidget*, cairo_t*, gpointer);
+
+void check_end_conditions(void);
 
 #endif

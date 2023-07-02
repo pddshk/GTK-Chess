@@ -139,7 +139,8 @@ void recalc_castlings(game_state* state)
 void next_move(__attribute_maybe_unused__ const game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
     game_state new_state = *state;
-    set_field(&new_state, from_row, from_col, '-');
+    if (!promotion)
+        set_field(&new_state, from_row, from_col, '-');
     
     new_state.side_to_move = !new_state.side_to_move;
     if (new_state.side_to_move) {
@@ -157,7 +158,7 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
         set_enpassant(&new_state, to_row-1, to_col);
     else
         clear_enpassant(&new_state);
-    char *move_buffer = malloc(sizeof(char) * 6);
+    char move_buffer[6] = "";
     get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
