@@ -139,7 +139,8 @@ void recalc_castlings(game_state* state)
 void next_move(__attribute_maybe_unused__ const game_state* state, char piece, int from_row, int from_col, int to_row, int to_col, char promotion)
 {
     game_state new_state = *state;
-    set_field(&new_state, from_row, from_col, '-');
+    if (!promotion)
+        set_field(&new_state, from_row, from_col, '-');
     
     new_state.side_to_move = !new_state.side_to_move;
     if (new_state.side_to_move) {
@@ -157,7 +158,7 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
         set_enpassant(&new_state, to_row-1, to_col);
     else
         clear_enpassant(&new_state);
-    char *move_buffer = malloc(sizeof(char) * 6);
+    char move_buffer[6] = "";
     get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
@@ -274,7 +275,6 @@ int is_bishop(char piece) { return piece == 'B' || piece == 'b'; }
 int is_knight(char piece) { return piece == 'N' || piece == 'n'; }
 int is_pawn(char piece) { return piece == 'P' || piece == 'p'; }
 
-// Why here?!
 void copy_state(game_state *other){
     memcpy((void*) other, &tree.current->state, sizeof(game_state));
 }
@@ -485,15 +485,15 @@ void print_state(game_state* state)
 //     tree.current->field = newstate;
 // }
 
-void removeChar(char *str, char garbage) {
+// void removeChar(char *str, char garbage) {
 
-    char *src, *dst;
-    for (src = dst = str; *src != '\0'; src++) {
-        *dst = *src;
-        if (*dst != garbage) dst++;
-    }
-    *dst = '\0';
-}
+//     char *src, *dst;
+//     for (src = dst = str; *src != '\0'; src++) {
+//         *dst = *src;
+//         if (*dst != garbage) dst++;
+//     }
+//     *dst = '\0';
+// }
 
 // char* remove_PGN_comments(char* pgn) {
 //     char* newpgn = malloc(sizeof(char) * strlen(pgn));
