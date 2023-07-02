@@ -80,7 +80,6 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <!-- <signal name="clicked" handler="paste_FEN" swapped="no"/> -->
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -94,7 +93,6 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <!-- <signal name="clicked" handler="paste_PGN" swapped="no"/> -->
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -236,6 +234,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <signal name="button-release-event" handler="board_clicked" swapped="no"/>
+                    <signal name="drag-drop" handler="drag_drop" swapped="no"/>
                     <signal name="drag-failed" handler="drag_failed" swapped="no"/>
                     <signal name="drag-motion" handler="drag_motion" swapped="no"/>
                     <signal name="draw" handler="draw_board" swapped="no"/>
@@ -475,20 +474,20 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="CurrentDepth">
+                              <object class="GtkLabel" id="TopMove">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Depth = 0</property>
+                                <property name="label" translatable="yes">1. ...e5</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="TopMove">
+                              <object class="GtkLabel" id="CurrentDepth">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">1. ...e5</property>
+                                <property name="label" translatable="yes">Depth = 0</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>
