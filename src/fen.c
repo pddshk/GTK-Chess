@@ -86,6 +86,7 @@ static game_state* FEN_to_game_state(const gchar* fen)
     CHECK_DELIMITER(i_fen);
 
     // read castlings (TODO: think of X-FEN)
+    clear_castlings(&res);
     for (int i = 0; i < 4; i++) // max 4 symbols KQkq
     {
         switch (*i_fen)

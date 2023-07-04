@@ -90,6 +90,10 @@ void clear_enpassant(game_state *state)
     state->enpassant_row = state->enpassant_col = -1;
 }
 
+void clear_castlings(game_state *state){
+    state->castlings[0] = state->castlings[1] = state->castlings[2] = state->castlings[3] = FALSE;
+}
+
 void recalc_castlings(game_state* state)
 {
     if (state->field[0][4] != 'k')

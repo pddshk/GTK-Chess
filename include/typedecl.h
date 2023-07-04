@@ -2,8 +2,8 @@
 #define TYPEDECL_H
 #include <gtk/gtk.h>
 
-#define WHITE 1
-#define BLACK 0
+#define WHITE (1)
+#define BLACK (0)
 
 typedef struct {
     // TODO fix to be KQkq
