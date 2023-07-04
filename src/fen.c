@@ -99,15 +99,16 @@ static game_state* FEN_to_game_state(const gchar* fen)
             res.castlings[2] = TRUE; break;
         case 'k':
             res.castlings[3] = TRUE; break;
-        case ' ':
-            i = 4; continue; // end cycle
         case '-':
-            if (i == 0)
-                i = 4;
-            else {
+            if (i != 0){
         default:
-            raise_error();
-            return NULL;
+                raise_error();
+                return NULL;
+            } else {
+                i_fen++;
+        case ' ':
+                i = 4;
+                continue;
         }}
         i_fen++;
     }
