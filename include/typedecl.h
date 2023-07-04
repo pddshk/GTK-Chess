@@ -38,4 +38,12 @@ typedef struct
     tnode* current;
 } state_tree;
 
+enum _EngineState{
+	ENGINE_NONE,
+    ENGINE_OFF,
+    ENGINE_IDLE,
+    ENGINE_WORKING,
+    ENGINE_ERROR
+};
+
 #endif

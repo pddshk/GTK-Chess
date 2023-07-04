@@ -4,6 +4,12 @@
 
 #define TEXTURES_PATH "resource:///org/gtk/gtkchess/textures/classic/"
 
+extern state_tree tree;
+extern int flipped;
+extern int pawn_promotion_row, pawn_promotion_col;
+extern char pawn_promotion;
+extern GtkWidget *dialogs[4];
+
 enum {
 	None,
 	WKing, WQueen, WRook, WBishop, WKnight, WPawn,
@@ -421,4 +427,10 @@ void check_end_conditions(void)
         gtk_dialog_run(GTK_DIALOG (dialogs[1]));
 	else if (insufficient_material(&tree.current->state))
 		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
+}
+
+void flip_board(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
+{
+	flipped = !flipped;
+	gtk_widget_queue_draw(GTK_WIDGET(Board));
 }

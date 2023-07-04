@@ -2,11 +2,6 @@
 #define STATE_H
 #include "typedecl.h"
 
-extern state_tree tree;
-
-extern int pawn_promotion_row, pawn_promotion_col;
-extern char pawn_promotion;
-
 void init_state(game_state*);
 
 char get_field_by_notation(game_state*, const char*);

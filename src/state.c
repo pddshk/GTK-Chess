@@ -6,7 +6,10 @@
 #include <ctype.h>
 #include "rules.h"
 #include "gtkchessapp.h"
+#include "notation.h"
 
+// TODO: get rid of it!!
+extern state_tree tree;
 
 void init_state(game_state* state)
 {

@@ -1,7 +1,9 @@
 #include "fen.h"
 
 #include "state_tree.h"
-#include "gtkchessapp.h"
+#include "notation.h"
+
+extern state_tree tree;
 
 void paste_FEN(
     __attribute_maybe_unused__ GtkButton* self, 
@@ -30,7 +32,6 @@ void paste_FEN(
 static game_state* FEN_to_game_state(const gchar* fen)
 {
     if (!fen) return NULL;
-    puts(fen);
     game_state res;
     const char *i_fen = fen;
     
@@ -68,7 +69,6 @@ static game_state* FEN_to_game_state(const gchar* fen)
         }
     }
     CHECK_DELIMITER(i_fen);
-    puts(i_fen);
 
     // read side to move
     switch (*i_fen)
@@ -83,7 +83,6 @@ static game_state* FEN_to_game_state(const gchar* fen)
     }
     i_fen++;
     CHECK_DELIMITER(i_fen);
-    puts(i_fen);
 
     // read castlings (TODO: think of X-FEN)
     for (int i = 0; i < 4; i++) // max 4 symbols KQkq
@@ -111,7 +110,6 @@ static game_state* FEN_to_game_state(const gchar* fen)
         i_fen++;
     }
     CHECK_DELIMITER(i_fen);
-    puts(i_fen);
 
     // read enpassant
     if (*i_fen == '-'){
@@ -129,7 +127,6 @@ static game_state* FEN_to_game_state(const gchar* fen)
         }
     }
     CHECK_DELIMITER(i_fen);
-    puts(i_fen);
 
     // read 50 moves counter
     int ret = sscanf(i_fen, "%d%d", &res.fifty_moves_counter, &res.move_counter);
