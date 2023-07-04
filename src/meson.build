@@ -4,7 +4,8 @@ gtkchess_sources = files(
     'board.c',
     'state.c',
     'rules.c',
-    'state_tree.c'
+    'state_tree.c',
+    'fen.c'
 )
 
 engine_manager_sources = files(
