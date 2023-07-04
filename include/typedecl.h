@@ -6,6 +6,7 @@
 #define BLACK 0
 
 typedef struct {
+    // TODO fix to be KQkq
     int castlings[4]; // Queenside | Kingside | queenside | kingside
     int side_to_move;
     int fifty_moves_counter;

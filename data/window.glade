@@ -76,7 +76,7 @@
                 <property name="can-focus">False</property>
                 <child>
                   <object class="GtkButton" id="PasteFEN">
-                    <property name="label" translatable="yes">FEN</property>
+                    <property name="label" translatable="yes">Paste FEN</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -89,6 +89,20 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkButton" id="CopyFEN">
+                    <property name="label" translatable="yes">Copy FEN</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <signal name="clicked" handler="copy_FEN" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="PastePGN">
                     <property name="label" translatable="yes">PGN</property>
                     <property name="visible">True</property>
@@ -98,7 +112,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -107,10 +121,10 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="Insert">
+              <object class="GtkLabel" id="Position">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Insert</property>
+                <property name="label" translatable="yes">Position</property>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -475,20 +489,20 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="TopMove">
+                              <object class="GtkLabel" id="CurrentDepth">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">1. ...e5</property>
+                                <property name="label" translatable="yes">Depth = 0</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="CurrentDepth">
+                              <object class="GtkLabel" id="TopMove">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Depth = 0</property>
+                                <property name="label" translatable="yes">1. ...e5</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>

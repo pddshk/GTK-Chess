@@ -1,6 +1,7 @@
 #include "fen.h"
 
 #include "state_tree.h"
+#include "state.h"
 #include "notation.h"
 
 extern state_tree tree;
@@ -89,16 +90,16 @@ static game_state* FEN_to_game_state(const gchar* fen)
     {
         switch (*i_fen)
         {
-        case 'K':
-            res.castlings[0] = TRUE; break;
         case 'Q':
+            res.castlings[0] = TRUE; break;
+        case 'K':
             res.castlings[1] = TRUE; break;
-        case 'k':
-            res.castlings[2] = TRUE; break;
         case 'q':
+            res.castlings[2] = TRUE; break;
+        case 'k':
             res.castlings[3] = TRUE; break;
         case ' ':
-            i = 4; break; // end cycle
+            i = 4; continue; // end cycle
         case '-':
             if (i == 0)
                 i = 4;
@@ -130,7 +131,6 @@ static game_state* FEN_to_game_state(const gchar* fen)
 
     // read 50 moves counter
     int ret = sscanf(i_fen, "%d%d", &res.fifty_moves_counter, &res.move_counter);
-    printf("%d, %d\n", res.fifty_moves_counter, res.move_counter);
     if (ret != 2) {
         raise_error();
         return NULL;
@@ -145,64 +145,87 @@ inline void raise_error(void)
     (void)fprintf(stderr, "Invalid FEN!\n");
 }
 
-// void FEN_to_state(const char* fen) {
-//     char delim[] = " ";
-//     game_state newstate;
-//     char* placement = strtok((char*)fen, delim);
-//     char field_ptr = 0;
-//     for(size_t i = 0; i < strlen(placement); field_ptr++) 
-//     {
-//         if (placement[i] < '0' || placement[i] > '9') {
-//             if (placement[i] == '/') {
-//                 newstate.field[field_ptr / 9][field_ptr % 9] = '\0';
-//             }
-//             else {
-//                 newstate.field[field_ptr / 9][field_ptr % 9] = placement[i];
-//             }
-//             i++;
-//         }
-//         else {
-//             placement[i]--;
-//             newstate.field[field_ptr / 9][field_ptr % 9] = '-';
-//             if (placement[i] == '0') i++;
-//         }
-//     }
-//     char* color = strtok(NULL, delim);
-//     if (color[0] == 'w') {
-//         newstate.side_to_move = 1;
-//     }
-//     else {
-//         newstate.side_to_move = 0;
-//     }
-//     char* castling = strtok(NULL, delim);
-//     for(size_t i = 0; i < strlen(castling); i++) {
-//         if (castling[i] == 'K') {
-//             newstate.castlings[1] = 1;
-//         }
-//         if (castling[i] == 'Q') {
-//             newstate.castlings[0] = 1;
-//         }
-//         if (castling[i] == 'k') {
-//             newstate.castlings[3] = 1;
-//         }
-//         if (castling[i] == 'Q') {
-//             newstate.castlings[2] = 1;
-//         }
-//     }
-//     char* enpassant_square = strtok(NULL, delim);
-//     newstate.enpassant_col = newstate.enpassant_row = -1;
-//     if (isalpha(enpassant_square[0])) {
-//         newstate.enpassant_col = enpassant_square[0] - 'a';
-//         newstate.enpassant_row = enpassant_square[1] - '0';
-//     }
-//     char* fiftymoves = strtok(NULL, delim);
-//     sscanf(fiftymoves, "%d", &newstate.fifty_moves_counter);
-//     char* fullmove = strtok(NULL, delim);
-//     sscanf(fullmove, "%d", &newstate.move_counter);
-//     newstate.is_active = tree.current->field.is_active;
-//     newstate.flipped = tree.current->field.flipped;
-//     tree.current->field = newstate;
-// }
+void copy_FEN(
+    __attribute_maybe_unused__ GtkButton* button, 
+    __attribute_maybe_unused__ gpointer data)
+{
+    GdkDisplay *display = gdk_display_get_default();
+    GtkClipboard *clipboard = gtk_clipboard_get_default(display);
+    char fen[128] = "";
+    game_state_to_FEN(&tree.current->state, fen);
+    gtk_clipboard_set_text(clipboard, fen, -1);
+}
+
+void game_state_to_FEN(const game_state* state, char* fen)
+{
+    for (int i = 0; i < 8; ++i) {
+        int nskips = 0;
+        for(int j = 0; j < 8; ++j){
+            if (state->field[i][j] == '-'){
+                nskips++;
+            } else {
+                if (nskips != 0){
+                    *fen = nskips + '0';
+                    fen++;
+                    nskips = 0;
+                }
+                *fen = state->field[i][j];
+                fen++;
+            }
+        }
+        if (nskips != 0) {
+            *fen = nskips + '0';
+            fen++;
+        }
+        *fen = '/';
+        fen++;
+    }
+    *(fen-1) = ' '; // delete trailing '/'
+    if (state->side_to_move == WHITE)
+        *fen = 'w';
+    else
+        *fen = 'b';
+    fen++;
+    *fen = ' ';
+    fen++;
+    char *castlings = fen;
+    if (state->castlings[1]){
+        *fen = 'K';
+        fen++;
+    }
+    if (state->castlings[0]){
+        *fen = 'Q';
+        fen++;
+    }
+    if (state->castlings[3]){
+        *fen = 'k';
+        fen++;
+    }
+    if (state->castlings[2]){
+        *fen = 'q';
+        fen++;
+    }
+    if (fen == castlings){ // if none of above
+        *fen = '-';
+        fen++;
+    }
+    *fen = ' ';
+    fen++;
+    if (state->enpassant_col == -1) {
+        *fen = '-';
+        fen++;
+    } else {
+        get_field_notation(
+            state->enpassant_row,
+            state->enpassant_col,
+            fen
+        );
+        fen += 2;
+    }
+    *fen = ' ';
+    fen++;
+    (void)sprintf(fen, "%d %d", state->fifty_moves_counter, state->move_counter);
+}
 
 // void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
 // {

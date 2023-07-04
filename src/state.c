@@ -44,19 +44,6 @@ int is_active(game_state* state){
     return state->is_active;
 }
 
-void swap(int* mas, int a, int b)
-{
-    int t = mas[a];
-    mas[b]=mas[a];
-    mas[a]=t;
-}
-void min_el(int* mas, int mas_size)
-{
-    for(int i=0;i<mas_size;i++)
-    {
-        mas[i]*=-1;
-    }
-}
 char get_field_by_notation(game_state* state, const char* field)
 {
     int i = field[0] - 'a', j = field[1] - '0';
@@ -72,29 +59,13 @@ void get_move_notation(__attribute_maybe_unused__ game_state* state, char* res, 
     res[4] = promoted;
 }
 
-// void resolve_coord(__attribute_maybe_unused__ game_state* state, int*row, int*col)
-// {
-//     if (flipped){
-//         *row = 7 - *row;
-//         *col = 7 - *col;
-//     }
-// }
+void get_field_notation(int row, int col, char* dest)
+{
+    *dest = col + 'a';
+    dest++;
+    *dest = 8 - row + '0';
+}
 
-// char get_field(game_state* state, int row, int col)
-// {
-//     if (flipped)
-//         return state->field[7-row][7-col];
-//     else
-//         return state->field[row][col];
-// }
-
-// void set_field(game_state* state, int row, int col, char piece)
-// {
-//     if (flipped)
-//         state->field[7-row][7-col] = piece;
-//     else
-//         state->field[row][col] = piece;
-// }
 char get_field(game_state* state, int row, int col) {
     return state->field[row][col];
 }
