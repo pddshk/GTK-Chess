@@ -7,6 +7,7 @@
 #define TOO_MANY_PIECES     2
 #define TOO_MANY_KINGS      4
 #define NO_MOVES_POSSIBLE   8
+#define NO_KING             16
 
 void init_state(game_state*);
 

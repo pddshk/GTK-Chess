@@ -438,6 +438,8 @@ int validate_state(game_state* state)
         res |= TOO_MANY_PIECES;
     if (k>1 ||K>1)
         res |= TOO_MANY_KINGS;
+    else if (k==0 || K==0)
+        res |= NO_KING;
     if (res == STATE_OK && !any_moves_possible(state))
         res |= NO_MOVES_POSSIBLE;
     return res;

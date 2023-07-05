@@ -32,6 +32,8 @@ void paste_FEN(
                 puts("Too many kings");
             if (state_validation & NO_MOVES_POSSIBLE)
                 puts("No moves possible");
+            if (state_validation & NO_KING)
+                puts("No king");
         }
     }
 }
