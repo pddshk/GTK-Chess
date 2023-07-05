@@ -19,7 +19,6 @@ void paste_FEN(
         if (state_validation == STATE_OK){
             destroy_tree(&tree);
             init_tree(&tree, state);
-            free(state);
             gtk_widget_queue_draw(Board);
             show_state(tree.root,0);
         } else {
@@ -35,6 +34,7 @@ void paste_FEN(
             if (state_validation & NO_KING)
                 puts("No king");
         }
+        free(state);
     }
 }
 
