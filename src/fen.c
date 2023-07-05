@@ -87,32 +87,37 @@ static game_state* FEN_to_game_state(const gchar* fen)
 
     // read castlings (TODO: think of X-FEN)
     clear_castlings(&res);
-    for (int i = 0; i < 4; i++) // max 4 symbols KQkq
-    {
-        switch (*i_fen)
-        {
-        case 'Q':
-            res.castlings[0] = TRUE; break;
-        case 'K':
-            res.castlings[1] = TRUE; break;
-        case 'q':
-            res.castlings[2] = TRUE; break;
-        case 'k':
-            res.castlings[3] = TRUE; break;
-        case '-':
-            if (i != 0){
-        default:
-                raise_error();
-                return NULL;
-            } else {
-                i_fen++;
-        case ' ':
-                i = 4;
-                continue;
-        }}
+    int any = 0;
+    if (*i_fen == 'K') {
+        res.castlings[1] = 1;
+        any = TRUE;
         i_fen++;
     }
-    CHECK_DELIMITER(i_fen);
+    if (*i_fen == 'Q') {
+        res.castlings[0] = 1;
+        any = TRUE;
+        i_fen++;
+    }
+    if (*i_fen == 'k') {
+        res.castlings[3] = 1;
+        any = TRUE;
+        i_fen++;
+    }
+    if (*i_fen == 'q') {
+        res.castlings[2] = 1;
+        any = TRUE;
+        i_fen++;
+    }
+    if (*i_fen == '-' && any == 0) {
+        i_fen++;
+        any = -1;
+    }
+    if (*i_fen != ' ' || any == 0) {
+        raise_error();
+        return NULL;
+    } else {
+        i_fen++;
+    }
 
     // read enpassant
     if (*i_fen == '-'){
