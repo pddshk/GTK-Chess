@@ -14,6 +14,8 @@ void paste_FEN(
     GtkClipboard *clipboard = gtk_clipboard_get_default(display);
     const gchar* fen = gtk_clipboard_wait_for_text(clipboard);
     game_state *state = FEN_to_game_state(fen);
+    if (fen)
+        g_free(fen);
     if (state) {
         int state_validation = validate_state(state);
         if (state_validation == STATE_OK){
