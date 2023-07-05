@@ -2,6 +2,12 @@
 #define STATE_H
 #include "typedecl.h"
 
+#define STATE_OK            0
+#define PAWN_ON_END_ROW     1
+#define TOO_MANY_PIECES     2
+#define TOO_MANY_KINGS      4
+#define NO_MOVES_POSSIBLE   8
+
 void init_state(game_state*);
 
 char get_field_by_notation(game_state*, const char*);
@@ -20,7 +26,7 @@ void clear_castlings(game_state*);
 void recalc_castlings(game_state*);
 void next_move(const game_state*, char, int, int, int, int, char);
 
-void copy_state(game_state*);
+void copy_state(game_state *dest, game_state* src);
 
 void move(game_state*, char, int, int, int, int);
 void just_move(game_state*, char, int, int);
@@ -47,5 +53,7 @@ int fifty_moves_exceeded(game_state*);
 int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
+
+int validate_state(game_state*);
 
 #endif

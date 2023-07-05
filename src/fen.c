@@ -15,11 +15,24 @@ void paste_FEN(
     const gchar* fen = gtk_clipboard_wait_for_text(clipboard);
     game_state *state = FEN_to_game_state(fen);
     if (state) {
-        destroy_tree(&tree);
-        init_tree(&tree, state);
-        free(state);
-        gtk_widget_queue_draw(Board);
-        show_state(tree.root,0);
+        int state_validation = validate_state(state);
+        if (state_validation == STATE_OK){
+            destroy_tree(&tree);
+            init_tree(&tree, state);
+            free(state);
+            gtk_widget_queue_draw(Board);
+            show_state(tree.root,0);
+        } else {
+            puts("FEN is valid, but position is not. Issues are:");
+            if (state_validation & PAWN_ON_END_ROW)
+                puts("Pawn on 1th or 8th horizontal");
+            if (state_validation & TOO_MANY_PIECES)
+                puts("Too many pieces");
+            if (state_validation & TOO_MANY_KINGS)
+                puts("Too many kings");
+            if (state_validation & NO_MOVES_POSSIBLE)
+                puts("No moves possible");
+        }
     }
 }
 
@@ -87,32 +100,32 @@ static game_state* FEN_to_game_state(const gchar* fen)
 
     // read castlings (TODO: think of X-FEN)
     clear_castlings(&res);
-    int any = 0;
+    int any = FALSE;
     if (*i_fen == 'K') {
-        res.castlings[1] = 1;
+        res.castlings[1] = TRUE;
         any = TRUE;
         i_fen++;
     }
     if (*i_fen == 'Q') {
-        res.castlings[0] = 1;
+        res.castlings[0] = TRUE;
         any = TRUE;
         i_fen++;
     }
     if (*i_fen == 'k') {
-        res.castlings[3] = 1;
+        res.castlings[3] = TRUE;
         any = TRUE;
         i_fen++;
     }
     if (*i_fen == 'q') {
-        res.castlings[2] = 1;
+        res.castlings[2] = TRUE;
         any = TRUE;
         i_fen++;
     }
-    if (*i_fen == '-' && any == 0) {
+    if (*i_fen == '-' && !any) {
         i_fen++;
-        any = -1;
+        any = TRUE;
     }
-    if (*i_fen != ' ' || any == 0) {
+    if (*i_fen != ' ' || !any) {
         raise_error();
         return NULL;
     } else {

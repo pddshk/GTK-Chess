@@ -253,8 +253,8 @@ int is_bishop(char piece) { return piece == 'B' || piece == 'b'; }
 int is_knight(char piece) { return piece == 'N' || piece == 'n'; }
 int is_pawn(char piece) { return piece == 'P' || piece == 'p'; }
 
-void copy_state(game_state *other){
-    memcpy((void*) other, &tree.current->state, sizeof(game_state));
+void copy_state(game_state *dest, game_state* src){
+    memcpy((void*) dest, src, sizeof(game_state));
 }
 
 char resolve_promotion(int row)
@@ -401,4 +401,44 @@ void print_state(game_state* state)
         }
         printf("\n");
     }
+}
+
+int validate_state(game_state* state)
+{
+    int res = STATE_OK;
+    int p=0, n=0, b=0, r=0, q=0, k=0,
+        P=0, N=0, B=0, R=0, Q=0, K=0;
+    for (int i=0; i<8; ++i) for(int j=0; j<8; ++j) {
+        switch (state->field[i][j])
+        {
+        case '-': continue;
+        case 'p':
+            if (i == 0 || i == 8)
+                res |= PAWN_ON_END_ROW;
+            p++; break;
+        case 'P':
+            if (i == 0 || i == 8)
+                res |= PAWN_ON_END_ROW;
+            P++; break;
+        case 'n': n++; break;
+        case 'N': N++; break;
+        case 'b': b++; break;
+        case 'B': B++; break;
+        case 'r': r++; break;
+        case 'R': R++; break;
+        case 'q': q++; break;
+        case 'Q': Q++; break;
+        case 'k': k++; break;
+        case 'K': K++; break;
+        default: return FALSE;
+        }
+    }
+    if (p+n+b+r+q>15 || p+n>10 || p+b>10 || p+r>10 || p+q>10 ||
+        P+N+B+R+Q>15 || P+N>10 || P+B>10 || P+R>10 || P+Q>10)
+        res |= TOO_MANY_PIECES;
+    if (k>1 ||K>1)
+        res |= TOO_MANY_KINGS;
+    if (res == STATE_OK && !any_moves_possible(state))
+        res |= NO_MOVES_POSSIBLE;
+    return res;
 }
