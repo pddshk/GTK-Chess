@@ -40,7 +40,10 @@ void paste_FEN(
 
 static game_state* FEN_to_game_state(const gchar* fen)
 {
-    if (!fen) return NULL;
+    if (!fen) {
+        (void)fprintf(stderr,"FEN parsing error: clipboard is empty or its content cannot be converted to text\n");
+        return NULL;
+    }
     game_state res;
     if (
         read_field(&res, &fen)          &&
