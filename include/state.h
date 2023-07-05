@@ -57,4 +57,6 @@ void print_state(game_state*);
 
 int validate_state(game_state*);
 
+int castling_index(char);
+
 #endif

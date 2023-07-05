@@ -38,133 +38,170 @@ void paste_FEN(
     }
 }
 
-#define CHECK_DELIMITER(i_fen) \
-    if (*i_fen != ' '){ \
-        raise_error(); \
-        return NULL; \
-    } \
-    i_fen++;
-
 static game_state* FEN_to_game_state(const gchar* fen)
 {
     if (!fen) return NULL;
     game_state res;
-    const char *i_fen = fen;
-    
-    // reading field
-    // cppcheck-suppress uninitdata
-    char *flat_field = res.field[0];
+    if (
+        read_field(&res, &fen)          &&
+        read_side_to_move(&res, &fen)   &&
+        read_castlings(&res, &fen)      &&
+        read_enpassant(&res, &fen)      &&
+        read_move_counters(&res, &fen)
+    ){
+        game_state *result = malloc(sizeof(game_state));
+        *result = res;
+        return result;
+    } else {
+        return NULL;
+    }
+    // cppcheck-suppress uninitdata 
+}
+
+static int read_field(game_state* state, const char** fen)
+{
+#ifdef DEBUG_FEN
+    puts(*fen);
+#endif
+    char *flat_field = state->field[0];
     size_t i_field = 0;
     while (i_field < 8*9-1) {
         // printf("Reading %c, %d\n", *i_fen, i_field);
-        switch (*i_fen)
+        switch (**fen)
         {
         case 'q': case 'Q': case 'k': case 'K': case 'n': case 'N':
         case 'b': case 'B': case 'r': case 'R': case 'p': case 'P':
-            flat_field[i_field] = *i_fen;
+            flat_field[i_field] = **fen;
             i_field++;
-            i_fen++;
             break;
-        case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': {
-            int nempty = *i_fen - '0';
-            for (int i = 0; i < nempty; ++i) {
-                flat_field[i_field++] = '-';
-            }
-            i_fen++;
-            break;
-        }
         case '/':
             flat_field[i_field] = '\0';
             i_field++;
-            i_fen++;
             break;
         default:
-            raise_error();
-            return NULL;
+            if ('1' <= **fen && **fen <= '8') {
+                int nempty = **fen - '0';
+                for (int i = 0; i < nempty; ++i)
+                    flat_field[i_field++] = '-';
+            } else {
+                (void)fprintf(stderr, "FEN parsing error while reading board: unknown character %c\n", **fen);
+                return FALSE;    
+            }
         }
+        *fen += 1;
     }
-    CHECK_DELIMITER(i_fen);
-
-    // read side to move
-    switch (*i_fen)
-    {
-    case 'w':
-        res.side_to_move = WHITE; break;
-    case 'b':
-        res.side_to_move = BLACK; break;
-    default:
-        raise_error();
-        return NULL;
-    }
-    i_fen++;
-    CHECK_DELIMITER(i_fen);
-
-    // read castlings (TODO: think of X-FEN)
-    clear_castlings(&res);
-    int any = FALSE;
-    if (*i_fen == 'K') {
-        res.castlings[1] = TRUE;
-        any = TRUE;
-        i_fen++;
-    }
-    if (*i_fen == 'Q') {
-        res.castlings[0] = TRUE;
-        any = TRUE;
-        i_fen++;
-    }
-    if (*i_fen == 'k') {
-        res.castlings[3] = TRUE;
-        any = TRUE;
-        i_fen++;
-    }
-    if (*i_fen == 'q') {
-        res.castlings[2] = TRUE;
-        any = TRUE;
-        i_fen++;
-    }
-    if (*i_fen == '-' && !any) {
-        i_fen++;
-        any = TRUE;
-    }
-    if (*i_fen != ' ' || !any) {
-        raise_error();
-        return NULL;
-    } else {
-        i_fen++;
-    }
-
-    // read enpassant
-    if (*i_fen == '-'){
-        res.enpassant_col = res.enpassant_row = -1;
-        i_fen++;
-    } else if ('a' <= *i_fen && *i_fen <= 'h') {
-        res.enpassant_col = *i_fen - 'a';
-        i_fen++;
-        if ('1' <= *i_fen && *i_fen <= '8'){
-            res.enpassant_row = *i_fen - '1';
-            i_fen++;
-        } else {
-            raise_error();
-            return NULL;
-        }
-    }
-    CHECK_DELIMITER(i_fen);
-
-    // read 50 moves counter
-    int ret = sscanf(i_fen, "%d%d", &res.fifty_moves_counter, &res.move_counter);
-    if (ret != 2) {
-        raise_error();
-        return NULL;
-    }
-    game_state *result = malloc(sizeof(game_state));
-    *result = res;
-    return result;
+    if (**fen != ' '){ 
+        (void)fprintf(stderr, "FEN parsing error while reading board: no whitespace delimiter after board\n");
+        return FALSE; 
+    } 
+    *fen+=1;
+    return TRUE;
 }
 
-inline void raise_error(void)
+static int read_side_to_move(game_state* state, const char** fen)
 {
-    (void)fprintf(stderr, "Invalid FEN!\n");
+#ifdef DEBUG_FEN
+    puts(*fen);
+#endif
+    if (**fen == 'w')
+        state->side_to_move = WHITE;
+    else if (**fen == 'b')
+        state->side_to_move = BLACK;
+    else {
+        (void)fprintf(stderr, "FEN parsing error while reading side_to_move: unknown characted %c\n", **fen);
+        return FALSE;
+    }
+    *fen+=1;
+    if (**fen != ' ') {
+        (void)fprintf(stderr, "FEN parsing error while reading castlings: no whitespace separator\n");
+        return FALSE;
+    } else {
+        *fen+=1;
+        return TRUE;
+    }
+    return TRUE;
+}
+
+// read castlings (TODO: think of X-FEN)
+static int read_castlings(game_state *state, const char** fen)
+{
+#ifdef DEBUG_FEN
+    puts(*fen);
+#endif
+    const char *begin = *fen;
+    clear_castlings(state);
+    int any = FALSE;
+    for (int i = 0; **fen != ' ' && i<5; i++, *fen+=1){
+        int index = castling_index(**fen);
+        if (index != -1 && !state->castlings[index]) {
+            state->castlings[index] = TRUE;
+            any = TRUE;
+        } else if (**fen == '-' && !any){
+            any = TRUE;
+            i = 4;
+            continue;
+        } else {
+            (void)fprintf(stderr, "FEN parsing error while reading castlings: corrupted string %.*s\n", (int)(*fen - begin + 1), begin);
+            return FALSE;
+        }
+    }
+    if (**fen != ' ') {
+        (void)fprintf(stderr, "FEN parsing error while reading castlings: no whitespace separator\n");
+        return FALSE;
+    } else {
+        *fen+=1;
+        return TRUE;
+    }
+}
+
+static int read_enpassant(game_state* state, const char** fen)
+{
+#ifdef DEBUG_FEN
+    puts(*fen);
+#endif
+    const char* begin = *fen;
+    if (**fen == '-'){
+        state->enpassant_col = state->enpassant_row = -1;
+        *fen+=1;
+    } else if ('a' <= **fen && **fen <= 'h') {
+        state->enpassant_col = **fen - 'a';
+        *fen+=1;
+        if ('1' <= **fen && **fen <= '8'){
+            state->enpassant_row = **fen - '1';
+            *fen+=1;
+        } else {
+            (void)fprintf(stderr, "FEN parsing error while reading enpassant: corrupted string %.*s\n", (int)(*fen - begin + 1), begin);
+            return FALSE;
+        }
+    }
+    if (**fen != ' ') {
+        (void)fprintf(stderr, "FEN parsing error while reading enpassant: no whitespace separator\n");
+        return FALSE;
+    } else {
+        *fen+=1;
+        return TRUE;
+    }
+}
+
+static int read_move_counters(game_state* state, const char **fen)
+{
+#ifdef DEBUG_FEN
+    puts(*fen);
+#endif
+    int ret = sscanf(*fen, "%d%d", &state->fifty_moves_counter, &state->move_counter);
+    if (ret != 2) {
+        (void)fprintf(stderr,"FEN parsing error while reading move counters: corrupted string %s\n", *fen);
+        return FALSE;
+    }
+    if (state->fifty_moves_counter < 0) {
+        (void)fprintf(stderr,"FEN parsing error while reading move counters: 50 move counter is < 0\n");
+        return FALSE;
+    }
+    if (state->move_counter < 0) {
+        (void)fprintf(stderr,"FEN parsing error while reading move counters: move counter is < 0\n");
+        return FALSE;
+    }
+    return TRUE;
 }
 
 void copy_FEN(

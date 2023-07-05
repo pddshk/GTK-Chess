@@ -444,3 +444,15 @@ int validate_state(game_state* state)
         res |= NO_MOVES_POSSIBLE;
     return res;
 }
+
+int castling_index(char c)
+{
+    switch (c)
+    {
+    case 'K': return 1;
+    case 'Q': return 0;
+    case 'k': return 3;
+    case 'q': return 2;
+    default : return -1;
+    }
+}
