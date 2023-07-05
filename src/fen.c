@@ -12,7 +12,7 @@ void paste_FEN(
 {
     GdkDisplay *display = gdk_display_get_default();
     GtkClipboard *clipboard = gtk_clipboard_get_default(display);
-    const gchar* fen = gtk_clipboard_wait_for_text(clipboard);
+    gchar* fen = gtk_clipboard_wait_for_text(clipboard);
     game_state *state = FEN_to_game_state(fen);
     if (fen)
         g_free(fen);
@@ -217,10 +217,22 @@ void copy_FEN(
     GtkClipboard *clipboard = gtk_clipboard_get_default(display);
     char fen[128] = "";
     game_state_to_FEN(&tree.current->state, fen);
+#ifdef DEBUG_FEN
+    puts(fen);
+#endif
     gtk_clipboard_set_text(clipboard, fen, -1);
 }
 
 void game_state_to_FEN(const game_state* state, char* fen)
+{
+    write_board(state, &fen);
+    write_side_to_move(state, &fen);
+    write_castlings(state, &fen);
+    write_enpassant(state, &fen);
+    write_counters(state, &fen);
+}
+
+static void write_board(const game_state* state, char** fen)
 {
     for (int i = 0; i < 8; ++i) {
         int nskips = 0;
@@ -229,82 +241,80 @@ void game_state_to_FEN(const game_state* state, char* fen)
                 nskips++;
             } else {
                 if (nskips != 0){
-                    *fen = nskips + '0';
-                    fen++;
+                    **fen = nskips + '0';
+                    *fen+=1;
                     nskips = 0;
                 }
-                *fen = state->field[i][j];
-                fen++;
+                **fen = state->field[i][j];
+                *fen+=1;
             }
         }
         if (nskips != 0) {
-            *fen = nskips + '0';
-            fen++;
+            **fen = nskips + '0';
+            *fen+=1;
         }
-        *fen = '/';
-        fen++;
+        **fen = '/';
+        *fen+=1;
     }
-    *(fen-1) = ' '; // delete trailing '/'
+    *(*fen-1) = ' '; // delete trailing '/'
+}
+
+static void write_side_to_move(const game_state* state, char** fen)
+{
     if (state->side_to_move == WHITE)
-        *fen = 'w';
+        **fen = 'w';
     else
-        *fen = 'b';
-    fen++;
-    *fen = ' ';
-    fen++;
-    char *castlings = fen;
+        **fen = 'b';
+    *fen+=1;
+    **fen = ' ';
+    *fen+=1;
+}
+
+static void write_castlings(const game_state* state, char** fen)
+{
+    char *castlings = *fen;
     if (state->castlings[1]){
-        *fen = 'K';
-        fen++;
+        **fen = 'K';
+        *fen+=1;
     }
     if (state->castlings[0]){
-        *fen = 'Q';
-        fen++;
+        **fen = 'Q';
+        *fen+=1;
     }
     if (state->castlings[3]){
-        *fen = 'k';
-        fen++;
+        **fen = 'k';
+        *fen+=1;
     }
     if (state->castlings[2]){
-        *fen = 'q';
-        fen++;
+        **fen = 'q';
+        *fen+=1;
     }
-    if (fen == castlings){ // if none of above
-        *fen = '-';
-        fen++;
+    if (*fen == castlings){ // if none of above
+        **fen = '-';
+        *fen+=1;
     }
-    *fen = ' ';
-    fen++;
+    **fen = ' ';
+    *fen+=1;
+}
+
+static void write_enpassant(const game_state* state, char** fen)
+{
     if (state->enpassant_col == -1) {
-        *fen = '-';
-        fen++;
+        **fen = '-';
+        *fen+=1;
     } else {
         get_field_notation(
             state->enpassant_row,
             state->enpassant_col,
-            fen
+            *fen
         );
-        fen += 2;
+        *fen += 2;
     }
-    *fen = ' ';
-    fen++;
-    (void)sprintf(fen, "%d %d", state->fifty_moves_counter, state->move_counter);
+    **fen = ' ';
+    *fen+=1;
 }
 
-// void get_FEN(__attribute_maybe_unused__ GtkButton* button, gpointer data)
-// {
-// 	GtkWidget* widget = GTK_WIDGET(data);
-// 	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG (widget));
-// 	GList *children = gtk_container_get_children(GTK_CONTAINER(content_area));
-// 	GtkWidget *grid = children->data;
-// 	GList *gchildren = gtk_container_get_children(GTK_CONTAINER(grid));
-	
-//     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
-//     FEN_to_state(gtk_entry_get_text(entry));
-// 	game_state state = tree.current->field;
-// 	destroy_tree(&tree);
-// 	init_tree(state);
-// 	show_state(tree.root, 0);
-//     gtk_widget_destroy (widget); // This will close the dialog
-// 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-// }
+static void write_counters(const game_state* state, char** fen)
+{
+    (void)sprintf(*fen, "%d %d", state->fifty_moves_counter, state->move_counter);
+}

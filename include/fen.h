@@ -15,5 +15,10 @@ static int read_move_counters(game_state* state, const char **fen);
 
 void copy_FEN(GtkButton*, gpointer);
 static void game_state_to_FEN(const game_state* state, char* fen);
+static void write_board(const game_state* state, char** fen);
+static void write_side_to_move(const game_state* state, char** fen);
+static void write_castlings(const game_state* state, char** fen);
+static void write_enpassant(const game_state* state, char** fen);
+static void write_counters(const game_state* state, char** fen);
 
 #endif
