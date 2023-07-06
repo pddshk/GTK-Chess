@@ -2,16 +2,19 @@
 #define STATE_H
 #include "typedecl.h"
 
-extern state_tree tree;
-
-extern int pawn_promotion_row, pawn_promotion_col;
-extern char pawn_promotion;
+#define STATE_OK            0
+#define PAWN_ON_END_ROW     1
+#define TOO_MANY_PIECES     2
+#define TOO_MANY_KINGS      4
+#define NO_MOVES_POSSIBLE   8
+#define NO_KING             16
 
 void init_state(game_state*);
 
 char get_field_by_notation(game_state*, const char*);
 void get_move_notation(game_state*, char*, int, int, int, int, char);
-void resolve_coord(game_state*, int*, int*);
+// writes two charactes into *dest *(dest+1)
+void get_field_notation(int row, int col, char* dest);
 char get_field(game_state*, int, int);
 void set_field(game_state*, int, int, char);
 
@@ -20,10 +23,11 @@ int is_active(game_state*);
 int is_enpassant_square(game_state*, int,int);
 void set_enpassant(game_state*, int,int);
 void clear_enpassant(game_state*);
+void clear_castlings(game_state*);
 void recalc_castlings(game_state*);
 void next_move(const game_state*, char, int, int, int, int, char);
 
-void copy_state(game_state*);
+void copy_state(game_state *dest, game_state* src);
 
 void move(game_state*, char, int, int, int, int);
 void just_move(game_state*, char, int, int);
@@ -50,7 +54,9 @@ int fifty_moves_exceeded(game_state*);
 int insufficient_material(game_state*);
 //debug
 void print_state(game_state*);
-void FEN_to_state(const char*);
-void PGN_to_tree(char*);
+
+int validate_state(game_state*);
+
+int castling_index(char);
 
 #endif

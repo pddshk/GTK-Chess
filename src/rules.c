@@ -31,7 +31,7 @@ int is_valid_move(game_state* state, char piece, int from_row, int from_col, int
 {
     if (_is_valid_move(state, piece, from_row, from_col, to_row, to_col)){
         game_state possible_state;
-        copy_state(&possible_state);
+        copy_state(&possible_state, state);
         possible_state.field[to_row][to_col] = piece;
         possible_state.field[from_row][from_col] = '-';
         if (is_king_threatened(&possible_state, state->side_to_move ? 'K' : 'k')){

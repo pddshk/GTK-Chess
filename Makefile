@@ -12,7 +12,7 @@ SRCDIR	= src
 DATADIR = data
 INCDIR  = include
 DOCDIR	= docs
-NAMES   = main board state rules gtkchessapp state_tree
+NAMES   = main board state rules gtkchessapp state_tree fen engine_controls notation
 OBJECTS	= $(addprefix $(OBJDIR)/, $(addsuffix .o, $(NAMES)))
 SOURCES = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(NAMES)))
 
