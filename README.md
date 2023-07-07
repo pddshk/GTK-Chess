@@ -1,6 +1,6 @@
 # GTK-Chess
 [![license: WTFPL](https://img.shields.io/badge/license-WTFPL-brightgreen.svg)](http://www.wtfpl.net/about/)
-[![documentation: unstable](https://img.shields.io/badge/documentation-unstable-orange)](https://pddshk.github.io/GTK-Chess/)
+[![documentation: latest](https://img.shields.io/badge/documentation-latets-orange)](https://pddshk.github.io/GTK-Chess/)
 
 UCI chess engine GUI written in C.
 
