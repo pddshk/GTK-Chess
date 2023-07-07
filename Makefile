@@ -3,13 +3,8 @@ STD		?= c17
 GTK		= gtk+-3.0
 RSVG	= librsvg-2.0
 GIO		= gio-unix-2.0 gio-2.0
-<<<<<<< HEAD
-PKGCONF	= $(shell which pkg-config)
-CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
-=======
 PKGCONF	?= $(shell which pkg-config)
-CFLAGS	+= -Wall -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
->>>>>>> 41e1d34 (build: add basic flake.nix)
+CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
 OBJDIR	= obj
