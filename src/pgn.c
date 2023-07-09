@@ -431,9 +431,9 @@
 	
 //     GtkEntry* entry = GTK_ENTRY(gchildren->next->data);
 // 	PGN_to_tree((char*)gtk_entry_get_text(entry));
-// 	//show_state(tree->root, 0);
+// 	//show_notation(&tree);
 //     gtk_widget_destroy(widget); 
-// 	//show_state(tree->root, 0);
+// 	//show_notations(&tree);
 //     //gtk_widget_destroy (widget); // This will close the dialog
 // 	//gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
 // }

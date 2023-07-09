@@ -19,10 +19,10 @@ void paste_FEN(
     if (state) {
         int state_validation = validate_state(state);
         if (state_validation == STATE_OK){
-            destroy_tree(&tree);
+            clear_tree(&tree);
             init_tree(&tree, state);
             gtk_widget_queue_draw(Board);
-            show_state(tree.root,0);
+            show_notation(&tree);
         } else {
             puts("FEN is valid, but position is not. Issues are:");
             if (state_validation & PAWN_ON_END_ROW)

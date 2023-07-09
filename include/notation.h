@@ -4,8 +4,10 @@
 #include <gtk/gtk.h>
 #include "typedecl.h"
 
-gchar* get_sign(int number,char symbol);
-void select_state(GtkButton*, gpointer);
+void select_state(GtkButton*, tnode*);
+void show_notation(const state_tree*);
+
 void show_state(tnode*, int);
+gchar* get_sign(int number, char symbol);
 
 #endif
