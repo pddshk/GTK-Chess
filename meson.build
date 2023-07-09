@@ -17,6 +17,7 @@ dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.24.0')
 dep_glib = dependency('glib-2.0', version: '>= 2.64.0')
 dep_giounix = dependency('gio-unix-2.0', version: '>= 2.64.0')
 dep_rsvg = dependency('librsvg-2.0', version: '>= 2.52.0')
+dep_threads = dependency('threads')
 
 subdir('data')
 
@@ -31,8 +32,7 @@ subdir('src')
 executable(
     'engine_manager',
     engine_manager_sources,
-    dependencies: [dep_giounix],
-    link_args: ['-pthread'],
+    dependencies: [dep_giounix, dep_threads],
     install: true,
     install_dir: '.',
     include_directories : incdir
