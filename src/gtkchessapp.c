@@ -58,7 +58,7 @@ void gtkchess_app_shutdown(
 		fprintf(stderr, "Warning: Force exiting engine manager");
         g_subprocess_force_exit(engine_manager);
 	}
-	destroy_tree(&tree);
+	clear_tree(&tree);
 }
 
 void gtkchess_app_open(
@@ -160,9 +160,8 @@ GtkBuilder *builder_init(void)
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	destroy_tree(&tree);
+	clear_tree(&tree);
 	init_tree(&tree, NULL);
-	tree.root->state.flipped = flipped;
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
-	show_state(tree.root,0);
+	show_notation(&tree);
 }

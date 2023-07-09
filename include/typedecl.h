@@ -14,8 +14,7 @@ typedef struct {
     // set when pawn is moved 2 steps forward
     // unset when not
     int enpassant_row, enpassant_col;
-    int is_active;
-    int flipped;
+    int is_active; //?????
     char field[8][9];
 } game_state;
 
@@ -23,13 +22,13 @@ struct tnode;
 
 typedef struct
 {
-    game_state state;      // поле данных
-    struct tnode* parent;  // родитель
+    game_state state;
+    struct tnode* parent;
     GList* children;
-    int hbox_status;
-    int indent;
-    GtkBox* hbox;
-    GtkBox* vbox;
+    int hbox_status;// remove
+    int indent;     // remove
+    GtkBox* hbox;   // remove
+    GtkBox* vbox;   // remove
     char last_move_notation[10];
 } tnode;
 

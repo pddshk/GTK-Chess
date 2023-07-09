@@ -5,24 +5,27 @@ extern state_tree tree;
 extern GtkBuilder *builder;
 extern GtkBox* vbox;
 
-gchar* get_sign(int number,char symbol)
+// allocates
+gchar* get_sign(int number, char symbol)
 {
 	number++;
-	//printf("%d/n", number);
-	gchar* st = (gchar*)malloc(sizeof(gchar)*(number*40 + 1));
-	for(int i = 0; i< number * 40;i++) {
+	gchar* st = malloc(sizeof(gchar) * (number*40 + 1));
+	for(int i = 0; i < number * 40; i++) {
 		st[i] = symbol;
 	}
 	st[number * 40] = '\0';
 	return st;
-
 }
 
-void select_state(__attribute_maybe_unused__ GtkButton* button, gpointer node) {
-	tree.current = (tnode*)node;
+void show_notation(const state_tree* tree)
+{
+	show_state(tree->root, 0);
+}
+
+void select_state(__attribute_maybe_unused__ GtkButton* button, tnode* node) {
+	tree.current = node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-	show_state(tree.root, 0);
-	
+	show_notation(&tree);
 }
 
 void show_state(tnode* node, int level) 
@@ -50,7 +53,7 @@ void show_state(tnode* node, int level)
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
-			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), node);
 			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
 			gtk_container_add(GTK_CONTAINER(subtreehbox), GTK_WIDGET(button));
 
@@ -90,7 +93,7 @@ void show_state(tnode* node, int level)
 				text[61] = '\0';
 			}
 			else
-			text =  get_sign(1,' ');
+			text = get_sign(1,' ');
 
 
 			gtk_text_buffer_set_text (tb,text,strlen(text));
@@ -104,7 +107,7 @@ void show_state(tnode* node, int level)
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
-			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), node);
 
 			gtk_widget_set_size_request(GTK_WIDGET(button), 240, 50);
 			
@@ -175,7 +178,7 @@ void show_state(tnode* node, int level)
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
-			g_signal_connect(button, "clicked", G_CALLBACK(select_state), (gpointer)node);
+			g_signal_connect(button, "clicked", G_CALLBACK(select_state), node);
 			
 			free(label);
 			//going through children

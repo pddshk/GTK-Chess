@@ -59,4 +59,6 @@ int validate_state(game_state*);
 
 int castling_index(char);
 
+int states_equals(const game_state*, const game_state*);
+
 #endif

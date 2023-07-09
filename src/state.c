@@ -140,8 +140,8 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
     get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
-    tree.current =  addnode(new_state, tree.current,  move_buffer); 
-    show_state(tree.root,0);
+    tree.current = addnode(new_state, tree.current,  move_buffer); 
+    show_notation(&tree);
     //
 }
 
@@ -455,4 +455,9 @@ int castling_index(char c)
     case 'q': return 2;
     default : return -1;
     }
+}
+
+int states_equals(const game_state* a, const game_state* b)
+{
+    return memcmp(a, b, sizeof(game_state)) == 0;
 }
