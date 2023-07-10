@@ -17,10 +17,26 @@ UCI chess engine GUI written in C.
 - [ ] Show engine output on GUI
 
 # Build
-Linux only. Requires `gtk+-3.0` and `librsvg-2.0`.
+The project is supposed to be built and run on Linux, and all the development process is done under the Linux platform, however it is supposed to run on Windows and Mac as well. Requires `gtk+-3.0` and `librsvg-2.0`.
+
+Feel free to use `make` or `meson`.
+
+## Make
+
+Simple
 
 ```
 make
 ```
 
-This will produce `GTKChess` executable.
+should produce `GTKChess` executable.
+
+N.B. `make` is using `clang` as default compiler.
+
+## Meson
+
+```
+meson setup build
+cd build
+meson compile
+```
