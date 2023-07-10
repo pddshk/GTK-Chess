@@ -27,8 +27,8 @@ jobs:
     - name: Check for modifications in docs
       id: changed-docs
       uses: tj-actions/changed-files@v37
-        with:
-          files: docs/*
+      with:
+        files: docs/*
 
     - name: Setup Pages
       if: steps.changed-docs.outputs.any_changed == 'true'
