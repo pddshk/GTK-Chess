@@ -36,8 +36,8 @@ void init_tree(state_tree* tree, const game_state* state)
     tree->root->parent = NULL;
     tree->root->children = NULL;
     strcpy(tree->root->last_move_notation, "begin");
-    tree->root->hbox_status=0;
-    tree->root->indent=0;
+    tree->root->hbox_status = 0;
+    tree->root->indent = 0;
     tree->root->hbox = NULL;
     tree->root->vbox = NULL;
     if (state)
