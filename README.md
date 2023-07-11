@@ -23,13 +23,7 @@ Feel free to use `make` or `meson`.
 
 ## Make
 
-Simple
-
-```
-make
-```
-
-should produce `GTKChess` executable.
+Simple `make` should produce `GTKChess` executable.
 
 N.B. `make` is using `clang` as default compiler.
 
