@@ -1,13 +1,24 @@
 #include "state_tree.h"
 #include "state.h"
+//#define DEBUG_STATE_TREE
 
-// allocates
-tnode* addnode(game_state _field, tnode *_parent, const char *last_move) 
+// allocates node, by default set _comment as NULL
+tnode* addnode(game_state _field, tnode *_parent, const char *_last_move, const char* _comment) 
 {
     tnode* new_node = malloc(sizeof(tnode)); 
     new_node->state = _field;
     new_node->children =  NULL;
-    strcpy(new_node->last_move_notation, last_move);
+    strcpy(new_node->last_move_notation, _last_move);
+    if(_comment==NULL)
+    {
+        new_node->comment = NULL;
+    }
+    else
+    {
+        new_node->comment = malloc(strlen(_comment));
+        strcpy(new_node->comment, _comment);
+    }
+
     new_node->hbox = NULL;
     new_node->vbox = NULL;
     (*new_node).hbox_status=0;
@@ -36,6 +47,7 @@ void init_tree(state_tree* tree, const game_state* state)
     tree->root->parent = NULL;
     tree->root->children = NULL;
     strcpy(tree->root->last_move_notation, "begin");
+    tree->root->comment=NULL;
     tree->root->hbox_status=0;
     tree->root->indent=0;
     tree->root->hbox = NULL;
@@ -64,6 +76,9 @@ void destroy_tnode(tnode* node)
         }
         g_list_free(element);
     }
+    if(node->comment!=NULL)
+    free(node->comment);
+
     free(node);
 }
 
