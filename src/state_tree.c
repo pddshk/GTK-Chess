@@ -9,16 +9,7 @@ tnode* addnode(game_state _field, tnode *_parent, const char *_last_move, const 
     new_node->state = _field;
     new_node->children =  NULL;
     strcpy(new_node->last_move_notation, _last_move);
-    if(_comment==NULL)
-    {
-        new_node->comment = NULL;
-    }
-    else
-    {
-        new_node->comment = malloc(strlen(_comment));
-        strcpy(new_node->comment, _comment);
-    }
-
+    set_comment(new_node, _comment);
     new_node->hbox = NULL;
     new_node->vbox = NULL;
     (*new_node).hbox_status=0;
@@ -37,6 +28,20 @@ tnode* addnode(game_state _field, tnode *_parent, const char *_last_move, const 
         _parent->children = g_list_append(_parent->children, new_node);
     }
     return new_node;
+}
+
+//setter for comment field 
+void set_comment(tnode * _node, const char* _comment)
+{
+    if(_comment==NULL)
+    {
+        _node->comment = NULL;
+    }
+    else
+    {
+        _node->comment = malloc(strlen(_comment));
+        strcpy(_node->comment, _comment);
+    }
 }
 
 // init tree from given state if state is NULL, then init fro starting postion
