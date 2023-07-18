@@ -5,7 +5,7 @@
 #include "gtk/gtk.h"
 
 void paste_FEN(GtkButton*, GtkWidget*);
-game_state* FEN_to_game_state(const gchar*);
+static game_state* FEN_to_game_state(const gchar*);
 
 static int read_field(game_state* state, const char** fen);
 static int read_side_to_move(game_state* state, const char** fen);

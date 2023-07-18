@@ -9,7 +9,8 @@
 #include "notation.h"
 
 // TODO: get rid of it!!
-extern state_tree tree;
+extern game_info game;
+extern state_tree* const tree;
 
 void init_state(game_state* state)
 {
@@ -140,8 +141,8 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
     get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
     
     //
-    tree.current = addnode(new_state, tree.current,  move_buffer); 
-    show_notation(&tree);
+    tree->current = addnode(new_state, tree->current,  move_buffer); 
+    show_notation(tree);
     //
 }
 

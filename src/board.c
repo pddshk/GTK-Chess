@@ -4,7 +4,8 @@
 
 #define TEXTURES_PATH "resource:///org/gtk/gtkchess/textures/classic/"
 
-extern state_tree tree;
+extern game_info game;
+extern state_tree* const tree;
 extern int flipped;
 extern int pawn_promotion_row, pawn_promotion_col;
 extern char pawn_promotion;
@@ -213,9 +214,9 @@ gboolean draw_board(GtkWidget *Board, cairo_t *cr, __attribute_maybe_unused__ gp
 			else if (row == n_row)
 				current_piece = resolve_promoted_piece(n);
 			else
-				current_piece=resolve_piece(get_field(&tree.current->state, row, col));
+				current_piece=resolve_piece(get_field(&tree->current->state, row, col));
 		} else
-			current_piece=resolve_piece(get_field(&tree.current->state, row, col));
+			current_piece=resolve_piece(get_field(&tree->current->state, row, col));
 		if (current_piece){ // render it
 			gdouble x = flip_resolve(col) * cell_size, y = flip_resolve(row) * cell_size;
 			RsvgRectangle piece_holder;
@@ -279,12 +280,12 @@ drag_begin (
 	);
 	drag_col_start = flip_resolve((int)((start_x - w_offset) / cell_size));
 	drag_row_start = flip_resolve((int)((start_y - h_offset) / cell_size));
-	dragged_piece = get_field(&tree.current->state, drag_row_start, drag_col_start);
+	dragged_piece = get_field(&tree->current->state, drag_row_start, drag_col_start);
 	// check if piece to be moved is of valid side
-	const char* piece_set = tree.current->state.side_to_move ? "KQRBNP" : "kqrbnp";
+	const char* piece_set = tree->current->state.side_to_move ? "KQRBNP" : "kqrbnp";
 	if (pawn_promotion == '-' && strchr(piece_set, dragged_piece)){
 		// remove dragged piece from state to prevent drawing it
-		set_field(&tree.current->state, drag_row_start, drag_col_start, '-');
+		set_field(&tree->current->state, drag_row_start, drag_col_start, '-');
 		gtk_drag_set_icon_pixbuf(context, empty_icon, 0, 0);
 		drag_status = 1;
 	} else {
@@ -319,7 +320,7 @@ drag_failed (
   __attribute_maybe_unused__ gpointer user_data
 )
 {
-	cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
+	cancel_drag(&tree->current->state, dragged_piece, drag_row_start, drag_col_start);
 	drag_pos_x = drag_pos_y = -1;
 	drag_status = 0;
 	gtk_widget_queue_draw(self);
@@ -349,7 +350,7 @@ drag_drop (
 		row = flip_resolve((int)((y - h_offset) / cell_size));
 	int from_row = drag_row_start, from_col = drag_col_start, to_row = row, to_col = col;
 	// chek if there was move and move is valid
-	if (drag_status && is_valid_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col))
+	if (drag_status && is_valid_move(&tree->current->state, dragged_piece, from_row, from_col, to_row, to_col))
 	{
 		if (is_pawn_promotion(dragged_piece, to_row)){
 			pawn_promotion = dragged_piece;
@@ -358,15 +359,15 @@ drag_drop (
 		} 
 		else 
 		{
-			cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
+			cancel_drag(&tree->current->state, dragged_piece, drag_row_start, drag_col_start);
 			//return piece and then move to save current state
 
-			next_move(&tree.current->state, dragged_piece, from_row, from_col, to_row, to_col,0);
+			next_move(&tree->current->state, dragged_piece, from_row, from_col, to_row, to_col,0);
 		}
 		
 	}
 	else
-		cancel_drag(&tree.current->state, dragged_piece, drag_row_start, drag_col_start);
+		cancel_drag(&tree->current->state, dragged_piece, drag_row_start, drag_col_start);
 
 	gtk_widget_queue_draw(widget);
 	//drag_col_start = drag_row_start = 0;
@@ -401,11 +402,11 @@ board_clicked (
 		int col = flip_resolve((int)((event->x - w_offset) / cell_size)),
 			row = flip_resolve((int)((event->y - h_offset) / cell_size));
 		if (col != pawn_promotion_col) return TRUE;
-		if ((pawn_promotion == 'P' && tree.current->state.side_to_move && row < 4) ||
-			(pawn_promotion == 'p' && !(tree.current->state.side_to_move) && row > 3)) {
+		if ((pawn_promotion == 'P' && tree->current->state.side_to_move && row < 4) ||
+			(pawn_promotion == 'p' && !(tree->current->state.side_to_move) && row > 3)) {
 			//return piece and then move to save current state
 			next_move(
-				&tree.current->state,
+				&tree->current->state,
 				'P',
 				drag_row_start, drag_col_start,
 				pawn_promotion_row, pawn_promotion_col,
@@ -422,11 +423,11 @@ board_clicked (
 
 void check_end_conditions(void)
 {
-	if (is_mate(&tree.current->state))
+	if (is_mate(&tree->current->state))
         gtk_dialog_run(GTK_DIALOG (dialogs[0]));
-	else if (is_stalemate(&tree.current->state))
+	else if (is_stalemate(&tree->current->state))
         gtk_dialog_run(GTK_DIALOG (dialogs[1]));
-	else if (insufficient_material(&tree.current->state))
+	else if (insufficient_material(&tree->current->state))
 		gtk_dialog_run(GTK_DIALOG(dialogs[2]));
 }
 

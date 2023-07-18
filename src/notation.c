@@ -1,7 +1,8 @@
 #include "notation.h"
 #include "state_tree.h"
 
-extern state_tree tree;
+extern game_info game;
+extern state_tree* const tree;
 extern GtkBuilder *builder;
 extern GtkBox* vbox;
 
@@ -23,9 +24,9 @@ void show_notation(const state_tree* tree)
 }
 
 void select_state(__attribute_maybe_unused__ GtkButton* button, tnode* node) {
-	tree.current = node;
+	tree->current = node;
 	gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(builder, "Board")));
-	show_notation(&tree);
+	show_notation(tree);
 }
 
 void show_state(tnode* node, int level) 
@@ -49,7 +50,7 @@ void show_state(tnode* node, int level)
 			gtk_container_add(GTK_CONTAINER(vbox),GTK_WIDGET(subtreehbox));
 			const char label[11] = "Game Start";
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
-			if (node == tree.current) {
+			if (node == tree->current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
@@ -103,7 +104,7 @@ void show_state(tnode* node, int level)
 
 			GtkButton *button = GTK_BUTTON(gtk_button_new_with_label(label));
 			free(label);
-			if (node == tree.current) {
+			if (node == tree->current) {
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
 			}
@@ -173,7 +174,7 @@ void show_state(tnode* node, int level)
 			gtk_widget_set_size_request(GTK_WIDGET(button), 120, 50);
 			gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(button));
 			
-			if (node == tree.current) 
+			if (node == tree->current) 
 			{
 				GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(button));
 				gtk_style_context_add_class(context,"selected");
