@@ -38,6 +38,27 @@ typedef struct
     tnode* current;
 } state_tree;
 
+typedef struct 
+{
+    char event[256];
+    char site[256];
+    char date[256];
+    char round[256];
+    char white[256];
+    char black[256];
+    char result[256];
+    char annotator[256];
+    char plyCount[256];
+    char timeControl[256];
+    char time[256];
+    char termination[256];
+    char mode[256];
+    char setUp[256];
+    char FEN[256];
+    state_tree movetree;
+} game_info;
+
+
 enum _EngineState{
 	ENGINE_NONE,
     ENGINE_OFF,

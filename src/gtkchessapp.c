@@ -1,6 +1,7 @@
 #include "gtkchessapp.h"
 #include "board.h"
 #include "state_tree.h"
+#include "game_info.h"
 #include "engine_controls.h"
 #include "notation.h"
 
@@ -14,6 +15,7 @@ extern int nvariations;
 extern GtkLabel *variations[4];
 extern GtkWidget *dialogs[4];
 extern state_tree tree;
+extern game_info game;
 extern GtkBox* vbox;
 extern enum _EngineState engine_state;
 
@@ -29,7 +31,9 @@ void gtkchess_app_startup(
 	} else {
 		engine_state = ENGINE_IDLE;
 	}
-	init_tree(&tree, NULL);
+	init_casual_game(&game);
+	//init_tree(&tree, NULL);
+	
 }
 
 void gtkchess_app_activate(
