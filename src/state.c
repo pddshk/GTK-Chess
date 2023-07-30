@@ -9,7 +9,6 @@
 #include "notation.h"
 
 // TODO: get rid of it!!
-extern game_info game;
 extern state_tree* const tree;
 
 void init_state(game_state* state)

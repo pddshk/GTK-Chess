@@ -1,7 +1,6 @@
 #include "notation.h"
 #include "state_tree.h"
 
-extern game_info game;
 extern state_tree* const tree;
 extern GtkBuilder *builder;
 extern GtkBox* vbox;

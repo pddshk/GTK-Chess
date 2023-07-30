@@ -4,7 +4,6 @@
 
 #define TEXTURES_PATH "resource:///org/gtk/gtkchess/textures/classic/"
 
-extern game_info game;
 extern state_tree* const tree;
 extern int flipped;
 extern int pawn_promotion_row, pawn_promotion_col;

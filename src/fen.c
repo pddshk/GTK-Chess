@@ -4,7 +4,6 @@
 #include "state.h"
 #include "notation.h"
 
-extern game_info game;
 extern state_tree* const tree;
 
 void paste_FEN(
