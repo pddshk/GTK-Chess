@@ -9,6 +9,7 @@
 #include "notation.h"
 
 // TODO: get rid of it!!
+extern game_info game;
 extern state_tree* const tree;
 
 void init_state(game_state* state)
@@ -141,6 +142,20 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
     
     //
     tree->current = addnode(new_state, tree->current,  move_buffer); 
+    sprintf(game.plyCount, "%d", tree->current->state.move_counter / 2);
+    if (is_mate(&tree->current->state)) {
+        strcpy(game.termination,"normal");
+        if (tree->current->state.side_to_move) {
+            strcpy(game.result, "0-1");
+        }
+        else {
+            strcpy(game.result, "1-0");
+        }
+    }
+    if (is_stalemate(&tree->current->state)) {
+        strcpy(game.termination, "normal");
+        strcpy(game.result, "1/2-1/2");
+    }
     show_notation(tree);
     //
 }
