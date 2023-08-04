@@ -90,7 +90,7 @@ void show_state(tnode* node, int level)
 				for(int i = 3; i< 62;i++) {
 					text[i] = '-';
 				}
-				text[61] = '\0';
+				text[62] = '\0';
 			}
 			else
 			text = get_sign(1,' ');

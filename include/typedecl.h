@@ -25,6 +25,7 @@ typedef struct
     game_state state;
     struct tnode* parent;
     GList* children;
+    char* comment;
     int hbox_status;// remove
     int indent;     // remove
     GtkBox* hbox;   // remove

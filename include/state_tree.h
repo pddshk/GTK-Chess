@@ -6,7 +6,8 @@
 void init_tree(state_tree*, const game_state*);
 void clear_tree(state_tree*);
 
-tnode * addnode(game_state, tnode*, const char* last_move);
+tnode * addnode(game_state, tnode*, const char*, const char*);
+void set_comment(tnode*, const char*);
 void destroy_tnode(tnode*);
 
 int tnode_equals(const tnode*, const tnode*);
