@@ -1,6 +1,7 @@
 #include "gtkchessapp.h"
 #include "board.h"
 #include "state_tree.h"
+#include "game_info.h"
 #include "engine_controls.h"
 #include "notation.h"
 
@@ -13,7 +14,8 @@ extern GtkWindow *mainwindow;
 extern int nvariations;
 extern GtkLabel *variations[4];
 extern GtkWidget *dialogs[4];
-extern state_tree tree;
+extern game_info game;
+extern state_tree* const tree;
 extern GtkBox* vbox;
 extern enum _EngineState engine_state;
 
@@ -29,7 +31,9 @@ void gtkchess_app_startup(
 	} else {
 		engine_state = ENGINE_IDLE;
 	}
-	init_tree(&tree, NULL);
+	init_casual_game(&game);
+	//init_tree(&tree, NULL);
+	
 }
 
 void gtkchess_app_activate(
@@ -58,7 +62,7 @@ void gtkchess_app_shutdown(
 		fprintf(stderr, "Warning: Force exiting engine manager");
         g_subprocess_force_exit(engine_manager);
 	}
-	clear_tree(&tree);
+	clear_tree(tree);
 }
 
 void gtkchess_app_open(
@@ -160,8 +164,8 @@ GtkBuilder *builder_init(void)
 
 void new_game(__attribute_maybe_unused__ GtkButton* button, gpointer Board)
 {
-	clear_tree(&tree);
-	init_tree(&tree, NULL);
+	clear_tree(tree);
+	init_tree(tree, NULL);
 	gtk_widget_queue_draw(GTK_WIDGET(Board));
-	show_notation(&tree);
+	show_notation(tree);
 }

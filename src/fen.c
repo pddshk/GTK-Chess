@@ -4,7 +4,7 @@
 #include "state.h"
 #include "notation.h"
 
-extern state_tree tree;
+extern state_tree* const tree;
 
 void paste_FEN(
     __attribute_maybe_unused__ GtkButton* self, 
@@ -19,10 +19,10 @@ void paste_FEN(
     if (state) {
         int state_validation = validate_state(state);
         if (state_validation == STATE_OK){
-            clear_tree(&tree);
-            init_tree(&tree, state);
+            clear_tree(tree);
+            init_tree(tree, state);
             gtk_widget_queue_draw(Board);
-            show_notation(&tree);
+            show_state(tree->root,0);
         } else {
             puts("FEN is valid, but position is not. Issues are:");
             if (state_validation & PAWN_ON_END_ROW)
@@ -40,7 +40,7 @@ void paste_FEN(
     }
 }
 
-game_state* FEN_to_game_state(const gchar* fen)
+static game_state* FEN_to_game_state(const gchar* fen)
 {
     if (!fen) {
         (void)fprintf(stderr,"FEN parsing error: clipboard is empty or its content cannot be converted to text\n");
@@ -216,7 +216,7 @@ void copy_FEN(
     GdkDisplay *display = gdk_display_get_default();
     GtkClipboard *clipboard = gtk_clipboard_get_default(display);
     char fen[128] = "";
-    game_state_to_FEN(&tree.current->state, fen);
+    game_state_to_FEN(&tree->current->state, fen);
 #ifdef DEBUG_FEN
     puts(fen);
 #endif

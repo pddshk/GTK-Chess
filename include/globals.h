@@ -8,7 +8,9 @@ GOutputStream *to_engine_manager;
 //my var
 GtkBuilder* builder;
 GtkBox* vbox;
-state_tree tree;
+game_info game;
+state_tree* const tree = &(game.movetree);
+//state_tree tree;
 //GObject* scrl_window;
 //GObject* viewport;
 // GInputStream *from_engine_manager;
