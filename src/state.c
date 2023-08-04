@@ -138,9 +138,8 @@ void next_move(__attribute_maybe_unused__ const game_state* state, char piece, i
         clear_enpassant(&new_state);
     char move_buffer[6] = "";
     get_move_notation(&new_state, move_buffer, from_row, from_col, to_row, to_col, promotion);
-    
     //
-    tree.current = addnode(new_state, tree.current,  move_buffer); 
+    tree.current = addnode(new_state, tree.current,  move_buffer, NULL); 
     show_notation(&tree);
     //
 }
