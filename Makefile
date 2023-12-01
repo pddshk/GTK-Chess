@@ -7,6 +7,8 @@ PKGCONF	= $(shell which pkg-config)
 CFLAGS	+= -Wall -Wextra -Wpedantic -Wno-overlength-strings -std=$(STD) -O3 `$(PKGCONF) --cflags $(GTK) $(RSVG) $(GIO)`
 LDFLAGS	+= `$(PKGCONF) --libs $(GTK) $(RSVG) $(GIO)` -lm
 
+GTK_PATH = ""
+
 OBJDIR	= obj
 SRCDIR	= src
 DATADIR = data
@@ -36,9 +38,12 @@ OBJECTS := $(BUILT_SRC:.c=.o) $(OBJECTS)
 GRESOURCE = $(DATADIR)/gtkchessapp.gresource.xml
 UI = $(DATADIR)/window.glade $(DATADIR)/selected.css
 
+GIO_X = $(shell which gio)
+
 all: prepare engine_manager $(OBJECTS)
 	$(CC) $(CFLAGS) -rdynamic -o GTKChess $(OBJECTS) $(LDFLAGS)
-	gio set -t string GTKChess metadata::custom-icon file://$(PWD)/data/textures/classic/WKnight.svg
+#	$(GIO_X) set GTKChess metadata::custom-icon file://$(PWD)/data/textures/classic/WKnight.svg
+#	$(GIO_X) set -t string GTKChess metadata::custom-icon file://$(PWD)/data/textures/classic/WKnight.svg
 
 engine_manager: $(OBJDIR)/engine_manager.o
 	$(CC) $(CFLAGS) -o engine_manager $< $(LDFLAGS) -pthread
